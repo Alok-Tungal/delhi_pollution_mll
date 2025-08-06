@@ -10,3 +10,4 @@ qrcode[pil]
 Pillow
 gspread
 google-auth
+openpyxl
