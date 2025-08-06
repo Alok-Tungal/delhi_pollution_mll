@@ -632,12 +632,14 @@ try:
 except Exception as e:
     st.error(f"❌ Failed to log prediction: {e}")
 
-# 📊 Prediction logic
+
 input_data = pd.DataFrame([[pm25, pm10, no2, so2, co, ozone]],
-                          columns=['PM2.5', 'PM10', 'NO₂', 'SO₂', 'CO', 'Ozone'])
+    columns=['PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'Ozone']
+)
 
 predicted_aqi = model.predict(input_data)[0]
 aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
+
 
 
 # ✅ Prepare your data row
