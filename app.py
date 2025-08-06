@@ -682,7 +682,7 @@ if os.path.exists("aqi_logs.csv"):
     elif df_log.shape[1] == 10:
         df_log.columns = ["Timestamp", "PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone", "AQI", "Category", "Extra"]
     else:
-    st.error("Unexpected number of columns in log file. Please check aqi_logs.csv")
+        st.error("Unexpected number of columns in log file. Please check aqi_logs.csv")
 
     # Optional: Convert timestamp column to datetime
     df_log["Timestamp"] = pd.to_datetime(df_log["Timestamp"])
