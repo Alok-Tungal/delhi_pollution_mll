@@ -642,19 +642,23 @@ aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 
 
 
-# ✅ Prepare your data row
-# 🔮 Make Prediction from Inputs
-input_data = pd.DataFrame([[pm25, pm10, no2, so2, co, ozone]],
-    columns=['PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'Ozone'])
+import datetime
+import pandas as pd
 
-# 🎯 Predict using trained model
-predicted_aqi = model.predict(input_data)[0].item()  # Convert NumPy int64 → Python int
-aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]  # Get category name
+# 🧠 Step 1: Create input dataframe from user values
+input_data = pd.DataFrame(
+    [[pm25, pm10, no2, so2, co, ozone]],
+    columns=["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+)
 
-# 🕓 Timestamp for logs
+# 🤖 Step 2: Run prediction
+predicted_aqi = model.predict(input_data)[0].item()  # Convert from NumPy to native int
+aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
+
+# 🕒 Step 3: Timestamp
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# ✅ Prepare row with clean types for logging
+# ✅ Step 4: Format row for Google Sheets
 data_row = [
     now,
     float(pm25),
@@ -667,11 +671,9 @@ data_row = [
     str(aqi_category)
 ]
 
-# ✅ Log it to Google Sheets
-sheet.append_row(data_row)
-
-st.success("✅ Prediction logged to Google Sheets!")
-
-
-
-st.success("✅ Prediction logged to Google Sheets!")
+# 📝 Step 5: Append row to Google Sheet
+try:
+    sheet.append_row(data_row)
+    st.success("✅ Prediction logged to Google Sheets!")
+except Exception as e:
+    st.error(f"❌ Failed to log prediction: {e}")
