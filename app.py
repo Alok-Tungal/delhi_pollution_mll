@@ -650,7 +650,7 @@ try:
     with open("aqi_logs.csv", "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow(data_row)
-    st.success("✅ Prediction logged successfully to aqi_logs.csv.")
+    # st.success("✅ Prediction logged successfully to aqi_logs.csv.")
 except Exception as e:
     st.error(f"❌ Failed to log to CSV: {e}")
 
