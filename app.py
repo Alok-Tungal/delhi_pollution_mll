@@ -624,6 +624,14 @@ gc = gspread.service_account_from_dict(st.secrets["gspread"])
 # ✅ Open your Google Sheet
 sheet = gc.open("Delhi AQI Predictions").sheet1
 
+try:
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    data_row = [now, pm25, pm10, no2, so2, co, ozone, predicted_aqi, aqi_category]
+    sheet.append_row(data_row)
+    st.success("✅ Prediction logged to Google Sheets!")
+except Exception as e:
+    st.error(f"❌ Failed to log prediction: {e}")
+
 # ✅ Prepare your data row
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 data_row = [now, pm25, pm10, no2, so2, co, ozone, predicted_aqi, aqi_category]
