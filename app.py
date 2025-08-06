@@ -603,9 +603,14 @@ log_prediction(inputs, aqi_category, main_pollutant, risk)
 
 import pandas as pd
 import os
+import csv
+import datetime
+import gspread
 
+# ---------------------------
+# 🔒 Admin Tools in Sidebar
+# ---------------------------
 st.sidebar.markdown("### 🛠️ Admin Tools")
-
 if st.sidebar.button("📂 View Log File"):
     if os.path.exists("aqi_logs.csv"):
         df_log = pd.read_csv("aqi_logs.csv")
@@ -613,58 +618,34 @@ if st.sidebar.button("📂 View Log File"):
     else:
         st.warning("Log file not found. It may have reset.")
 
-
-
-import gspread
-import datetime
-
-# ✅ Authenticate using secrets
-gc = gspread.service_account_from_dict(st.secrets["gspread"])
-
-# ✅ Open your Google Sheet
-sheet = gc.open("Delhi AQI Predictions").sheet1
-
-try:
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    data_row = [now, pm25, pm10, no2, so2, co, ozone, predicted_aqi, aqi_category]
-    sheet.append_row(data_row)
-    st.success("✅ Prediction logged to Google Sheets!")
-except Exception as e:
-    st.error(f"❌ Failed to log prediction: {e}")
-
-
-input_data = pd.DataFrame([[pm25, pm10, no2, so2, co, ozone]],
-    columns=['PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'Ozone']
-)
-
-predicted_aqi = model.predict(input_data)[0]
-aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
-
-
-
-import datetime
-import csv
-import pandas as pd
-
+# ---------------------------
 # 🔮 Step 1: Prepare input
+# ---------------------------
 input_data = pd.DataFrame(
     [[pm25, pm10, no2, so2, co, ozone]],
     columns=["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 )
 
-# 🤖 Step 2: Make prediction
+# ---------------------------
+# 🤖 Step 2: Prediction
+# ---------------------------
 predicted_aqi = model.predict(input_data)[0].item()
 aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# 📊 Step 3: Prepare clean row
+# ---------------------------
+# 📊 Step 3: Format row
+# ---------------------------
 data_row = [
     now,
-    float(pm25), float(pm10), float(no2), float(so2), float(co), float(ozone),
+    float(pm25), float(pm10), float(no2),
+    float(so2), float(co), float(ozone),
     int(predicted_aqi), str(aqi_category)
 ]
 
-# 💾 Step 4: Log to CSV
+# ---------------------------
+# 💾 Step 4: Save to CSV
+# ---------------------------
 try:
     with open("aqi_logs.csv", "a", newline="") as f:
         writer = csv.writer(f)
@@ -673,8 +654,12 @@ try:
 except Exception as e:
     st.error(f"❌ Failed to log to CSV: {e}")
 
-# ☁️ Step 5: Log to Google Sheets
+# ---------------------------
+# ☁️ Step 5: Save to Google Sheets
+# ---------------------------
 try:
+    gc = gspread.service_account_from_dict(st.secrets["gspread"])
+    sheet = gc.open("Delhi AQI Predictions").sheet1
     sheet.append_row(data_row)
     st.success("✅ Prediction logged to Google Sheets!")
 except Exception as e:
