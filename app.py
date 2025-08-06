@@ -664,3 +664,55 @@ try:
     st.success("✅ Prediction logged to Google Sheets!")
 except Exception as e:
     st.error(f"❌ Failed to log to Google Sheets: {e}")
+
+import pandas as pd
+import os
+import streamlit as st
+from io import BytesIO
+
+st.sidebar.markdown("### 🧠 Admin Dashboard")
+
+# Load log file
+if os.path.exists("aqi_logs.csv"):
+    df_log = pd.read_csv("aqi_logs.csv", header=None)
+    df_log.columns = ["Timestamp", "PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone", "AQI", "Category"]
+
+    # Optional: Convert timestamp column to datetime
+    df_log["Timestamp"] = pd.to_datetime(df_log["Timestamp"])
+
+    # Filters
+    with st.expander("🔍 Filter Logs"):
+        selected_category = st.multiselect("Filter by AQI Category", options=df_log["Category"].unique())
+        start_date = st.date_input("Start Date", value=df_log["Timestamp"].min().date())
+        end_date = st.date_input("End Date", value=df_log["Timestamp"].max().date())
+
+        # Apply filters
+        filtered_df = df_log[
+            (df_log["Timestamp"].dt.date >= start_date) &
+            (df_log["Timestamp"].dt.date <= end_date)
+        ]
+        if selected_category:
+            filtered_df = filtered_df[filtered_df["Category"].isin(selected_category)]
+
+    # Show filtered data
+    st.markdown("### 📋 Filtered AQI Logs")
+    st.dataframe(filtered_df, use_container_width=True)
+
+    # Download filtered data as Excel
+    def convert_df_to_excel(df):
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='AQI Logs')
+        processed_data = output.getvalue()
+        return processed_data
+
+    excel_data = convert_df_to_excel(filtered_df)
+
+    st.download_button(
+        label="📥 Download Logs as Excel",
+        data=excel_data,
+        file_name="filtered_aqi_logs.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+else:
+    st.warning("No AQI log file found yet.")
