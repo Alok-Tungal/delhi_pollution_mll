@@ -644,9 +644,18 @@ aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 
 # ✅ Prepare your data row
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-data_row = [now, pm25, pm10, no2, so2, co, ozone, predicted_aqi, aqi_category]
-
-# ✅ Append the row to the sheet
+data_row = [
+    now,
+    float(pm25),
+    float(pm10),
+    float(no2),
+    float(so2),
+    float(co),
+    float(ozone),
+    int(predicted_aqi),     # 🔁 Convert from int64 to native int
+    str(aqi_category)       # 🔁 Ensure it's string
+]
 sheet.append_row(data_row)
+
 
 st.success("✅ Prediction logged to Google Sheets!")
