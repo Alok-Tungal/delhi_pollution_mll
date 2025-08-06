@@ -614,17 +614,21 @@ if st.sidebar.button("📂 View Log File"):
         st.warning("Log file not found. It may have reset.")
 
 
-from google.oauth2.service_account import Credentials
+
 import gspread
+import datetime
 
-def get_google_client():
-    creds_dict = st.secrets["gspread"]
-    credentials = Credentials.from_service_account_info(dict(creds_dict))
-    client = gspread.authorize(credentials)
-    return client
+# ✅ Authenticate using secrets
+gc = gspread.service_account_from_dict(st.secrets["gspread"])
 
+# ✅ Open your Google Sheet
+sheet = gc.open("Delhi AQI Predictions").sheet1
 
+# ✅ Prepare your data row
+now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+data_row = [now, pm25, pm10, no2, so2, co, ozone, predicted_aqi, aqi_category]
 
-client = get_google_client()
-sheet = client.open("Delhi_AQI_Logs").sheet1
-sheet.append_row([...])
+# ✅ Append the row to the sheet
+sheet.append_row(data_row)
+
+st.success("✅ Prediction logged to Google Sheets!")
