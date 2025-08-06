@@ -643,7 +643,18 @@ aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 
 
 # ✅ Prepare your data row
+# 🔮 Make Prediction from Inputs
+input_data = pd.DataFrame([[pm25, pm10, no2, so2, co, ozone]],
+    columns=['PM2.5', 'PM10', 'NO2', 'SO2', 'CO', 'Ozone'])
+
+# 🎯 Predict using trained model
+predicted_aqi = model.predict(input_data)[0].item()  # Convert NumPy int64 → Python int
+aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]  # Get category name
+
+# 🕓 Timestamp for logs
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+# ✅ Prepare row with clean types for logging
 data_row = [
     now,
     float(pm25),
@@ -652,10 +663,15 @@ data_row = [
     float(so2),
     float(co),
     float(ozone),
-    int(predicted_aqi),     # 🔁 Convert from int64 to native int
-    str(aqi_category)       # 🔁 Ensure it's string
+    int(predicted_aqi),
+    str(aqi_category)
 ]
+
+# ✅ Log it to Google Sheets
 sheet.append_row(data_row)
+
+st.success("✅ Prediction logged to Google Sheets!")
+
 
 
 st.success("✅ Prediction logged to Google Sheets!")
