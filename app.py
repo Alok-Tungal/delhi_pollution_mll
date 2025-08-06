@@ -643,26 +643,28 @@ aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 
 
 import datetime
+import csv
 import pandas as pd
 
-# STEP: Predict AQI
+# 🔮 Step 1: Prepare input
 input_data = pd.DataFrame(
     [[pm25, pm10, no2, so2, co, ozone]],
     columns=["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 )
 
+# 🤖 Step 2: Make prediction
 predicted_aqi = model.predict(input_data)[0].item()
 aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-# Create a clean log row
+# 📊 Step 3: Prepare clean row
 data_row = [
     now,
     float(pm25), float(pm10), float(no2), float(so2), float(co), float(ozone),
     int(predicted_aqi), str(aqi_category)
 ]
 
-# ✅ Save to CSV
+# 💾 Step 4: Log to CSV
 try:
     with open("aqi_logs.csv", "a", newline="") as f:
         writer = csv.writer(f)
@@ -671,7 +673,7 @@ try:
 except Exception as e:
     st.error(f"❌ Failed to log to CSV: {e}")
 
-# ✅ Save to Google Sheets
+# ☁️ Step 5: Log to Google Sheets
 try:
     sheet.append_row(data_row)
     st.success("✅ Prediction logged to Google Sheets!")
