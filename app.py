@@ -665,6 +665,8 @@ try:
 except Exception as e:
     st.error(f"❌ Failed to log to Google Sheets: {e}")
 
+
+
 import pandas as pd
 import os
 import streamlit as st
@@ -675,7 +677,12 @@ st.sidebar.markdown("### 🧠 Admin Dashboard")
 # Load log file
 if os.path.exists("aqi_logs.csv"):
     df_log = pd.read_csv("aqi_logs.csv", header=None)
-    df_log.columns = ["Timestamp", "PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone", "AQI", "Category"]
+    if df_log.shape[1] == 9:
+        df_log.columns = ["Timestamp", "PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone", "AQI", "Category"]
+    elif df_log.shape[1] == 10:
+        df_log.columns = ["Timestamp", "PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone", "AQI", "Category", "Extra"]
+    else:
+    st.error("Unexpected number of columns in log file. Please check aqi_logs.csv")
 
     # Optional: Convert timestamp column to datetime
     df_log["Timestamp"] = pd.to_datetime(df_log["Timestamp"])
