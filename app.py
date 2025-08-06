@@ -653,7 +653,7 @@ input_data = pd.DataFrame(
 )
 
 # 🤖 Step 2: Make prediction
-predicted_aqi = model.predict(input_data)[0].item()
+predicted_aqi= model.predict(input_data)[0].item()
 aqi_category = label_encoder.inverse_transform([predicted_aqi])[0]
 now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
