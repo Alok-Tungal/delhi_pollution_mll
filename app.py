@@ -1,3 +1,7 @@
+import os
+
+os.environ["XDG_CONFIG_HOME"] = os.path.join(os.getcwd(), ".streamlit")
+
 import streamlit as st
 from streamlit_option_menu import option_menu
 import io
