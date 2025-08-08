@@ -1,8 +1,0 @@
-[server]
-headless = true
-port = $PORT
-enableCORS = false
-
-[global]
-disableWatchdogWarning = true
-disableInstallTelemetry = true
