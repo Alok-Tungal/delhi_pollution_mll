@@ -13,7 +13,7 @@ st.markdown("""
     <style>
         body {
             background-color: #f9f9f9;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', sans-serif; 
         }
         .main, .block-container {
             padding-top: 1rem;
