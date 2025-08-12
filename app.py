@@ -3,7 +3,7 @@ port = int(os.environ.get("PORT", 8501))
 os.environ["STREAMLIT_SERVER_PORT"] = str(port)
 
 import streamlit as st
-st.write("✅ Port is set correctly!")
+st.title("✅ Streamlit running on the correct port")
 
 
 
