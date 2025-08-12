@@ -1,6 +1,3 @@
-import os
-os.environ["STREAMLIT_HOME"] = "/home/user/.streamlit"
-os.makedirs(os.environ["STREAMLIT_HOME"], exist_ok=True)
 
 
 
