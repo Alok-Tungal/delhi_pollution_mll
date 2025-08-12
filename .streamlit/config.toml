@@ -4,6 +4,5 @@ port = 8501
 enableCORS = false
 enableXsrfProtection = false
 
-[global]
-disableWatchdogWarning = true
-disableInstallTelemetry = true
+[browser]
+gatherUsageStats = false
