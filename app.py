@@ -1,14 +1,9 @@
 import os
-
-# Hugging Face PORT fix
 port = int(os.environ.get("PORT", 8501))
 os.environ["STREAMLIT_SERVER_PORT"] = str(port)
 
-# Avoid /.streamlit permission issues
-os.environ["STREAMLIT_HOME"] = "/home/user/.streamlit"
-os.makedirs(os.environ["STREAMLIT_HOME"], exist_ok=True)
-
 import streamlit as st
+st.write("✅ Port is set correctly!")
 
 
 
