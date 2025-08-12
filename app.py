@@ -1,7 +1,6 @@
 import os
-os.environ["STREAMLIT_METRICS_ENABLED"] = "false"
-os.environ["STREAMLIT_TELEMETRY_ENABLED"] = "false"
-os.environ["XDG_CONFIG_HOME"] = os.path.join(os.getcwd(), ".streamlit")
+os.environ["STREAMLIT_HOME"] = "/home/user/.streamlit"
+os.makedirs(os.environ["STREAMLIT_HOME"], exist_ok=True)
 
 
 
