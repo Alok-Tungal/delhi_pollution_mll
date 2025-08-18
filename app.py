@@ -1355,9 +1355,9 @@ if page.startswith("1)"):
                 </div>
                 """, unsafe_allow_html=True)
 
-        # st.markdown("---")
-        # st.subheader("📣 Share on Social Media")
-        # share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
+        st.markdown("---")
+        st.subheader("📣 Share on Social Media")
+        share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
         latest = st.session_state.last_prediction
         if latest is not None:
             aqi_val, aqi_label = latest
