@@ -1,3 +1,100 @@
+
+st.markdown("---")
+st.markdown("### 🧠 Understand the Pollutants & Their Impact")
+
+pollutant_info = {
+    "PM2.5": {
+        "emoji": "🌫️",
+        "source": "Combustion engines, factories, stubble burning",
+        "effect": "Can penetrate deep into lungs and enter bloodstream, causing heart and lung issues.",
+    },
+    "PM10": {
+        "emoji": "🌪️",
+        "source": "Dust, construction, roads",
+        "effect": "Irritates nose, throat, and lungs. Can trigger asthma.",
+    },
+    "NO₂": {
+        "emoji": "🛻",
+        "source": "Vehicle emissions, industrial activities",
+        "effect": "Aggravates respiratory diseases like asthma. Increases hospital visits.",
+    },
+    "SO₂": {
+        "emoji": "🏭",
+        "source": "Coal burning, thermal power plants",
+        "effect": "Affects lungs, causes wheezing, shortness of breath.",
+    },
+    "CO": {
+        "emoji": "🚗",
+        "source": "Incomplete combustion in vehicles, stoves",
+        "effect": "Reduces oxygen supply to body organs. Dangerous in enclosed areas.",
+    },
+    "Ozone": {
+        "emoji": "☀️",
+        "source": "Formed by sunlight reacting with pollutants (secondary pollutant)",
+        "effect": "Causes chest pain, coughing, worsens bronchitis & asthma.",
+    }
+}
+
+for pollutant, details in pollutant_info.items():
+    st.markdown(f"""
+**{details['emoji']} {pollutant}**
+- **Source:** {details['source']}
+- **Health Effect:** {details['effect']}
+    """)
+    
+# ✅ STEP 7: AQI Knowledge Hub 🧠💨
+with st.expander("📚 Learn About AQI & Health Tips"):
+    st.markdown("### 💡 What Do These Pollutants Mean?")
+    
+    st.markdown("""
+- **🟤 PM2.5 (Fine Particles):** Penetrates deep into lungs. Sources: dust, smoke.
+- **🟠 PM10 (Coarse Particles):** Irritates eyes, nose, and throat.
+- **🟣 NO₂ (Nitrogen Dioxide):** Increases asthma risk, especially in children.
+- **🔵 SO₂ (Sulfur Dioxide):** Causes coughing, shortness of breath.
+- **⚫ CO (Carbon Monoxide):** Reduces oxygen to brain; very dangerous at high levels.
+- **🟢 Ozone (O₃):** Harmful at ground level — affects lung function.
+""")
+
+    st.markdown("### 📈 AQI Historical Meaning:")
+    st.info("""
+- AQI below **100** = Generally safe for most people.
+- AQI above **200** = Can be dangerous for sensitive groups.
+- AQI **above 300** = Public health emergency levels!
+    """)
+
+    st.markdown("### 🧘 Health Tips for High AQI Days:")
+    st.success("""
+- ✅ Stay indoors & use air purifiers
+- ✅ Wear N95 masks outdoors
+- ✅ Drink water to stay hydrated
+- ✅ Avoid morning walks on high-pollution days
+""")
+
+    # ✅ Fixed Download Button (text string instead of StringIO)
+    education_text = """
+Air Quality & You 🌍
+
+Pollutants Explained:
+- PM2.5, PM10 → Lung irritants
+- NO2, SO2 → Harmful to respiratory system
+- CO → Oxygen blocker
+- Ozone → Triggers asthma
+
+Stay safe:
+✔ Stay indoors on high AQI days
+✔ Use masks, purifiers, and hydrate often
+
+Made with ❤️ by Alok Tungal
+    """
+    st.download_button(
+        label="📥 Download AQI Safety Guide",
+        data=education_text,  # 🛠️ Send string instead of StringIO
+        file_name="aqi_safety_guide.txt",
+        mime="text/plain",
+        key="download_guide_education"
+    )
+
+
 import os
 port = int(os.environ.get("PORT", 8501))
 os.environ["STREAMLIT_SERVER_PORT"] = str(port)
@@ -67,6 +164,7 @@ elif selected == "About":
     **Purpose**: Predict and analyze Delhi's air quality using AI and real-time data.  
     **Tech Used**: Python, Streamlit, scikit-learn, SHAP, OpenAQ API
     """)
+
 
 
 
@@ -347,100 +445,6 @@ plt.grid(axis="y")
 st.pyplot(fig)
 plt.clf()
 
-st.markdown("---")
-st.markdown("### 🧠 Understand the Pollutants & Their Impact")
-
-pollutant_info = {
-    "PM2.5": {
-        "emoji": "🌫️",
-        "source": "Combustion engines, factories, stubble burning",
-        "effect": "Can penetrate deep into lungs and enter bloodstream, causing heart and lung issues.",
-    },
-    "PM10": {
-        "emoji": "🌪️",
-        "source": "Dust, construction, roads",
-        "effect": "Irritates nose, throat, and lungs. Can trigger asthma.",
-    },
-    "NO₂": {
-        "emoji": "🛻",
-        "source": "Vehicle emissions, industrial activities",
-        "effect": "Aggravates respiratory diseases like asthma. Increases hospital visits.",
-    },
-    "SO₂": {
-        "emoji": "🏭",
-        "source": "Coal burning, thermal power plants",
-        "effect": "Affects lungs, causes wheezing, shortness of breath.",
-    },
-    "CO": {
-        "emoji": "🚗",
-        "source": "Incomplete combustion in vehicles, stoves",
-        "effect": "Reduces oxygen supply to body organs. Dangerous in enclosed areas.",
-    },
-    "Ozone": {
-        "emoji": "☀️",
-        "source": "Formed by sunlight reacting with pollutants (secondary pollutant)",
-        "effect": "Causes chest pain, coughing, worsens bronchitis & asthma.",
-    }
-}
-
-for pollutant, details in pollutant_info.items():
-    st.markdown(f"""
-**{details['emoji']} {pollutant}**
-- **Source:** {details['source']}
-- **Health Effect:** {details['effect']}
-    """)
-    
-# ✅ STEP 7: AQI Knowledge Hub 🧠💨
-with st.expander("📚 Learn About AQI & Health Tips"):
-    st.markdown("### 💡 What Do These Pollutants Mean?")
-    
-    st.markdown("""
-- **🟤 PM2.5 (Fine Particles):** Penetrates deep into lungs. Sources: dust, smoke.
-- **🟠 PM10 (Coarse Particles):** Irritates eyes, nose, and throat.
-- **🟣 NO₂ (Nitrogen Dioxide):** Increases asthma risk, especially in children.
-- **🔵 SO₂ (Sulfur Dioxide):** Causes coughing, shortness of breath.
-- **⚫ CO (Carbon Monoxide):** Reduces oxygen to brain; very dangerous at high levels.
-- **🟢 Ozone (O₃):** Harmful at ground level — affects lung function.
-""")
-
-    st.markdown("### 📈 AQI Historical Meaning:")
-    st.info("""
-- AQI below **100** = Generally safe for most people.
-- AQI above **200** = Can be dangerous for sensitive groups.
-- AQI **above 300** = Public health emergency levels!
-    """)
-
-    st.markdown("### 🧘 Health Tips for High AQI Days:")
-    st.success("""
-- ✅ Stay indoors & use air purifiers
-- ✅ Wear N95 masks outdoors
-- ✅ Drink water to stay hydrated
-- ✅ Avoid morning walks on high-pollution days
-""")
-
-    # ✅ Fixed Download Button (text string instead of StringIO)
-    education_text = """
-Air Quality & You 🌍
-
-Pollutants Explained:
-- PM2.5, PM10 → Lung irritants
-- NO2, SO2 → Harmful to respiratory system
-- CO → Oxygen blocker
-- Ozone → Triggers asthma
-
-Stay safe:
-✔ Stay indoors on high AQI days
-✔ Use masks, purifiers, and hydrate often
-
-Made with ❤️ by Alok Tungal
-    """
-    st.download_button(
-        label="📥 Download AQI Safety Guide",
-        data=education_text,  # 🛠️ Send string instead of StringIO
-        file_name="aqi_safety_guide.txt",
-        mime="text/plain",
-        key="download_guide_education"
-    )
 
 # step 6
 # Step 6: Show Recent AQI Trend (Static Sample Data for Demo)
