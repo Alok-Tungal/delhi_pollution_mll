@@ -9,7 +9,7 @@ st.title("✅ Streamlit running on the correct port")
 
 import streamlit as st
 from streamlit_option_menu import option_menu
-import io
+import io  
 import seaborn as sns
 # Set page config 
 st.set_page_config(page_title="🌫️ Delhi AQI Dashboard", layout="wide")
