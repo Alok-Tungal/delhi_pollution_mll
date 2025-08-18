@@ -1103,9 +1103,42 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # ──────────────────────────────
 # HELPERS
 # ──────────────────────────────
-APP_URL = st.secrets.get("app_url", "").strip()
-if not APP_URL:
-    APP_URL = "https://github.com/Alok-Tungal/delhi_pollution_mll/blob/main/app.py"
+# Generate QR Code with high box_size for clarity
+qr = qrcode.QRCode(
+    version=1,
+    box_size=10,
+    border=4
+)
+qr.add_data(paste_url)
+qr.make(fit=True)
+
+# Create and resize image for laptop viewing
+img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+img = img.resize((300, 300), Image.LANCZOS)  # Clear and sharp
+
+# Display QR code with updated Streamlit parameter
+st.image(img, caption="📱 Scan to open the report", use_container_width=False)
+
+# ✅ Show in Streamlit
+st.markdown("### 📲 Share This AQI Summary via QR Code")
+# st.image(qr_path, caption="🔗 Scan to open AQI Report", use_container_width=True)
+
+# Optional: Download QR Code
+buf = BytesIO()
+img.save(buf, format="PNG")
+byte_im = buf.getvalue()
+
+st.download_button(
+    label="📥 Download QR Code",
+    data=byte_im,
+    file_name="Delhi_AQI_QR_Code.png",
+    mime="image/png"
+)
+
+
+# APP_URL = st.secrets.get("app_url", "").strip()
+# if not APP_URL:
+#     APP_URL = "https://github.com/Alok-Tungal/delhi_pollution_mll/blob/main/app.py"
 
 # APP_URL = st.secrets.get("app_url", "").strip() or "https://github.com/Alok-Tungal/delhi_pollution_mll/edit/main/app.py"
 
