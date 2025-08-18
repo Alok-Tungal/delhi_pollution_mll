@@ -46,7 +46,7 @@ with st.sidebar:
 # Placeholder Pages (will be filled in future steps)
 if selected == "AQI Dashboard":
     st.title("📡Delhi AQI Dashboard")
-    # st.info("We will integrate live AQI from OpenAQ API here.")
+    st.info("We will integrate live AQI from OpenAQ API here.")
 
 elif selected == "Predict AQI":
     st.title("🤖 Predict AQI Category")
