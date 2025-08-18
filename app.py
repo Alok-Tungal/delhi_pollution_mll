@@ -140,30 +140,30 @@ st.markdown("""
 #         default_index=0,
 #     )
 
-# Placeholder Pages (will be filled in future steps)
-if selected == "AQI Dashboard":
-    st.title("📡Delhi AQI Dashboard")
-    st.info("We will integrate live AQI from OpenAQ API here.")
+# # Placeholder Pages (will be filled in future steps)
+# if selected == "AQI Dashboard":
+#     st.title("📡Delhi AQI Dashboard")
+#     st.info("We will integrate live AQI from OpenAQ API here.")
 
-elif selected == "Predict AQI":
-    st.title("🤖 Predict AQI Category")
-    st.warning("This will use your trained ML model with SHAP analysis.")
+# elif selected == "Predict AQI":
+#     st.title("🤖 Predict AQI Category")
+#     st.warning("This will use your trained ML model with SHAP analysis.")
 
-elif selected == "AQI History":
-    st.title("📈 AQI History & Trends")
-    st.info("Time series line chart & heatmap coming soon.")
+# elif selected == "AQI History":
+#     st.title("📈 AQI History & Trends")
+#     st.info("Time series line chart & heatmap coming soon.")
 
-elif selected == "Pollutant Info":
-    st.title("🧪 Pollutant Information")
-    st.success("Will display health impact & limits of PM2.5, NO2, etc.")
+# elif selected == "Pollutant Info":
+#     st.title("🧪 Pollutant Information")
+#     st.success("Will display health impact & limits of PM2.5, NO2, etc.")
 
-elif selected == "About":
-    st.title("ℹ️ About This App")
-    st.markdown("""
-    **Creator**: Alok Tungal  
-    **Purpose**: Predict and analyze Delhi's air quality using AI and real-time data.  
-    **Tech Used**: Python, Streamlit, scikit-learn, SHAP, OpenAQ API
-    """)
+# elif selected == "About":
+# #     st.title("ℹ️ About This App")
+#     st.markdown("""
+#     **Creator**: Alok Tungal  
+#     **Purpose**: Predict and analyze Delhi's air quality using AI and real-time data.  
+#     **Tech Used**: Python, Streamlit, scikit-learn, SHAP, OpenAQ API
+#     """)
 
 
 
