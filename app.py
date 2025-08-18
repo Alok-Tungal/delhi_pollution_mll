@@ -131,14 +131,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Sidebar Navigation
-with st.sidebar:
-    selected = option_menu(
-        menu_title="🌫️ Delhi AQI App",
-        options=["Live AQI Dashboard", "Predict AQI", "AQI History", "Pollutant Info", "About"],
-        icons=["cloud-fog2", "graph-up", "bar-chart-line", "info-circle", "person-circle"],
-        menu_icon="cast",
-        default_index=0,
-    )
+# with st.sidebar:
+#     selected = option_menu(
+#         menu_title="🌫️ Delhi AQI App",
+#         options=["Live AQI Dashboard", "Predict AQI", "AQI History", "Pollutant Info", "About"],
+#         icons=["cloud-fog2", "graph-up", "bar-chart-line", "info-circle", "person-circle"],
+#         menu_icon="cast",
+#         default_index=0,
+#     )
 
 # Placeholder Pages (will be filled in future steps)
 if selected == "AQI Dashboard":
