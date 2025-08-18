@@ -872,7 +872,7 @@ elif page == "📊 Recent AQI Trends":
 
     df_logs = load_logs_df()
     if len(df_logs) >= 2:
-    st.subheader("📈 Recent Prediction Trends")
+        st.subheader("📈 Recent Prediction Trends")
 
     # Trend line for predicted AQI
     st.line_chart(
