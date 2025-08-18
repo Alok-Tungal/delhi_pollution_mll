@@ -872,12 +872,13 @@ elif page == "📊 Recent AQI Trends":
 
     df_logs = load_logs_df()
     if len(df_logs) >= 2:
-        # Show a simple trend line using Streamlit built-in chart
-        st.line_chart(
-            df_logs.set_index("Timestamp")["PredictedAQI"],
-            use_container_width=True
-        )
-        st.dataframe(df_logs.tail(20), use_container_width=True)
+    st.subheader("📈 Recent Prediction Trends")
+
+    # Trend line for predicted AQI
+    st.line_chart(
+        df_logs.set_index("Timestamp")["PredictedAQI"],
+        use_container_width=True
+    )
     else:
         # Simulated fallback
         st.info("No logs found. Showing simulated AQI trend.")
