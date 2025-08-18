@@ -1103,8 +1103,11 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # ──────────────────────────────
 # HELPERS
 # ──────────────────────────────
+APP_URL = st.secrets.get("app_url", "").strip()
+if not APP_URL:
+    APP_URL = "https://github.com/Alok-Tungal/delhi_pollution_mll/blob/main/app.py"
 
-APP_URL = st.secrets.get("app_url", "").strip() or "https://github.com/Alok-Tungal/delhi_pollution_mll/edit/main/app.py"
+# APP_URL = st.secrets.get("app_url", "").strip() or "https://github.com/Alok-Tungal/delhi_pollution_mll/edit/main/app.py"
 
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
