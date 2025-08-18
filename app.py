@@ -873,26 +873,32 @@ elif page == "📊 Recent AQI Trends":
     # Load logs
     df_logs = load_logs_df()
 
-    if df_logs is not None and len(df_logs) >= 2:
+    required_cols = {"Timestamp", "PredictedAQI"}
+    if df_logs is not None and required_cols.issubset(df_logs.columns) and len(df_logs) >= 2:
         st.subheader("📈 Recent Prediction Trends (From Logs)")
 
-        # Trend line for predicted AQI
+        # Convert Timestamp to datetime if needed
+        df_logs["Timestamp"] = pd.to_datetime(df_logs["Timestamp"], errors="coerce")
+
+        # Drop any rows with invalid timestamps
+        df_logs = df_logs.dropna(subset=["Timestamp"])
+
+        # Plot AQI trend
         st.line_chart(
             df_logs.set_index("Timestamp")["PredictedAQI"],
             use_container_width=True
         )
 
-        # Show last 20 records with conditional formatting
+        # Show last 20 records with gradient formatting
         st.write("📋 **Last 20 Predictions**")
         styled_df = df_logs.tail(20).style.background_gradient(
-            subset=["PredictedAQI"],
-            cmap="RdYlGn_r"  # Green for low AQI, Red for high AQI
+            subset=["PredictedAQI"], cmap="RdYlGn_r"
         )
         st.dataframe(styled_df, use_container_width=True)
 
     else:
         # Simulated fallback
-        st.warning("⚠️ No logs found. Showing simulated AQI trend for demo purposes.")
+        st.warning("⚠️ No valid logs found. Showing simulated AQI trend for demo purposes.")
 
         dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
         sim = pd.DataFrame({
@@ -902,6 +908,7 @@ elif page == "📊 Recent AQI Trends":
 
         st.subheader("📈 Simulated AQI Trend")
         st.line_chart(sim.set_index("Timestamp"), use_container_width=True)
+
 
 # ──────────────────────────────
 # COMPARISON
