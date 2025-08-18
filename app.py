@@ -1378,44 +1378,42 @@ with st.sidebar:
 if page.startswith("1)"):
     st.title("🔎 Understand the Pollutants & Their Impact")
 
-    c1, c2 = st.columns([3, 1], vertical_alignment="top")
+    # c1, c2 = st.columns([3, 1], vertical_alignment="top")
 
-    with c1:
-        st.markdown("Get familiar with the key pollutants that drive Delhi’s AQI:")
-        colA, colB, colC = st.columns(3)
-        items = list(POLLUTANT_INFO.items())
-        for idx, (poll, desc) in enumerate(items):
-            box = [colA, colB, colC][idx % 3]
-            with box:
-                st.markdown(f"""
-                <div class="card">
-                  <strong>{poll}</strong><br/>
-                  <small>{desc}</small>
-                </div>
-                """, unsafe_allow_html=True)
+#     with c1:
+#         st.markdown("Get familiar with the key pollutants that drive Delhi’s AQI:")
+#         colA, colB, colC = st.columns(3)
+#         items = list(POLLUTANT_INFO.items())
+#         for idx, (poll, desc) in enumerate(items):
+#             box = [colA, colB, colC][idx % 3]
+#             with box:
+#                 st.markdown(f"""
+#                 <div class="card">
+#                   <strong>{poll}</strong><br/>
+#                   <small>{desc}</small>
+#                 </div>
+#                 """, unsafe_allow_html=True)
 
-        st.markdown("---")
+#         st.markdown("---")
         
-        # Optional: Download QR Code
-        buf = BytesIO()
-        img.save(buf, format="PNG")
-        byte_im = buf.getvalue()
+#         # Optional: Download QR Code
+#         buf = BytesIO()
+#         img.save(buf, format="PNG")
+#         byte_im = buf.getvalue()
         
-        st.download_button(
-            label="📥 Download QR Code",
-            data=byte_im,
-            file_name="Delhi_AQI_QR_Code.png",
-            mime="image/png"
-        )
-
-# 🔗 Put your deployed Streamlit app link here
-    APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
+#         st.download_button(
+#             label="📥 Download QR Code",
+#             data=byte_im,
+#             file_name="Delhi_AQI_QR_Code.png",
+#             mime="image/png"
+#         )
+     # Create 2 columns at the top
+    c1, c2 = st.columns([3, 1])  # left wide, right narrow
     
-    with c2:
+    with c2:  # 👉 QR code in the right column
         st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
-        st.markdown('<div class="qr-title">📱 Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+        st.markdown('<div class="qr-title">📲 Share This AQI Summary via QR</div>', unsafe_allow_html=True)
     
-        # If prediction is available, embed AQI + app link
         if st.session_state.last_prediction is not None:
             aqi_val, aqi_label = st.session_state.last_prediction
             qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
@@ -1423,27 +1421,60 @@ if page.startswith("1)"):
             qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
     
         # Generate QR image
-        qr_img = make_qr_image(qr_content, size_px=160)  # your QR generator should return a PIL image
-        
-        # Save into buffer (fixes your error)
-        buf = BytesIO()
-        qr_img.save(buf, format="PNG")
-        buf.seek(0)
-        qr_png = buf.getvalue()
+        qr_img = make_qr_image(qr_content, size_px=160)
     
-        # Show QR on screen
-        st.image(qr_png, caption="Scan to open", use_container_width=True)
+        # Show QR
+        st.image(qr_img, caption="Scan to open", use_container_width=True)
     
         # Download button
+        buf = BytesIO()
+        qr_img.save(buf, format="PNG")
         st.download_button(
             "⬇️ Download QR Code",
-            data=qr_png,
+            data=buf.getvalue(),
             file_name="Delhi_AQI_QR.png",
             mime="image/png",
             use_container_width=True
         )
     
         st.markdown('</div>', unsafe_allow_html=True)
+
+# 🔗 Put your deployed Streamlit app link here
+    # APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
+    
+    # with c2:
+    #     st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
+    #     st.markdown('<div class="qr-title">📱 Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+    
+    #     # If prediction is available, embed AQI + app link
+    #     if st.session_state.last_prediction is not None:
+    #         aqi_val, aqi_label = st.session_state.last_prediction
+    #         qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
+    #     else:
+    #         qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
+    
+    #     # Generate QR image
+    #     qr_img = make_qr_image(qr_content, size_px=160)  # your QR generator should return a PIL image
+        
+    #     # Save into buffer (fixes your error)
+    #     buf = BytesIO()
+    #     qr_img.save(buf, format="PNG")
+    #     buf.seek(0)
+    #     qr_png = buf.getvalue()
+    
+    #     # Show QR on screen
+    #     st.image(qr_png, caption="Scan to open", use_container_width=True)
+    
+    #     # Download button
+    #     st.download_button(
+    #         "⬇️ Download QR Code",
+    #         data=qr_png,
+    #         file_name="Delhi_AQI_QR.png",
+    #         mime="image/png",
+    #         use_container_width=True
+    #     )
+    
+    #     st.markdown('</div>', unsafe_allow_html=True)
 
 
 
