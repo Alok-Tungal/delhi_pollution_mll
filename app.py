@@ -1104,7 +1104,7 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # ──────────────────────────────
 # HELPERS
 # ──────────────────────────────
-paste_url = "https://alokdelhiairqualityml.streamlit.app/"
+paste_url = "https://alokdelhiairqualitymll.streamlit.app/"
 
 # Generate QR Code with high box_size for clarity
 qr = qrcode.QRCode(
