@@ -868,22 +868,39 @@ if page == "🔮 Prediction":
 # ──────────────────────────────
 elif page == "📊 Recent AQI Trends":
     st.title("📊 Recent AQI Trends")
-    st.caption("Shows recent predictions from your logs (simulated if none).")
+    st.caption("Visualize recent predictions from your logs. If no data is found, simulated values will be shown.")
 
+    # Load logs
     df_logs = load_logs_df()
-    if len(df_logs) >= 2:
-        st.subheader("📈 Recent Prediction Trends")
 
-    # Trend line for predicted AQI
-    st.line_chart(
-        df_logs.set_index("Timestamp")["PredictedAQI"],
-        use_container_width=True
-    )
+    if df_logs is not None and len(df_logs) >= 2:
+        st.subheader("📈 Recent Prediction Trends (From Logs)")
+
+        # Trend line for predicted AQI
+        st.line_chart(
+            df_logs.set_index("Timestamp")["PredictedAQI"],
+            use_container_width=True
+        )
+
+        # Show last 20 records with conditional formatting
+        st.write("📋 **Last 20 Predictions**")
+        styled_df = df_logs.tail(20).style.background_gradient(
+            subset=["PredictedAQI"],
+            cmap="RdYlGn_r"  # Green for low AQI, Red for high AQI
+        )
+        st.dataframe(styled_df, use_container_width=True)
+
     else:
         # Simulated fallback
-        st.info("No logs found. Showing simulated AQI trend.")
+        st.warning("⚠️ No logs found. Showing simulated AQI trend for demo purposes.")
+
         dates = pd.date_range(end=pd.Timestamp.today(), periods=30)
-        sim = pd.DataFrame({"Timestamp": dates, "PredictedAQI": np.random.randint(50, 300, size=30)})
+        sim = pd.DataFrame({
+            "Timestamp": dates,
+            "PredictedAQI": np.random.randint(50, 300, size=30)
+        })
+
+        st.subheader("📈 Simulated AQI Trend")
         st.line_chart(sim.set_index("Timestamp"), use_container_width=True)
 
 # ──────────────────────────────
