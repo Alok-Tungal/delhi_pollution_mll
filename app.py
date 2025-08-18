@@ -1104,7 +1104,7 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # HELPERS
 # ──────────────────────────────
 
-APP_URL = st.secrets.get("app_url", "").strip() or "https://your-app-url.example.com"
+APP_URL = st.secrets.get("app_url", "").strip() or "https://github.com/Alok-Tungal/delhi_pollution_mll/edit/main/app.py"
 
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
@@ -1316,7 +1316,7 @@ MODEL, ENCODER = load_model_and_encoder()
 # SIDEBAR NAVIGATION (ORDER EXACT)
 # ──────────────────────────────
 with st.sidebar:
-    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+    st.image("https://in.images.search.yahoo.com/yhs/search;_ylt=AwrPrxnOS6Nof4kO4BDnHgx.;_ylu=Y29sbwMEcG9zAzEEdnRpZAMEc2VjA3BpdnM-?p=delhi+AQI+image&type=ud-c-in--s-p-aqpu7avh--exp-none--subid-none&param1=pemc0wx0yet8gpltqxryj7r1&hsimp=yhs-091&hspart=infospace&ei=UTF-8&fr=yhs-infospace-091#id=23&iurl=https%3A%2F%2Fimages.news9live.com%2Fwp-content%2Fuploads%2F2024%2F11%2FAir_quality.jpg%3Fw%3D802%26enlarge%3Dtrue&action=click", width=32)
     st.markdown("### Delhi AQI App")
     page = st.radio(
         "Navigation",
