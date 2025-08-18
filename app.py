@@ -1103,6 +1103,8 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # ──────────────────────────────
 # HELPERS
 # ──────────────────────────────
+paste_url = "https://alokdelhiairqualityml.streamlit.app/"
+
 # Generate QR Code with high box_size for clarity
 qr = qrcode.QRCode(
     version=1,
@@ -1289,7 +1291,7 @@ def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
         gc = gspread.service_account_from_dict(st.secrets["gspread"])
         sheet = gc.open("Delhi AQI Predictions").sheet1
         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        row = [
+        row = [ 
             now,
             float(values["PM2.5"]), float(values["PM10"]), float(values["NO2"]),
             float(values["SO2"]), float(values["CO"]), float(values["Ozone"]),
