@@ -1358,7 +1358,7 @@ if page.startswith("1)"):
         # st.markdown("---")
         # st.subheader("📣 Share on Social Media")
         # share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
-        # latest = st.session_state.last_prediction
+        latest = st.session_state.last_prediction
         if latest is not None:
             aqi_val, aqi_label = latest
             share_text = f"My Delhi AQI prediction: {aqi_val} ({aqi_label}). Try yours!"
