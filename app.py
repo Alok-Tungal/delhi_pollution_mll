@@ -1410,7 +1410,7 @@ if page.startswith("1)"):
      # Create 2 columns at the top
     
     c1, c2 = st.columns([3, 1])  # left wide, right narrow
-    paste_url = "https://alokdelhiairqualitymll.streamlit.app/"
+    APP_URL = "https://alokdelhiairqualitymll.streamlit.app/"
     
     with c2:  # 👉 QR code in the right column
         st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
