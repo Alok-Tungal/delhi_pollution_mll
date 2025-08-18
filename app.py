@@ -1444,37 +1444,37 @@ if page.startswith("1)"):
 # 🔗 Put your deployed Streamlit app link here
     APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
     
-    # with c2:
-    #     st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
-    #     st.markdown('<div class="qr-title">📱 Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+    with c2:
+        st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
+        st.markdown('<div class="qr-title">📱 Share This AQI Summary via QR</div>', unsafe_allow_html=True)
     
-    #     # If prediction is available, embed AQI + app link
-    #     if st.session_state.last_prediction is not None:
-    #         aqi_val, aqi_label = st.session_state.last_prediction
-    #         qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
-    #     else:
-    #         qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
+        # If prediction is available, embed AQI + app link
+        if st.session_state.last_prediction is not None:
+            aqi_val, aqi_label = st.session_state.last_prediction
+            qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
+        else:
+            qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
     
-    #     # Generate QR image
-    #     qr_img = make_qr_image(qr_content, size_px=160)  # your QR generator should return a PIL image
+        # Generate QR image
+        qr_img = make_qr_image(qr_content, size_px=160)  # your QR generator should return a PIL image
         
-    #     # Save into buffer (fixes your error)
-    #     buf = BytesIO()
-    #     qr_img.save(buf, format="PNG")
-    #     buf.seek(0)
-    #     qr_png = buf.getvalue()
+        # Save into buffer (fixes your error)
+        buf = BytesIO()
+        qr_img.save(buf, format="PNG")
+        buf.seek(0)
+        qr_png = buf.getvalue()
     
-    #     # Show QR on screen
-    #     st.image(qr_png, caption="Scan to open", use_container_width=True)
+        # Show QR on screen
+        st.image(qr_png, caption="Scan to open", use_container_width=True)
     
-    #     # Download button
-    #     st.download_button(
-    #         "⬇️ Download QR Code",
-    #         data=qr_png,
-    #         file_name="Delhi_AQI_QR.png",
-    #         mime="image/png",
-    #         use_container_width=True
-    #     )
+        # Download button
+        st.download_button(
+            "⬇️ Download QR Code",
+            data=qr_png,
+            file_name="Delhi_AQI_QR.png",
+            mime="image/png",
+            use_container_width=True
+        )
     
     #     st.markdown('</div>', unsafe_allow_html=True)
 
