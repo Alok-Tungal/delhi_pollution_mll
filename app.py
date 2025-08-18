@@ -1442,7 +1442,7 @@ if page.startswith("1)"):
         st.markdown('</div>', unsafe_allow_html=True)
 
 # 🔗 Put your deployed Streamlit app link here
-    # APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
+    APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
     
     # with c2:
     #     st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
