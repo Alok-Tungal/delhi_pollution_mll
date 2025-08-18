@@ -1104,7 +1104,7 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # HELPERS
 # ──────────────────────────────
 
-APP_URL = st.secrets.get("app_url", "").strip() or "https://your-app-url.example.com"
+APP_URL = st.secrets.get("app_url", "").strip() or "https://pollutionappcreatedbyalok.streamlit.app/"
 
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
@@ -1355,10 +1355,10 @@ if page.startswith("1)"):
                 </div>
                 """, unsafe_allow_html=True)
 
-        st.markdown("---")
-        st.subheader("📣 Share on Social Media")
-        share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
-        latest = st.session_state.last_prediction
+        # st.markdown("---")
+        # st.subheader("📣 Share on Social Media")
+        # share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
+        # latest = st.session_state.last_prediction
         if latest is not None:
             aqi_val, aqi_label = latest
             share_text = f"My Delhi AQI prediction: {aqi_val} ({aqi_label}). Try yours!"
