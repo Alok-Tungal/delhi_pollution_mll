@@ -6,7 +6,7 @@ from streamlit_option_menu import option_menu
 import io  
 import seaborn as sns
 # Set page config 
-# st.set_page_config(page_title="🌫️ Delhi AQI Dashboard", layout="wide")
+st.set_page_config(page_title="🌫️ Delhi AQI Dashboard", layout="wide")
 
 # Inject custom CSS for cleaner, modern look
 st.markdown("""
