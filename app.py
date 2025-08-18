@@ -1409,30 +1409,30 @@ if page.startswith("1)"):
         )
 
 # 🔗 Put your deployed Streamlit app link here
-APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
-
-with c2:
-    st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
-    st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+    APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
     
-    if st.session_state.last_prediction is not None:
-        aqi_val, aqi_label = st.session_state.last_prediction
-        qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
-    else:
-        qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
-
-    qr_png = make_qr_bytes(qr_content, size_px=160)
-    st.image(qr_png, caption="Scan to open", use_container_width=True)
-
-    st.download_button(
-        "⬇️ Download QR Code",
-        data=qr_png,
-        file_name="Delhi_AQI_QR.png",
-        mime="image/png",
-        use_container_width=True
-    )
+    with c2:
+        st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
+        st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+        
+        if st.session_state.last_prediction is not None:
+            aqi_val, aqi_label = st.session_state.last_prediction
+            qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
+        else:
+            qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
     
-    st.markdown('</div>', unsafe_allow_html=True)
+        qr_png = make_qr_bytes(qr_content, size_px=160)
+        st.image(qr_png, caption="Scan to open", use_container_width=True)
+    
+        st.download_button(
+            "⬇️ Download QR Code",
+            data=qr_png,
+            file_name="Delhi_AQI_QR.png",
+            mime="image/png",
+            use_container_width=True
+        )
+        
+        st.markdown('</div>', unsafe_allow_html=True)
 
 
 
