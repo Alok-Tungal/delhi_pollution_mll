@@ -1395,40 +1395,6 @@ if page.startswith("1)"):
                 """, unsafe_allow_html=True)
 
         st.markdown("---")
-        # st.subheader("📣 Share on Social Media")
-        # share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
-        # latest = st.session_state.last_prediction
-        # if latest is not None:
-        #     aqi_val, aqi_label = latest
-        #     share_text = f"My Delhi AQI prediction: {aqi_val} ({aqi_label}). Try yours!"
-
-        # twitter_url = f"https://twitter.com/intent/tweet?text={base64.urlsafe_b64encode(share_text.encode()).decode()}&url={APP_URL}"
-        # whatsapp_url = f"https://api.whatsapp.com/send?text={share_text} {APP_URL}"
-        # st.markdown(
-        #     f"[🐦 Share on Twitter]({twitter_url}) &nbsp;&nbsp; | &nbsp;&nbsp; [💬 Share on WhatsApp]({whatsapp_url})",
-        #     unsafe_allow_html=True
-        # )
-        paste_url = "https://alokdelhiairqualitymll.streamlit.app/"
-
-        # Generate QR Code with high box_size for clarity
-        qr = qrcode.QRCode(
-            version=1,
-            box_size=10,
-            border=4
-        )
-        qr.add_data(paste_url)
-        qr.make(fit=True)
-        
-        # Create and resize image for laptop viewing
-        img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
-        img = img.resize((300, 300), Image.LANCZOS)  # Clear and sharp
-        
-        # Display QR code with updated Streamlit parameter
-        st.image(img, caption="📱 Scan to open the report", use_container_width=False)
-        
-        # ✅ Show in Streamlit
-        st.markdown("### 📲 Share This AQI Summary via QR Code")
-        # st.image(qr_path, caption="🔗 Scan to open AQI Report", use_container_width=True)
         
         # Optional: Download QR Code
         buf = BytesIO()
@@ -1442,26 +1408,32 @@ if page.startswith("1)"):
             mime="image/png"
         )
 
-    with c2:
-        st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
-        st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
-        if st.session_state.last_prediction is not None:
-            aqi_val, aqi_label = st.session_state.last_prediction
-            qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
-        else:
-            qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
+# 🔗 Put your deployed Streamlit app link here
+APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  
 
-        qr_png = make_qr_bytes(qr_content, size_px=160)
-        st.image(qr_png, caption="Scan to open", use_container_width=True)
+with c2:
+    st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
+    st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+    
+    if st.session_state.last_prediction is not None:
+        aqi_val, aqi_label = st.session_state.last_prediction
+        qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
+    else:
+        qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
 
-        st.download_button(
-            "⬇️ Download QR Code",
-            data=qr_png,
-            file_name="Delhi_AQI_QR.png",
-            mime="image/png",
-            use_container_width=True
-        )
-        st.markdown('</div>', unsafe_allow_html=True)
+    qr_png = make_qr_bytes(qr_content, size_px=160)
+    st.image(qr_png, caption="Scan to open", use_container_width=True)
+
+    st.download_button(
+        "⬇️ Download QR Code",
+        data=qr_png,
+        file_name="Delhi_AQI_QR.png",
+        mime="image/png",
+        use_container_width=True
+    )
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+
 
 
 # ──────────────────────────────
