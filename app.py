@@ -1048,6 +1048,7 @@ import io
 import base64
 import datetime
 from typing import Tuple, Dict
+from io import BytesIO
 
 import numpy as np
 import pandas as pd
