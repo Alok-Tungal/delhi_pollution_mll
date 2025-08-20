@@ -1058,68 +1058,68 @@
 
 
 
-# # --- PAGE 1: AQI Prediction + Analysis ---
-# if page.startswith("1)"):
-#     st.title("🌍 Delhi AQI Predictor & Analysis")
+# --- PAGE 1: AQI Prediction + Analysis ---
+if page.startswith("1)"):
+    st.title("🌍 Delhi AQI Predictor & Analysis")
 
-#     # Form for pollutant inputs
-#     with st.form("aqi_form"):
-#         pm25 = st.number_input("PM2.5", 0, 500, 60)
-#         pm10 = st.number_input("PM10", 0, 600, 80)
-#         no2 = st.number_input("NO₂", 0, 400, 30)
-#         so2 = st.number_input("SO₂", 0, 400, 20)
-#         co = st.number_input("CO", 0, 50, 1)
-#         o3 = st.number_input("O₃", 0, 300, 25)
+    # Form for pollutant inputs
+    with st.form("aqi_form"):
+        pm25 = st.number_input("PM2.5", 0, 500, 60)
+        pm10 = st.number_input("PM10", 0, 600, 80)
+        no2 = st.number_input("NO₂", 0, 400, 30)
+        so2 = st.number_input("SO₂", 0, 400, 20)
+        co = st.number_input("CO", 0, 50, 1)
+        o3 = st.number_input("O₃", 0, 300, 25)
 
-#         submitted = st.form_submit_button("🔮 Predict AQI")
+        submitted = st.form_submit_button("🔮 Predict AQI")
 
-#     # Prediction
-#     if submitted:
-#         features = np.array([[pm25, pm10, no2, so2, co, o3]])
-#         pred = model.predict(features)[0]
-#         pred_label = label_encoder.inverse_transform([pred])[0]
+    # Prediction
+    if submitted:
+        features = np.array([[pm25, pm10, no2, so2, co, o3]])
+        pred = model.predict(features)[0]
+        pred_label = label_encoder.inverse_transform([pred])[0]
 
-#         st.session_state.last_prediction = (int(pred), pred_label)
+        st.session_state.last_prediction = (int(pred), pred_label)
 
-#         st.success(f"Predicted AQI: **{int(pred)}** → **{pred_label}**")
+        st.success(f"Predicted AQI: **{int(pred)}** → **{pred_label}**")
 
-#         # Quick Analysis
-#         st.subheader("📊 Take Analysis")
-#         if pred_label in ["Good", "Satisfactory"]:
-#             st.info("✅ Air quality is safe. You can go outdoors without major health risks.")
-#         elif pred_label in ["Moderate"]:
-#             st.warning("⚠️ Sensitive groups should take precautions (e.g., mask outdoors).")
-#         else:
-#             st.error("🚨 Poor air quality! Limit outdoor exposure and wear a mask.")
+        # Quick Analysis
+        st.subheader("📊 Take Analysis")
+        if pred_label in ["Good", "Satisfactory"]:
+            st.info("✅ Air quality is safe. You can go outdoors without major health risks.")
+        elif pred_label in ["Moderate"]:
+            st.warning("⚠️ Sensitive groups should take precautions (e.g., mask outdoors).")
+        else:
+            st.error("🚨 Poor air quality! Limit outdoor exposure and wear a mask.")
 
-#     # --- QR Code Section ---
-#     st.subheader("📲 Share This AQI Summary")
-#     c1, c2 = st.columns([2, 1])
+    # --- QR Code Section ---
+    st.subheader("📲 Share This AQI Summary")
+    c1, c2 = st.columns([2, 1])
 
-#     with c1:
-#         st.markdown("Easily share the latest AQI prediction with others via QR code.")
+    with c1:
+        st.markdown("Easily share the latest AQI prediction with others via QR code.")
 
-#     with c2:
-#         if "last_prediction" in st.session_state:
-#             aqi_val, aqi_label = st.session_state.last_prediction
-#             qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\nhttps://pollutionappcreatedbyalok.streamlit.app/"
-#         else:
-#             qr_content = "Delhi AQI App — Predict & Learn\nhttps://pollutionappcreatedbyalok.streamlit.app/"
+    with c2:
+        if "last_prediction" in st.session_state:
+            aqi_val, aqi_label = st.session_state.last_prediction
+            qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\nhttps://pollutionappcreatedbyalok.streamlit.app/"
+        else:
+            qr_content = "Delhi AQI App — Predict & Learn\nhttps://pollutionappcreatedbyalok.streamlit.app/"
 
-#         qr_img = make_qr_image(qr_content, size_px=180)
-#         buf = BytesIO()
-#         qr_img.save(buf, format="PNG")
-#         qr_bytes = buf.getvalue()
+        qr_img = make_qr_image(qr_content, size_px=180)
+        buf = BytesIO()
+        qr_img.save(buf, format="PNG")
+        qr_bytes = buf.getvalue()
 
-#         st.image(qr_bytes, caption="Scan to open", use_container_width=True)
+        st.image(qr_bytes, caption="Scan to open", use_container_width=True)
 
-#         st.download_button(
-#             "⬇️ Download QR Code",
-#             data=qr_bytes,
-#             file_name="Delhi_AQI_QR.png",
-#             mime="image/png",
-#             use_container_width=True
-        # )
+        st.download_button(
+            "⬇️ Download QR Code",
+            data=qr_bytes,
+            file_name="Delhi_AQI_QR.png",
+            mime="image/png",
+            use_container_width=True
+        )
 
 
 
