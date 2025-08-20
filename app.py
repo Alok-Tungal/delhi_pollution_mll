@@ -1656,4 +1656,4 @@ elif page.startswith("6)"):
 # FOOTER
 # ──────────────────────────────
 st.markdown("---")
-st.caption("© 2025 Delhi AQI App • Built with Streamlit •)
+st.caption("© 2025 Delhi AQI App • Built with Streamlit •")
