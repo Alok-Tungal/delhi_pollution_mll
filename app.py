@@ -1632,7 +1632,7 @@ APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
 
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
-PRESETS = {
+PRESENTS = {
     "Good":       [30,  40,  20,  5,  0.4, 10],
     "Moderate":   [90, 110,  40, 10,  1.2, 30],
     "Poor":       [200, 250, 90, 20,  2.0, 50],
