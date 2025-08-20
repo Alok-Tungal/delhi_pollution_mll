@@ -2392,16 +2392,26 @@ ensure_session_defaults()
 with st.form("aqi_form"):
     st.subheader("Enter pollutant levels:")
 
-    # Inputs linked to session state values
-    st.session_state.values["PM2.5"] = st.number_input("PM2.5 (µg/m³)", value=float(st.session_state.values["PM2.5"]))
-    st.session_state.values["PM10"]  = st.number_input("PM10 (µg/m³)", value=float(st.session_state.values["PM10"]))
-    st.session_state.values["NO2"]   = st.number_input("NO2 (µg/m³)", value=float(st.session_state.values["NO2"]))
-    st.session_state.values["SO2"]   = st.number_input("SO2 (µg/m³)", value=float(st.session_state.values["SO2"]))
-    st.session_state.values["CO"]    = st.number_input("CO (mg/m³)", value=float(st.session_state.values["CO"]))
-    st.session_state.values["Ozone"] = st.number_input("Ozone (µg/m³)", value=float(st.session_state.values["Ozone"]))
+    # Use safe defaults if session values are None or missing
+    pm25  = float(st.session_state.values.get("PM2.5", 0.0))
+    pm10  = float(st.session_state.values.get("PM10", 0.0))
+    no2   = float(st.session_state.values.get("NO2", 0.0))
+    so2   = float(st.session_state.values.get("SO2", 0.0))
+    co    = float(st.session_state.values.get("CO", 0.0))
+    ozone = float(st.session_state.values.get("Ozone", 0.0))
 
+    # Number inputs (update session state on change)
+    st.session_state.values["PM2.5"] = st.number_input("PM2.5 (µg/m³)", value=pm25, step=1.0)
+    st.session_state.values["PM10"]  = st.number_input("PM10 (µg/m³)",  value=pm10, step=1.0)
+    st.session_state.values["NO2"]   = st.number_input("NO2 (µg/m³)",   value=no2, step=1.0)
+    st.session_state.values["SO2"]   = st.number_input("SO2 (µg/m³)",   value=so2, step=1.0)
+    st.session_state.values["CO"]    = st.number_input("CO (mg/m³)",    value=co, step=0.1, format="%.2f")
+    st.session_state.values["Ozone"] = st.number_input("Ozone (µg/m³)", value=ozone, step=1.0)
+
+    # ✅ The missing submit button (inside the form!)
     submitted = st.form_submit_button("➡️ Predict AQI")
 
+# Handle prediction only if button pressed
 if submitted:
     # Debug raw input values
     st.write("🔎 Raw Input Values:", st.session_state.values)
@@ -2410,7 +2420,7 @@ if submitted:
     values = normalize_values(st.session_state.values)
     st.write("✅ Normalized Values:", values)
 
-    # Run prediction
+    # Run prediction safely
     try:
         aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
         st.session_state.last_prediction = (aqi_val, aqi_label)
@@ -2419,6 +2429,7 @@ if submitted:
         st.success(f"🌍 Predicted AQI: **{aqi_val}** → Category: **{aqi_label}**")
     except Exception as e:
         st.error(f"⚠️ Prediction failed: {e}")
+
 
 
 # ──────────────────────────────
