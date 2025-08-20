@@ -6,7 +6,7 @@
 # import io  
 # import seaborn as sns
 # # Set page config 
-# st.set_page_config(page_title="🌫️ Delhi AQI Dashboard", layout="wide")
+# st.set_page_config(page_title="🌫️ Delhi AQI Dashboard", layout="wide") 
 # st.markdown("---")
 # st.markdown("### 🧠 Understand the Pollutants & Their Impact")
 
@@ -1105,7 +1105,7 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # HELPERS
 # ──────────────────────────────
 
-APP_URL = st.secrets.get("app_url", "").strip() or "app_url = "https://pollutionappcreatedbyalok.streamlit.app/"
+APP_URL = st.secrets.get("app_url", "").strip() or app_url = "https://pollutionappcreatedbyalok.streamlit.app/"
 
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
