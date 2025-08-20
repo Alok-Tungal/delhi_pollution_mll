@@ -835,7 +835,7 @@
 #         "SO2":   float(so2),
         # "CO":    float(co),
         # "Ozone": float(ozone),
-    }
+    # }
 
     # Try to normalize if your app has normalize_values(); else use as-is
     # try:
