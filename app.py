@@ -1394,99 +1394,67 @@ with st.sidebar:
 
 
 
-# ──────────────────────────────
-# 1) UNDERSTAND POLLUTANTS & SHARE (QR on right + Download)
-# ──────────────────────────────
-if page.startswith("1)"):
-    st.title("🔎 Understand the Pollutants & Their Impact")
+import streamlit as st
+import qrcode
+from io import BytesIO
 
-    c1, c2 = st.columns([3, 1], vertical_alignment="top")
+# ---------------------------
+# CONFIGURE APP URL
+# ---------------------------
+APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  # Your real app link
 
-    # ---------------- LEFT SIDE ----------------
-    with c1:
-        st.markdown("Get familiar with the key pollutants that drive Delhi’s AQI:")
+# ---------------------------
+# QR CODE GENERATOR FUNCTION
+# ---------------------------
+def make_qr_image(url):
+    qr = qrcode.QRCode(
+        version=1, box_size=10, border=2
+    )
+    qr.add_data(url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
 
-        colA, colB, colC = st.columns(3)
-        items = list(POLLUTANT_INFO.items())
-        for idx, (poll, desc) in enumerate(items):
-            box = [colA, colB, colC][idx % 3]
-            with box:
-                st.markdown(f"""
-                <div class="card">
-                  <strong>{poll}</strong><br/>
-                  <small>{desc}</small>
-                </div>
-                """, unsafe_allow_html=True)
+# ---------------------------
+# PAGE 1
+# ---------------------------
+st.title("🌍 Delhi AQI Prediction App")
 
-        st.markdown("---")
-        st.subheader("📣 Share on Social Media")
+st.markdown("📌 Scan the QR code to open this app on your mobile!")
 
-        # --- DEFAULT SHARE TEXT ---
-        share_text = (
-            "Check out this Delhi AQI app — predict air quality and see health tips!"
-        )
+# Two-column layout (QR on right top, intro on left)
+c1, c2 = st.columns([2, 1])
 
-        # --- OVERRIDE IF PREDICTION AVAILABLE ---
-        if st.session_state.last_prediction is not None:
-            aqi_val, aqi_label = st.session_state.last_prediction
-            share_text = f"My Delhi AQI prediction: {aqi_val} ({aqi_label}). Try yours!"
+with c1:
+    st.subheader("Welcome!")
+    st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
+    st.write("👉 Click below to continue with your analysis.")
 
-        # --- APP URL ---
-        APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
+with c2:
+    qr_buf = make_qr_image(APP_URL)
+    st.image(qr_buf, caption="📱 Scan to open the app", use_container_width=True)
 
-        # --- TWITTER LINK ---
-        twitter_url = (
-            "https://twitter.com/intent/tweet?"
-            f"text={share_text}&url={APP_URL}"
-        )
+# Continue button
+if st.button("➡️ Take Analysis"):
+    st.session_state["page"] = "2) AQI Prediction"
 
-        # --- WHATSAPP LINK ---
-        whatsapp_url = (
-            "https://api.whatsapp.com/send?"
-            f"text={share_text} {APP_URL}"
-        )
-
-        # --- SHOW BUTTONS ---
-        st.markdown(
-            f"[🐦 Share on Twitter]({twitter_url}) &nbsp;&nbsp; | "
-            f"&nbsp;&nbsp; [💬 Share on WhatsApp]({whatsapp_url})",
-            unsafe_allow_html=True,
-        )
-
-    # ---------------- RIGHT SIDE ----------------
-    with c2:
-        st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
-        st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
-
-        # --- QR CONTENT ---
-        if st.session_state.last_prediction is not None:
-            aqi_val, aqi_label = st.session_state.last_prediction
-            qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
-        else:
-            qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
-
-        # --- GENERATE QR CODE ---
-        qr_png = make_qr_bytes(qr_content, size_px=200)
-        st.image(qr_png, caption="📱 Scan to open", use_container_width=True)
-
-        # --- DOWNLOAD BUTTON ---
-        st.download_button(
-            "⬇️ Download QR Code",
-            data=qr_png,
-            file_name="Delhi_AQI_QR.png",
-            mime="image/png",
-            use_container_width=True,
-        )
-
-        st.markdown('</div>', unsafe_allow_html=True)
+# ---------------------------
+# PAGE 2 placeholder
+# ---------------------------
+if st.session_state.get("page") == "2) AQI Prediction":
+    st.header("📊 AQI Prediction Page")
+    st.write("This is where your pollutant input form + prediction model will run.")
 
 
 
-# ──────────────────────────────
-# 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
-# ──────────────────────────────
-elif page.startswith("2)"):
-    st.title("📚 Learn About AQI & Health Tips")
+# # ──────────────────────────────
+# # 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
+# # ──────────────────────────────
+# elif page.startswith("2)"):
+#     st.title("📚 Learn About AQI & Health Tips")
 
     st.markdown("""
 **AQI Categories (India - simplified):**
