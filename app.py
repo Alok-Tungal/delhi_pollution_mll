@@ -2209,11 +2209,15 @@ elif page.startswith("4)"):
         so2  = st.number_input("SO2 (µg/m³)",   min_value=0.0, value=float(defaults[3]))
         o3   = st.number_input("Ozone (µg/m³)", min_value=0.0, value=float(defaults[5]))
 
-    # Update session (always normalized)
-    st.session_state.values = normalize_values({
-        "PM2.5": pm25, "PM10": pm10, "NO2": no2,
-        "SO2": so2,   "CO": co,    "Ozone": o3,
-    })
+    st.session_state.values = {
+    "PM2.5": pm25,
+    "PM10": pm10,
+    "NO2": no2,
+    "SO2": so2,
+    "CO": co,
+    "Ozone": o3,
+}
+
 
 
 
