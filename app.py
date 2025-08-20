@@ -1905,77 +1905,76 @@ with st.sidebar:
 
 # ---------------- Page-1 : Home ----------------
 if page.startswith("1)"):
-    # Title with emoji
+    # Nice title + thin brand line
     st.markdown(
         "<h1 style='text-align:center; color:#2E86C1;'>🌍 Delhi AQI Prediction Dashboard</h1>",
         unsafe_allow_html=True
     )
-    st.markdown("<hr style='border:2px solid #2E86C1;'>", unsafe_allow_html=True)
+    st.markdown("<hr style='border:2px solid #2E86C1; margin-top:4px;'>", unsafe_allow_html=True)
 
-    # Layout: Left (intro), Right (QR code)
-    c1, c2 = st.columns([2, 1])
+    # Two-column layout: Left = intro + features + pollutant cards | Right = QR
+    c1, c2 = st.columns([2, 1], vertical_alignment="top")
 
     with c1:
         st.subheader("✨ Welcome!")
+        # Intro + features line (your request: pollutants section comes right below this)
         st.markdown(
             """
             <div style="font-size:18px; line-height:1.6; color:#444;">
-            This interactive dashboard helps you understand and predict 
-            <b>Delhi's Air Quality Index (AQI)</b> 📊.  
-            <br><br>
-            ✅ Real-time like predictions  
-            ✅ Pollutant-wise insights  
-            ✅ Health recommendations 🩺  
-            <br>
+              This interactive dashboard helps you understand and predict
+              <b>Delhi's Air Quality Index (AQI)</b> 📊.
+              <br><br>
+              ✅ Real-time like predictions &nbsp;&nbsp; ✅ Pollutant-wise insights &nbsp;&nbsp; ✅ Health recommendations 🩺
             </div>
             """,
             unsafe_allow_html=True
         )
 
-        # Fancy button (navigation trigger to Page-5)
-        if st.button("🚀 Start Prediction Now!", key="go_predict"):
-            st.session_state["nav"] = "5) Predict Delhi AQI Category"
-            st.experimental_rerun()
+        # 🔻 Right below features: Key Pollutants Tracked
+        st.markdown("### 🌟 Key Pollutants Tracked")
+
+        # Small helper for pretty colored cards
+        def _card(bg_hex: str, title_html: str, subtitle: str) -> str:
+            return (
+                f"<div style='background:#{bg_hex}; padding:16px; border-radius:16px;"
+                f"box-shadow:0 2px 10px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.04);'>"
+                f"{title_html}<br><small style='color:#333;'>{subtitle}</small></div>"
+            )
+
+        # Row 1
+        r1c1, r1c2, r1c3 = st.columns(3)
+        with r1c1:
+            st.markdown(_card("FADBD8", "🌫️ <b>PM2.5</b>", "Fine particulate matter"), unsafe_allow_html=True)
+        with r1c2:
+            st.markdown(_card("D6EAF8", "🌪️ <b>PM10</b>", "Coarse particles"), unsafe_allow_html=True)
+        with r1c3:
+            st.markdown(_card("E8DAEF", "🌬️ <b>NO₂</b>", "Nitrogen dioxide"), unsafe_allow_html=True)
+
+        # Row 2
+        r2c1, r2c2, r2c3 = st.columns(3)
+        with r2c1:
+            st.markdown(_card("FCF3CF", "🔥 <b>SO₂</b>", "Sulfur dioxide"), unsafe_allow_html=True)
+        with r2c2:
+            st.markdown(_card("D5F5E3", "🟢 <b>CO</b>", "Carbon monoxide"), unsafe_allow_html=True)
+        with r2c3:
+            st.markdown(_card("FDEDEC", "☀️ <b>O₃</b>", "Ozone"), unsafe_allow_html=True)
+
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
 
     with c2:
-        st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open on mobile", use_container_width=True)
+        # Your QR remains exactly as before
+        st.image(
+            make_qr_bytes(APP_URL),
+            caption="📱 Scan to open on mobile",
+            use_container_width=True
+        )
 
-    # Info cards with colors
-    st.markdown("---")
-    st.markdown("### 🌟 Key Pollutants Tracked")
-
-    c3, c4, c5 = st.columns(3)
-    with c3:
-        st.markdown("<div style='background:#FADBD8; padding:15px; border-radius:15px;'>"
-                    "🌫️ <b>PM2.5</b><br><small>Fine particulate matter</small></div>", unsafe_allow_html=True)
-    with c4:
-        st.markdown("<div style='background:#D6EAF8; padding:15px; border-radius:15px;'>"
-                    "🌪️ <b>PM10</b><br><small>Coarse particles</small></div>", unsafe_allow_html=True)
-    with c5:
-        st.markdown("<div style='background:#E8DAEF; padding:15px; border-radius:15px;'>"
-                    "🌬️ <b>NO₂</b><br><small>Nitrogen dioxide</small></div>", unsafe_allow_html=True)
-
-    c6, c7, c8 = st.columns(3)
-    with c6:
-        st.markdown("<div style='background:#FCF3CF; padding:15px; border-radius:15px;'>"
-                    "🔥 <b>SO₂</b><br><small>Sulfur dioxide</small></div>", unsafe_allow_html=True)
-    with c7:
-        st.markdown("<div style='background:#D5F5E3; padding:15px; border-radius:15px;'>"
-                    "🟢 <b>CO</b><br><small>Carbon monoxide</small></div>", unsafe_allow_html=True)
-    with c8:
-        st.markdown("<div style='background:#FDEDEC; padding:15px; border-radius:15px;'>"
-                    "☀️ <b>O₃</b><br><small>Ozone</small></div>", unsafe_allow_html=True)
-
-    st.markdown("<br>", unsafe_allow_html=True)
+    # Subtle footer hint
+    st.markdown("<hr style='margin:18px 0 6px 0;'>", unsafe_allow_html=True)
     st.markdown(
-        "<div style='text-align:center; color:#666;'>"
-        "🚩 Scroll or use the sidebar to explore more features 🚩"
-        "</div>",
+        "<div style='text-align:center; color:#666;'>Use the sidebar to navigate the app</div>",
         unsafe_allow_html=True
     )
-
-
-
 
 # ──────────────────────────────
 # 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
