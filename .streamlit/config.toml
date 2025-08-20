@@ -1,4 +1,4 @@
-app_url = "https://pollutionappcreatedbyalok.streamlit.app/"
+
 [server]
 headless = true
 enableCORS = false
