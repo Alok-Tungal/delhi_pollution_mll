@@ -2335,28 +2335,37 @@ elif page.startswith("4)"):
 # ──────────────────────────────
 # 5) PREDICT DELHI AQI CATEGORY
 # ──────────────────────────────
-elif page.startswith("5)"):
-    st.title("🔮 Predict Delhi AQI Category")
+import streamlit as st
+import datetime
 
-    values = normalize_values(st.session_state.values)
-    st.markdown("Review your inputs before predicting:")
-    st.dataframe(values_table(values), use_container_width=True)
+# Assuming you already have predict_aqi function
+# def predict_aqi(pm25, pm10, no2, so2, co, ozone): ...
 
-    if st.button("🚀 Run Prediction", use_container_width=True):
-        aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
-        st.session_state.last_prediction = (aqi_val, aqi_label)
+# Sidebar navigation
+page = st.sidebar.radio("📌 Navigate", ["🔮 Prediction"])
 
-        bc = badge_class(aqi_label)
-        st.markdown(
-            f"""
-            <div class=\"card\" style=\"text-align:center\">\n
-                <div style=\"font-size:46px; font-weight:800; line-height:1\">AQI {aqi_val}</div>\n
-                <div class=\"badge {bc}\" style=\"margin-top:8px; font-size:16px\">{aqi_label}</div>\n
-                <div style=\"margin-top:6px\"><small class=\"mono\">Model: Random Forest (+safe fallback)</small></div>\n
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
+if page == "🔮 Prediction":
+    st.title("🔮 AQI Prediction")
+    st.caption("Enter pollutant levels to predict AQI category.")
+
+    col1, col2, col3 = st.columns(3)
+    pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+    pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+    no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
+
+    col4, col5, col6 = st.columns(3)
+    so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
+    co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
+    ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
+
+    if st.button("🚀 Predict", use_container_width=True):
+        try:
+            predicted_aqi, aqi_category = predict_aqi(pm25, pm10, no2, so2, co, ozone)
+            st.success(f"**Predicted AQI Category:** {aqi_category}")
+            st.metric(label="Predicted AQI Value", value=predicted_aqi)
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
+
 
 
 
