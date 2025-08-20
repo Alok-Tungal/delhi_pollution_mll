@@ -1877,116 +1877,30 @@ with st.sidebar:
     )
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-# # ---------------- Page-1 : Home ----------------
-# if page.startswith("1)"):
-#     st.title("🌍 Delhi AQI Prediction App")
-#     st.markdown("📌 Scan the QR code to open this app on your mobile!")
-
-#     c1, c2 = st.columns([2, 1])
-#     with c1:
-#         st.subheader("Welcome!")
-#         st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
-#         st.write("👉 Click below to jump to prediction.")
-
-#         # Navigation button
-#         if st.button("➡️ Take Analysis"):
-#             # Update page safely without direct overwrite
-#             st.session_state.page = "analysis"
-#             st.rerun()
-
-#     with c2:
-#         st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
-
-#     st.markdown("---")
-#     st.markdown("#### Pollutants you can track")
-#     for k, v in POLLUTANT_INFO.items():
-#         st.markdown(f"**{k}** — {v}")
-
-
-import streamlit as st
-import qrcode
-from io import BytesIO
-import joblib
-import numpy as np
-
-# ---------------------------
-# CONFIGURE APP URL
-# ---------------------------
-APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"  # Your deployed app link
-
-# ---------------------------
-# LOAD TRAINED MODEL + ENCODER
-# ---------------------------
-model = joblib.load("aqi_rf_model.joblib")
-label_encoder = joblib.load("label_encoder.joblib")
-
-# ---------------------------
-# QR CODE GENERATOR FUNCTION
-# ---------------------------
-def make_qr_image(url):
-    qr = qrcode.QRCode(version=1, box_size=10, border=2)
-    qr.add_data(url)
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    return buf
-
-# ---------------------------
-# SESSION STATE (Initialize)
-# ---------------------------
-if "page" not in st.session_state:
-    st.session_state.page = "home"   # default page
-
-# ---------------------------
-# HOME PAGE
-# ---------------------------
-if st.session_state.page == "home":
+# ---------------- Page-1 : Home ----------------
+if page.startswith("1)"):
     st.title("🌍 Delhi AQI Prediction App")
     st.markdown("📌 Scan the QR code to open this app on your mobile!")
 
     c1, c2 = st.columns([2, 1])
-
     with c1:
-        st.subheader("Welcome! 👋")
+        st.subheader("Welcome!")
         st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
-        st.write("👉 Click below to continue with your analysis.")
+        st.write("👉 Click below to jump to prediction.")
 
-        # Button changes session state
+        # Navigation button
         if st.button("➡️ Take Analysis"):
+            # Update page safely without direct overwrite
             st.session_state.page = "analysis"
             st.rerun()
 
     with c2:
-        qr_buf = make_qr_image(APP_URL)
-        st.image(qr_buf, caption="📱 Scan to open the app", use_container_width=True)
+        st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
 
-# ---------------------------
-# ANALYSIS PAGE
-# ---------------------------
-elif st.session_state.page == "analysis":
-    st.header("📊 AQI Prediction Page")
-    st.write("✅ Enter pollutant levels below:")
-
-    # Input form
-    pm25 = st.number_input("Enter PM2.5 level:", min_value=0.0, step=1.0)
-    pm10 = st.number_input("Enter PM10 level:", min_value=0.0, step=1.0)
-    no2 = st.number_input("Enter NO₂ level:", min_value=0.0, step=1.0)
-
-    if st.button("🔮 Predict AQI"):
-        # Prepare input for model
-        input_data = np.array([[pm25, pm10, no2]])
-        prediction = model.predict(input_data)
-        predicted_label = label_encoder.inverse_transform(prediction)[0]
-
-        st.success(f"Predicted AQI Category: **{predicted_label}**")
-
-    # Back button
-    if st.button("⬅️ Back to Home"):
-        st.session_state.page = "home"
-        st.rerun()
-
+    st.markdown("---")
+    st.markdown("#### Pollutants you can track")
+    for k, v in POLLUTANT_INFO.items():
+        st.markdown(f"**{k}** — {v}")
 
 
 # ──────────────────────────────
