@@ -1886,16 +1886,16 @@ if page.startswith("1)"):
 
     c1, c2 = st.columns([2, 1])
     with c1:
-    st.subheader("Welcome!")
-    st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
-    st.write("👉 Click below to jump to prediction.")
-
-    if st.button("➡️ Take Analysis"):
-        if "nav" not in st.session_state:
-            st.session_state["nav"] = "5) Predict Delhi AQI Category"
-        else:
-            st.session_state.nav = "5) Predict Delhi AQI Category"
-        st.experimental_rerun()
+        st.subheader("Welcome!")
+        st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
+        st.write("👉 Click below to jump to prediction.")
+    
+        if st.button("➡️ Take Analysis"):
+            if "nav" not in st.session_state:
+                st.session_state["nav"] = "5) Predict Delhi AQI Category"
+            else:
+                st.session_state.nav = "5) Predict Delhi AQI Category"
+            st.experimental_rerun()
 
     with c2:
         st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
