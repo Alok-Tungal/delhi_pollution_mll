@@ -2323,7 +2323,7 @@ elif page.startswith("4)"):
 
 
 # ──────────────────────────────
-# elif page.startswith("5)"):
+# elif page.startswith("5)"): 
 #     st.title("🔮 Predict Delhi AQI Category")
 
 #     values = st.session_state.values   # ✅ no double normalization
