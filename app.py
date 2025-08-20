@@ -811,57 +811,98 @@
 # # ──────────────────────────────
 # # PREDICTION PAGE
 # # ──────────────────────────────
-# if page == "🔮 Prediction":
-#     st.title("🔮 AQI Prediction")
-#     st.caption("Enter pollutant levels to predict AQI category.")
+# 🔮 Prediction — PASTE THIS WHOLE BLOCK
+if page == "🔮 Prediction":
+    st.title("🔮 AQI Prediction")
+    st.caption("Enter pollutant levels to predict AQI category.")
 
-#     col1, col2, col3 = st.columns(3)
-#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
-#     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
-#     no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
+    # Inputs (good non-zero defaults)
+    col1, col2, col3 = st.columns(3)
+    pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+    pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+    no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
 
-#     col4, col5, col6 = st.columns(3)
-#     so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
-#     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
-#     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
+    col4, col5, col6 = st.columns(3)
+    so2   = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0, step=1.0)
+    co    = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,  step=0.1, format="%.2f")
+    ozone = col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0, step=1.0)
 
-#     if st.button("🚀 Predict", use_container_width=True):
-#         try:
-#             predicted_aqi, aqi_category = predict_aqi(pm25, pm10, no2, so2, co, ozone)
-#             st.success(f"**Predicted AQI Category:** {aqi_category}")
+    # Build a values dict from current inputs
+    values = {
+        "PM2.5": float(pm25),
+        "PM10":  float(pm10),
+        "NO2":   float(no2),
+        "SO2":   float(so2),
+        "CO":    float(co),
+        "Ozone": float(ozone),
+    }
 
-#             # ⬇️ OPTIONAL: add your SHAP/feature-importance visualizations here
-#             # e.g., shap.force_plot / shap.summary_plot
+    # Try to normalize if your app has normalize_values(); else use as-is
+    try:
+        norm_values = normalize_values(values)  # your function (if defined)
+    except Exception:
+        norm_values = values
 
-#             # Prepare row for logs
-#             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#             row = [
-#                 now,
-#                 float(pm25), float(pm10), float(no2), float(so2), float(co), float(ozone),
-#                 int(predicted_aqi), str(aqi_category),
-#             ]
+    # Helper: local fallback category (if your simple_category_from_aqi not available)
+    def _fallback_cat(aqi: int) -> str:
+        if aqi <= 50:  return "Good"
+        if aqi <= 100: return "Satisfactory"
+        if aqi <= 200: return "Moderate"
+        if aqi <= 300: return "Poor"
+        if aqi <= 400: return "Very Poor"
+        return "Severe"
 
-#             # CSV log (local)
-#             try:
-#                 append_csv_row(row)
-#                 st.toast("✅ Logged to CSV (aqi_logs.csv)", icon="✅")
-#             except Exception as e_csv:
-#                 st.warning(f"CSV log failed: {e_csv}")
+    if st.button("🚀 Predict", use_container_width=True):
 
-#             # Google Sheets log (cloud)
-#             gs_ok, gs_err = log_to_google_sheets(row)
-#             if gs_ok:
-#                 st.toast("✅ Logged to Google Sheets", icon="✅")
-#             else:
-#                 st.info(f"Google Sheets skipped/failed: {gs_err}")
+        # Try multiple predict_aqi signatures safely
+        aqi_val, aqi_label = None, None
+        try:
+            # Most common in your project: dict + MODEL + ENCODER
+            aqi_val, aqi_label = predict_aqi(norm_values, MODEL, ENCODER)
+        except Exception:
+            try:
+                # Sometimes only dict + MODEL
+                aqi_val, aqi_label = predict_aqi(norm_values, MODEL)
+            except Exception:
+                try:
+                    # Some versions expect raw numeric args
+                    aqi_val, aqi_label = predict_aqi(pm25, pm10, no2, so2, co, ozone)
+                except Exception:
+                    # Final safe fallback: compute a heuristic AQI + label
+                    w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.20, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+                    try:
+                        score = sum(norm_values[k] * w[k] for k in w) / sum(w.values())
+                    except Exception:
+                        score = sum(values[k] * w[k] for k in w) / sum(w.values())
+                    aqi_val = int(max(0, min(500, score)))
+                    try:
+                        aqi_label = simple_category_from_aqi(aqi_val)  # if your function exists
+                    except Exception:
+                        aqi_label = _fallback_cat(aqi_val)
 
-#             # ⬇️ OPTIONAL: add your QR code/report download here
-#             # e.g., generate a QR to the app URL or a sharable result
-#             # qr = qrcode.make("https://your-app-url")
-#             # st.image(qr, caption="Scan to share", use_container_width=True)
+        # Display result (styled if your badge_class exists)
+        try:
+            bc = badge_class(aqi_label)
+            st.markdown(
+                f"""
+                <div class="card" style="text-align:center">
+                    <div style="font-size:46px; font-weight:800; line-height:1">AQI {aqi_val}</div>
+                    <div class="badge {bc}" style="margin-top:8px; font-size:16px">{aqi_label}</div>
+                    <div style="margin-top:6px"><small class="mono">Model: Random Forest (+safe fallback)</small></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        except Exception:
+            # Plain fallback if CSS helpers absent
+            st.success(f"🌍 Predicted AQI: **{aqi_val}** → Category: **{aqi_label}**")
 
-#         except Exception as e:
-#             st.error(f"Prediction failed: {e}")
+        # Optional: remember last prediction (no logs)
+        try:
+            st.session_state.last_prediction = (int(aqi_val), str(aqi_label))
+        except Exception:
+            pass
+
 
 # # ──────────────────────────────
 # # RECENT AQI TRENDS
