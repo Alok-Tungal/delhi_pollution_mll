@@ -2342,7 +2342,8 @@ import datetime
 # def predict_aqi(pm25, pm10, no2, so2, co, ozone): ...
 
 # Sidebar navigation
-page = st.sidebar.radio("📌 Navigate", ["🔮 Prediction"])
+page = st.sidebar.selectbox("📑 Choose a page:", ["🏠 Home", "📊 Data Overview", "🔮 Prediction"])
+
 
 if page == "🔮 Prediction":
     st.title("🔮 AQI Prediction")
