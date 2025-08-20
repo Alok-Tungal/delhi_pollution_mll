@@ -2122,16 +2122,16 @@ elif page.startswith("4)"):
     preset = st.selectbox("Choose Preset AQI Level", list(PRESETS.keys()))
     defaults = list(map(float, PRESETS[preset]))
 
-    # Update session state with preset defaults when selected
+    # Initialize values if not set or preset changed
     if "values" not in st.session_state or st.session_state.get("last_preset") != preset:
-        st.session_state.values = normalize_values({
+        st.session_state.values = {
             "PM2.5": defaults[0],
-            "PM10": defaults[1],
-            "NO2":  defaults[2],
-            "SO2":  defaults[3],
-            "CO":   defaults[4],
+            "PM10":  defaults[1],
+            "NO2":   defaults[2],
+            "SO2":   defaults[3],
+            "CO":    defaults[4],
             "Ozone": defaults[5],
-        })
+        }
         st.session_state.last_preset = preset
 
     # Display input sliders/boxes
@@ -2146,10 +2146,10 @@ elif page.startswith("4)"):
         o3   = st.number_input("Ozone (µg/m³)", min_value=0.0, value=st.session_state.values["Ozone"])
 
     # Update session with user-modified values
-    st.session_state.values = normalize_values({
+    st.session_state.values = {
         "PM2.5": pm25, "PM10": pm10, "NO2": no2,
         "SO2": so2,   "CO": co,    "Ozone": o3,
-    })
+    }
 
     # Show results
     st.markdown("### 📋 Your Entered Pollution Levels")
