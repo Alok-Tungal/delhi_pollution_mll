@@ -1913,27 +1913,24 @@ MODEL, ENCODER = load_model_and_encoder()
 with st.sidebar:
     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
     st.markdown("### Delhi AQI App")
+
+    page_options = [
+        "1) Understand + Share",
+        "2) Learn About AQI & Health Tips",
+        "3) Try a Sample AQI Scenario",
+        "4) Preset or Custom Inputs",
+        "5) Predict Delhi AQI Category",
+        "6) Compare with Delhi Avg & WHO",
+    ]
+
     page = st.radio(
         "Navigation",
-        options=[
-            "1) Understand + Share",
-            "2) Learn About AQI & Health Tips",
-            "3) Try a Sample AQI Scenario",
-            "4) Preset or Custom Inputs",
-            "5) Predict Delhi AQI Category",
-            "6) Compare with Delhi Avg & WHO",
-        ],
-        index=[
-            "1) Understand + Share",
-            "2) Learn About AQI & Health Tips",
-            "3) Try a Sample AQI Scenario",
-            "4) Preset or Custom Inputs",
-            "5) Predict Delhi AQI Category",
-            "6) Compare with Delhi Avg & WHO",
-        ].index(st.session_state.nav),
+        options=page_options,
+        index=page_options.index(st.session_state.nav),  # now safe
         key="nav",
     )
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+
 
 
 # # ---------------- Page-1 : Home ----------------
