@@ -1425,21 +1425,21 @@ st.title("🌍 Delhi AQI Prediction App")
 
 st.markdown("📌 Scan the QR code to open this app on your mobile!")
 
-# Two-column layout (QR on right top, intro on left)
+# Two-column layout (QR on right, intro + button on left)
 c1, c2 = st.columns([2, 1])
 
 with c1:
     st.subheader("Welcome!")
     st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
     st.write("👉 Click below to continue with your analysis.")
+    
+    # Place button here so it’s front-level under intro
+    if st.button("➡️ Take Analysis"):
+        st.session_state["page"] = "2) AQI Prediction"
 
 with c2:
     qr_buf = make_qr_image(APP_URL)
     st.image(qr_buf, caption="📱 Scan to open the app", use_container_width=True)
-
-# Continue button
-if st.button("➡️ Take Analysis"):
-    st.session_state["page"] = "2) AQI Prediction"
 
 # ---------------------------
 # PAGE 2 placeholder
@@ -1447,6 +1447,7 @@ if st.button("➡️ Take Analysis"):
 if st.session_state.get("page") == "2) AQI Prediction":
     st.header("📊 AQI Prediction Page")
     st.write("This is where your pollutant input form + prediction model will run.")
+
 
 
 
