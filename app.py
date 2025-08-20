@@ -1891,7 +1891,7 @@ if page.startswith("1)"):
         # Navigation button
         if st.button("➡️ Take Analysis"):
             # Update page safely without direct overwrite
-            st.session_state["nav"] = "5) Predict Delhi AQI Category"
+            st.session_state.page = "analysis"
             st.rerun()
 
     with c2:
