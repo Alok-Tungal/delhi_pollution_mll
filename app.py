@@ -1058,528 +1058,528 @@
 
 
 
-# --- PAGE 1: AQI Prediction + Analysis ---
-if page.startswith("1)"):
-    st.title("🌍 Delhi AQI Predictor & Analysis")
+# # --- PAGE 1: AQI Prediction + Analysis ---
+# if page.startswith("1)"):
+#     st.title("🌍 Delhi AQI Predictor & Analysis")
 
-    # Form for pollutant inputs
-    with st.form("aqi_form"):
-        pm25 = st.number_input("PM2.5", 0, 500, 60)
-        pm10 = st.number_input("PM10", 0, 600, 80)
-        no2 = st.number_input("NO₂", 0, 400, 30)
-        so2 = st.number_input("SO₂", 0, 400, 20)
-        co = st.number_input("CO", 0, 50, 1)
-        o3 = st.number_input("O₃", 0, 300, 25)
+#     # Form for pollutant inputs
+#     with st.form("aqi_form"):
+#         pm25 = st.number_input("PM2.5", 0, 500, 60)
+#         pm10 = st.number_input("PM10", 0, 600, 80)
+#         no2 = st.number_input("NO₂", 0, 400, 30)
+#         so2 = st.number_input("SO₂", 0, 400, 20)
+#         co = st.number_input("CO", 0, 50, 1)
+#         o3 = st.number_input("O₃", 0, 300, 25)
 
-        submitted = st.form_submit_button("🔮 Predict AQI")
+#         submitted = st.form_submit_button("🔮 Predict AQI")
 
-    # Prediction
-    if submitted:
-        features = np.array([[pm25, pm10, no2, so2, co, o3]])
-        pred = model.predict(features)[0]
-        pred_label = label_encoder.inverse_transform([pred])[0]
+#     # Prediction
+#     if submitted:
+#         features = np.array([[pm25, pm10, no2, so2, co, o3]])
+#         pred = model.predict(features)[0]
+#         pred_label = label_encoder.inverse_transform([pred])[0]
 
-        st.session_state.last_prediction = (int(pred), pred_label)
+#         st.session_state.last_prediction = (int(pred), pred_label)
 
-        st.success(f"Predicted AQI: **{int(pred)}** → **{pred_label}**")
+#         st.success(f"Predicted AQI: **{int(pred)}** → **{pred_label}**")
 
-        # Quick Analysis
-        st.subheader("📊 Take Analysis")
-        if pred_label in ["Good", "Satisfactory"]:
-            st.info("✅ Air quality is safe. You can go outdoors without major health risks.")
-        elif pred_label in ["Moderate"]:
-            st.warning("⚠️ Sensitive groups should take precautions (e.g., mask outdoors).")
-        else:
-            st.error("🚨 Poor air quality! Limit outdoor exposure and wear a mask.")
+#         # Quick Analysis
+#         st.subheader("📊 Take Analysis")
+#         if pred_label in ["Good", "Satisfactory"]:
+#             st.info("✅ Air quality is safe. You can go outdoors without major health risks.")
+#         elif pred_label in ["Moderate"]:
+#             st.warning("⚠️ Sensitive groups should take precautions (e.g., mask outdoors).")
+#         else:
+#             st.error("🚨 Poor air quality! Limit outdoor exposure and wear a mask.")
 
-    # --- QR Code Section ---
-    st.subheader("📲 Share This AQI Summary")
-    c1, c2 = st.columns([2, 1])
+#     # --- QR Code Section ---
+#     st.subheader("📲 Share This AQI Summary")
+#     c1, c2 = st.columns([2, 1])
 
-    with c1:
-        st.markdown("Easily share the latest AQI prediction with others via QR code.")
+#     with c1:
+#         st.markdown("Easily share the latest AQI prediction with others via QR code.")
 
-    with c2:
-        if "last_prediction" in st.session_state:
-            aqi_val, aqi_label = st.session_state.last_prediction
-            qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\nhttps://pollutionappcreatedbyalok.streamlit.app/"
-        else:
-            qr_content = "Delhi AQI App — Predict & Learn\nhttps://pollutionappcreatedbyalok.streamlit.app/"
+#     with c2:
+#         if "last_prediction" in st.session_state:
+#             aqi_val, aqi_label = st.session_state.last_prediction
+#             qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\nhttps://pollutionappcreatedbyalok.streamlit.app/"
+#         else:
+#             qr_content = "Delhi AQI App — Predict & Learn\nhttps://pollutionappcreatedbyalok.streamlit.app/"
 
-        qr_img = make_qr_image(qr_content, size_px=180)
-        buf = BytesIO()
-        qr_img.save(buf, format="PNG")
-        qr_bytes = buf.getvalue()
+#         qr_img = make_qr_image(qr_content, size_px=180)
+#         buf = BytesIO()
+#         qr_img.save(buf, format="PNG")
+#         qr_bytes = buf.getvalue()
 
-        st.image(qr_bytes, caption="Scan to open", use_container_width=True)
+#         st.image(qr_bytes, caption="Scan to open", use_container_width=True)
 
-        st.download_button(
-            "⬇️ Download QR Code",
-            data=qr_bytes,
-            file_name="Delhi_AQI_QR.png",
-            mime="image/png",
-            use_container_width=True
+#         st.download_button(
+#             "⬇️ Download QR Code",
+#             data=qr_bytes,
+#             file_name="Delhi_AQI_QR.png",
+#             mime="image/png",
+#             use_container_width=True
         )
 
 
 
 
 
-# # app.py
-# import os
-# import io
-# import base64
-# import datetime
-# from typing import Tuple, Dict
+# app.py
+import os
+import io
+import base64
+import datetime
+from typing import Tuple, Dict
 
-# import numpy as np
-# import pandas as pd
-# from PIL import Image
-# import qrcode
-# from qrcode.constants import ERROR_CORRECT_H
+import numpy as np
+import pandas as pd
+from PIL import Image
+import qrcode
+from qrcode.constants import ERROR_CORRECT_H
 
-# import streamlit as st
+import streamlit as st
 
-# # Optional: external deps (guarded)
-# try:
-#     import joblib
-# except Exception:
-#     joblib = None
+# Optional: external deps (guarded)
+try:
+    import joblib
+except Exception:
+    joblib = None
 
-# try:
-#     import gspread
-# except Exception:
-#     gspread = None
+try:
+    import gspread
+except Exception:
+    gspread = None
+
+
+# ──────────────────────────────
+# PAGE CONFIG
+# ──────────────────────────────
+st.set_page_config(
+    page_title="Delhi AQI – Prediction & Insights",
+    page_icon="🌫️",
+    layout="wide"
+)
+
+# Small CSS touch for polished cards / QR container
+st.markdown("""
+<style>
+.badge {
+  padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block;
+}
+.badge.good { background:#e7f5e9; color:#1e7e34; }
+.badge.moderate { background:#fff3cd; color:#856404; }
+.badge.poor { background:#ffe5d0; color:#a1490c; }
+.badge.verypoor { background:#fde2e1; color:#9b1c1c; }
+.badge.severe { background:#f8d7da; color:#721c24; }
+
+.card {
+  border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%;
+}
+.qr-box { text-align:center; }
+.qr-title { font-weight:700; margin-bottom:0.3rem; }
+small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
+</style>
+""", unsafe_allow_html=True)
+
+# ──────────────────────────────
+# HELPERS
+# ──────────────────────────────
+
+APP_URL = st.secrets.get("app_url", "").strip() or "https://pollutionappcreatedbyalok.streamlit.app/"
+
+
+COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+
+PRESETS = {
+    "Good":       [30,  40,  20,  5,  0.4, 10],
+    "Moderate":   [90, 110,  40, 10,  1.2, 30],
+    "Poor":       [200, 250, 90, 20,  2.0, 50],
+    "Very Poor":  [300, 350, 120, 30, 3.5, 70],
+    "Severe":     [400, 500, 150, 40, 4.5, 90],
+}
+
+WHO_LIMITS = {  # µg/m3 or mg/m3 as commonly communicated; simplified set
+    "PM2.5": 15,
+    "PM10": 45,
+    "NO2": 25,
+    "SO2": 40,
+    "CO": 4.0,         # mg/m3 (8-hour guideline)
+    "Ozone": 100
+}
+
+DELHI_AVG = {   # Example anchors; adjust if you have better baselines
+    "PM2.5": 120,
+    "PM10": 200,
+    "NO2": 45,
+    "SO2": 12,
+    "CO": 1.7,
+    "Ozone": 60
+}
+
+POLLUTANT_INFO: Dict[str, str] = {
+    "PM2.5": "Fine particles (≤2.5μm) penetrate deep into lungs; linked to heart & lung disease.",
+    "PM10": "Coarse particles (≤10μm) irritate airways; worsen asthma and bronchitis.",
+    "NO2":  "Traffic/industrial gas; inflames airways; reduces lung function over time.",
+    "SO2":  "From coal/oil burning; triggers wheezing, coughing; forms secondary PM.",
+    "CO":   "Colorless gas; reduces oxygen delivery in body; dangerous in high doses.",
+    "Ozone":"Formed in sunlight; irritates airways; causes chest pain & coughing."
+}
+
+
+def ensure_session_defaults():
+    if "values" not in st.session_state:
+        st.session_state.values = dict(zip(COLUMNS, PRESETS["Moderate"]))
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
+    if "scenario_applied" not in st.session_state:
+        st.session_state.scenario_applied = ""
+
+
+def load_model_and_encoder():
+    """Load RF model + label encoder. Safe fallback if missing."""
+    model, encoder = None, None
+    try:
+        if joblib is not None and os.path.exists("aqi_rf_model.joblib"):
+            model = joblib.load("aqi_rf_model.joblib")
+    except Exception:
+        model = None
+    try:
+        if joblib is not None and os.path.exists("label_encoder_.joblib"):
+            encoder = joblib.load("label_encoder_.joblib")
+    except Exception:
+        encoder = None
+    return model, encoder
+
+
+def simple_category_from_aqi(aqi: int) -> str:
+    # Generic Indian AQI buckets (simplified)
+    if aqi <= 50: return "Good"
+    if aqi <= 100: return "Satisfactory"  # or Moderate per your encoding
+    if aqi <= 200: return "Moderate"
+    if aqi <= 300: return "Poor"
+    if aqi <= 400: return "Very Poor"
+    return "Severe"
+
+
+def badge_class(label: str) -> str:
+    key = label.replace(" ", "").lower()
+    if key in ["good"]: return "good"
+    if key in ["moderate", "satisfactory"]: return "moderate"
+    if key == "poor": return "poor"
+    if key in ["verypoor", "verybad"]: return "verypoor"
+    return "severe"
+
+
+def predict_aqi(values: Dict[str, float], model, encoder) -> Tuple[int, str]:
+    """Predict AQI (int) and label (str) from values dict."""
+    row = pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
+
+    if model is not None:
+        try:
+            pred_raw = model.predict(row)[0]
+            # If model returns numpy type, coerce to python int
+            aqi_val = int(np.array(pred_raw).item())
+        except Exception:
+            # If model.predict yields class labels directly (encoded)
+            try:
+                aqi_val = int(pred_raw)
+            except Exception:
+                aqi_val = int(np.clip(np.average(list(values.values())), 0, 500))
+    else:
+        # Fallback heuristic if model missing
+        # Weighted sum emphasizing PMs and NO2
+        w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.2, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+        aqi_val = int(
+            sum(values[k] * w[k] for k in COLUMNS) / (sum(w.values()) or 1.0)
+        )
+        aqi_val = int(np.clip(aqi_val, 0, 500))
+
+    # Decode label
+    if encoder is not None:
+        try:
+            label = encoder.inverse_transform([aqi_val])[0]
+            if isinstance(label, (np.generic, np.integer)):  # weird encoders
+                label = simple_category_from_aqi(int(label))
+        except Exception:
+            label = simple_category_from_aqi(aqi_val)
+    else:
+        label = simple_category_from_aqi(aqi_val)
+
+    return aqi_val, label
+
+
+def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=ERROR_CORRECT_H,
+        box_size=10,
+        border=2
+    )
+    qr.add_data(content)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    # Resize to crisp "passport size"
+    img = img.resize((size_px, size_px), resample=Image.Resampling.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
+
+
+def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
+    """Optional Google Sheets logging (only if secrets and gspread are available)."""
+    if gspread is None:
+        return
+    if "gspread" not in st.secrets:
+        return
+    try:
+        gc = gspread.service_account_from_dict(st.secrets["gspread"])
+        sheet = gc.open("Delhi AQI Predictions").sheet1
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        row = [
+            now,
+            float(values["PM2.5"]), float(values["PM10"]), float(values["NO2"]),
+            float(values["SO2"]), float(values["CO"]), float(values["Ozone"]),
+            int(aqi_val), str(aqi_label)
+        ]
+        sheet.append_row(row)
+        st.toast("Logged to Google Sheets.", icon="☁️")
+    except Exception as e:
+        st.info(f"Sheets logging skipped: {e}")
+
+
+def log_to_csv(values: Dict[str, float], aqi_val: int, aqi_label: str):
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    row = {
+        "Timestamp": now,
+        "PM2.5": float(values["PM2.5"]),
+        "PM10": float(values["PM10"]),
+        "NO2": float(values["NO2"]),
+        "SO2": float(values["SO2"]),
+        "CO": float(values["CO"]),
+        "Ozone": float(values["Ozone"]),
+        "PredictedAQI": int(aqi_val),
+        "AQICategory": str(aqi_label),
+    }
+    df_row = pd.DataFrame([row])
+    if os.path.exists("aqi_logs.csv"):
+        try:
+            df_old = pd.read_csv("aqi_logs.csv")
+            df_new = pd.concat([df_old, df_row], ignore_index=True)
+        except Exception:
+            df_new = df_row
+    else:
+        df_new = df_row
+    df_new.to_csv("aqi_logs.csv", index=False)
+
+
+def values_table(values: Dict[str, float]) -> pd.DataFrame:
+    return pd.DataFrame([values], columns=COLUMNS)
+
+
+def comparison_frame(values: Dict[str, float]) -> pd.DataFrame:
+    rows = []
+    for p in COLUMNS:
+        rows.append({
+            "Pollutant": p,
+            "Your Level": float(values[p]),
+            "Delhi Avg": float(DELHI_AVG[p]),
+            "WHO Limit": float(WHO_LIMITS[p])
+        })
+    return pd.DataFrame(rows)
+
+
+# ──────────────────────────────
+# LOAD MODEL ONCE
+# ──────────────────────────────
+ensure_session_defaults()
+MODEL, ENCODER = load_model_and_encoder()
+
+# ──────────────────────────────
+# SIDEBAR NAVIGATION (ORDER EXACT)
+# ──────────────────────────────
+with st.sidebar:
+    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+    st.markdown("### Delhi AQI App")
+    page = st.radio(
+        "Navigation",
+        options=[
+            "1) Understand Pollutants + Share",
+            "2) Learn About AQI & Health Tips",
+            "3) Try a Sample AQI Scenario",
+            "4) Preset or Custom Inputs + Your Levels",
+            "5) Predict Delhi AQI Category",
+            "6) Compare with Delhi Avg & WHO"
+        ],
+        index=0
+    )
+    st.caption("Made with ❤️ for Delhi air quality.\nUse the pages in order for the best flow.")
 
 
 # # ──────────────────────────────
-# # PAGE CONFIG
+# # 1) UNDERSTAND POLLUTANTS & SHARE (QR on right + Download)
 # # ──────────────────────────────
-# st.set_page_config(
-#     page_title="Delhi AQI – Prediction & Insights",
-#     page_icon="🌫️",
-#     layout="wide"
-# )
+# if page.startswith("1)"):
+#     st.title("🔎 Understand the Pollutants & Their Impact")
 
-# # Small CSS touch for polished cards / QR container
-# st.markdown("""
-# <style>
-# .badge {
-#   padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block;
-# }
-# .badge.good { background:#e7f5e9; color:#1e7e34; }
-# .badge.moderate { background:#fff3cd; color:#856404; }
-# .badge.poor { background:#ffe5d0; color:#a1490c; }
-# .badge.verypoor { background:#fde2e1; color:#9b1c1c; }
-# .badge.severe { background:#f8d7da; color:#721c24; }
+#     c1, c2 = st.columns([3, 1], vertical_alignment="top")
 
-# .card {
-#   border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white;
-#   box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%;
-# }
-# .qr-box { text-align:center; }
-# .qr-title { font-weight:700; margin-bottom:0.3rem; }
-# small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
-# </style>
-# """, unsafe_allow_html=True)
+#     with c1:
+#         st.markdown("Get familiar with the key pollutants that drive Delhi’s AQI:")
+#         colA, colB, colC = st.columns(3)
+#         items = list(POLLUTANT_INFO.items())
+#         for idx, (poll, desc) in enumerate(items):
+#             box = [colA, colB, colC][idx % 3]
+#             with box:
+#                 st.markdown(f"""
+#                 <div class="card">
+#                   <strong>{poll}</strong><br/>
+#                   <small>{desc}</small>
+#                 </div>
+#                 """, unsafe_allow_html=True)
 
-# # ──────────────────────────────
-# # HELPERS
-# # ──────────────────────────────
+#         st.markdown("---")
+#         st.subheader("📣 Share on Social Media")
+#         share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
+#         latest = st.session_state.last_prediction
+#         if latest is not None:
+#             aqi_val, aqi_label = latest
+#             share_text = f"My Delhi AQI prediction: {aqi_val} ({aqi_label}). Try yours!"
 
-# APP_URL = st.secrets.get("app_url", "").strip() or "https://pollutionappcreatedbyalok.streamlit.app/"
-
-
-# COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
-
-# PRESETS = {
-#     "Good":       [30,  40,  20,  5,  0.4, 10],
-#     "Moderate":   [90, 110,  40, 10,  1.2, 30],
-#     "Poor":       [200, 250, 90, 20,  2.0, 50],
-#     "Very Poor":  [300, 350, 120, 30, 3.5, 70],
-#     "Severe":     [400, 500, 150, 40, 4.5, 90],
-# }
-
-# WHO_LIMITS = {  # µg/m3 or mg/m3 as commonly communicated; simplified set
-#     "PM2.5": 15,
-#     "PM10": 45,
-#     "NO2": 25,
-#     "SO2": 40,
-#     "CO": 4.0,         # mg/m3 (8-hour guideline)
-#     "Ozone": 100
-# }
-
-# DELHI_AVG = {   # Example anchors; adjust if you have better baselines
-#     "PM2.5": 120,
-#     "PM10": 200,
-#     "NO2": 45,
-#     "SO2": 12,
-#     "CO": 1.7,
-#     "Ozone": 60
-# }
-
-# POLLUTANT_INFO: Dict[str, str] = {
-#     "PM2.5": "Fine particles (≤2.5μm) penetrate deep into lungs; linked to heart & lung disease.",
-#     "PM10": "Coarse particles (≤10μm) irritate airways; worsen asthma and bronchitis.",
-#     "NO2":  "Traffic/industrial gas; inflames airways; reduces lung function over time.",
-#     "SO2":  "From coal/oil burning; triggers wheezing, coughing; forms secondary PM.",
-#     "CO":   "Colorless gas; reduces oxygen delivery in body; dangerous in high doses.",
-#     "Ozone":"Formed in sunlight; irritates airways; causes chest pain & coughing."
-# }
-
-
-# def ensure_session_defaults():
-#     if "values" not in st.session_state:
-#         st.session_state.values = dict(zip(COLUMNS, PRESETS["Moderate"]))
-#     if "last_prediction" not in st.session_state:
-#         st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
-#     if "scenario_applied" not in st.session_state:
-#         st.session_state.scenario_applied = ""
-
-
-# def load_model_and_encoder():
-#     """Load RF model + label encoder. Safe fallback if missing."""
-#     model, encoder = None, None
-#     try:
-#         if joblib is not None and os.path.exists("aqi_rf_model.joblib"):
-#             model = joblib.load("aqi_rf_model.joblib")
-#     except Exception:
-#         model = None
-#     try:
-#         if joblib is not None and os.path.exists("label_encoder_.joblib"):
-#             encoder = joblib.load("label_encoder_.joblib")
-#     except Exception:
-#         encoder = None
-#     return model, encoder
-
-
-# def simple_category_from_aqi(aqi: int) -> str:
-#     # Generic Indian AQI buckets (simplified)
-#     if aqi <= 50: return "Good"
-#     if aqi <= 100: return "Satisfactory"  # or Moderate per your encoding
-#     if aqi <= 200: return "Moderate"
-#     if aqi <= 300: return "Poor"
-#     if aqi <= 400: return "Very Poor"
-#     return "Severe"
-
-
-# def badge_class(label: str) -> str:
-#     key = label.replace(" ", "").lower()
-#     if key in ["good"]: return "good"
-#     if key in ["moderate", "satisfactory"]: return "moderate"
-#     if key == "poor": return "poor"
-#     if key in ["verypoor", "verybad"]: return "verypoor"
-#     return "severe"
-
-
-# def predict_aqi(values: Dict[str, float], model, encoder) -> Tuple[int, str]:
-#     """Predict AQI (int) and label (str) from values dict."""
-#     row = pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
-
-#     if model is not None:
-#         try:
-#             pred_raw = model.predict(row)[0]
-#             # If model returns numpy type, coerce to python int
-#             aqi_val = int(np.array(pred_raw).item())
-#         except Exception:
-#             # If model.predict yields class labels directly (encoded)
-#             try:
-#                 aqi_val = int(pred_raw)
-#             except Exception:
-#                 aqi_val = int(np.clip(np.average(list(values.values())), 0, 500))
-#     else:
-#         # Fallback heuristic if model missing
-#         # Weighted sum emphasizing PMs and NO2
-#         w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.2, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
-#         aqi_val = int(
-#             sum(values[k] * w[k] for k in COLUMNS) / (sum(w.values()) or 1.0)
+#         twitter_url = f"https://twitter.com/intent/tweet?text={base64.urlsafe_b64encode(share_text.encode()).decode()}&url={APP_URL}"
+#         whatsapp_url = f"https://api.whatsapp.com/send?text={share_text} {APP_URL}"
+#         st.markdown(
+#             f"[🐦 Share on Twitter]({twitter_url}) &nbsp;&nbsp; | &nbsp;&nbsp; [💬 Share on WhatsApp]({whatsapp_url})",
+#             unsafe_allow_html=True
 #         )
-#         aqi_val = int(np.clip(aqi_val, 0, 500))
 
-#     # Decode label
-#     if encoder is not None:
-#         try:
-#             label = encoder.inverse_transform([aqi_val])[0]
-#             if isinstance(label, (np.generic, np.integer)):  # weird encoders
-#                 label = simple_category_from_aqi(int(label))
-#         except Exception:
-#             label = simple_category_from_aqi(aqi_val)
-#     else:
-#         label = simple_category_from_aqi(aqi_val)
+#     with c2:
+#         st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
+#         st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
+#         if st.session_state.last_prediction is not None:
+#             aqi_val, aqi_label = st.session_state.last_prediction
+#             qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
+#         else:
+#             qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
 
-#     return aqi_val, label
+#         qr_png = make_qr_bytes(qr_content, size_px=160)
+#         st.image(qr_png, caption="Scan to open", use_container_width=True)
 
-
-# def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
-#     qr = qrcode.QRCode(
-#         version=None,
-#         error_correction=ERROR_CORRECT_H,
-#         box_size=10,
-#         border=2
-#     )
-#     qr.add_data(content)
-#     qr.make(fit=True)
-#     img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
-#     # Resize to crisp "passport size"
-#     img = img.resize((size_px, size_px), resample=Image.Resampling.LANCZOS)
-#     buf = io.BytesIO()
-#     img.save(buf, format="PNG", optimize=True)
-#     return buf.getvalue()
+#         st.download_button(
+#             "⬇️ Download QR Code",
+#             data=qr_png,
+#             file_name="Delhi_AQI_QR.png",
+#             mime="image/png",
+#             use_container_width=True
+#         )
+#         st.markdown('</div>', unsafe_allow_html=True)
 
 
-# def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
-#     """Optional Google Sheets logging (only if secrets and gspread are available)."""
-#     if gspread is None:
-#         return
-#     if "gspread" not in st.secrets:
-#         return
-#     try:
-#         gc = gspread.service_account_from_dict(st.secrets["gspread"])
-#         sheet = gc.open("Delhi AQI Predictions").sheet1
-#         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#         row = [
-#             now,
-#             float(values["PM2.5"]), float(values["PM10"]), float(values["NO2"]),
-#             float(values["SO2"]), float(values["CO"]), float(values["Ozone"]),
-#             int(aqi_val), str(aqi_label)
-#         ]
-#         sheet.append_row(row)
-#         st.toast("Logged to Google Sheets.", icon="☁️")
-#     except Exception as e:
-#         st.info(f"Sheets logging skipped: {e}")
+import streamlit as st
+import qrcode
+from io import BytesIO
+from PIL import Image
 
+# ========================
+# Configurations
+# ========================
+st.set_page_config(page_title="Delhi AQI Predictor", layout="wide")
 
-# def log_to_csv(values: Dict[str, float], aqi_val: int, aqi_label: str):
-#     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#     row = {
-#         "Timestamp": now,
-#         "PM2.5": float(values["PM2.5"]),
-#         "PM10": float(values["PM10"]),
-#         "NO2": float(values["NO2"]),
-#         "SO2": float(values["SO2"]),
-#         "CO": float(values["CO"]),
-#         "Ozone": float(values["Ozone"]),
-#         "PredictedAQI": int(aqi_val),
-#         "AQICategory": str(aqi_label),
-#     }
-#     df_row = pd.DataFrame([row])
-#     if os.path.exists("aqi_logs.csv"):
-#         try:
-#             df_old = pd.read_csv("aqi_logs.csv")
-#             df_new = pd.concat([df_old, df_row], ignore_index=True)
-#         except Exception:
-#             df_new = df_row
-#     else:
-#         df_new = df_row
-#     df_new.to_csv("aqi_logs.csv", index=False)
+APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
 
+# ========================
+# Top Layout: Title + Logo
+# ========================
+c1, c2 = st.columns([6, 1])  # left big, right small
 
-# def values_table(values: Dict[str, float]) -> pd.DataFrame:
-#     return pd.DataFrame([values], columns=COLUMNS)
+with c1:
+    st.title("🌆 Delhi AQI Predictor")
+    st.markdown("Enter pollutant levels to predict the **Air Quality Index (AQI)** category.")
 
+with c2:
+    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=60)
 
-# def comparison_frame(values: Dict[str, float]) -> pd.DataFrame:
-#     rows = []
-#     for p in COLUMNS:
-#         rows.append({
-#             "Pollutant": p,
-#             "Your Level": float(values[p]),
-#             "Delhi Avg": float(DELHI_AVG[p]),
-#             "WHO Limit": float(WHO_LIMITS[p])
-#         })
-#     return pd.DataFrame(rows)
+st.markdown("---")
 
+# ========================
+# Input Section
+# ========================
+st.subheader("🧾 Enter Pollutant Levels")
 
-# # ──────────────────────────────
-# # LOAD MODEL ONCE
-# # ──────────────────────────────
-# ensure_session_defaults()
-# MODEL, ENCODER = load_model_and_encoder()
+col1, col2, col3 = st.columns(3)
+with col1:
+    pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, step=1.0, value=50.0)
+    pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, step=1.0, value=80.0)
+with col2:
+    no2 = st.number_input("NO₂ (µg/m³)", min_value=0.0, step=1.0, value=30.0)
+    so2 = st.number_input("SO₂ (µg/m³)", min_value=0.0, step=1.0, value=15.0)
+with col3:
+    co = st.number_input("CO (mg/m³)", min_value=0.0, step=0.1, value=0.5)
+    o3 = st.number_input("O₃ (µg/m³)", min_value=0.0, step=1.0, value=40.0)
 
-# # ──────────────────────────────
-# # SIDEBAR NAVIGATION (ORDER EXACT)
-# # ──────────────────────────────
-# with st.sidebar:
-#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-#     st.markdown("### Delhi AQI App")
-#     page = st.radio(
-#         "Navigation",
-#         options=[
-#             "1) Understand Pollutants + Share",
-#             "2) Learn About AQI & Health Tips",
-#             "3) Try a Sample AQI Scenario",
-#             "4) Preset or Custom Inputs + Your Levels",
-#             "5) Predict Delhi AQI Category",
-#             "6) Compare with Delhi Avg & WHO"
-#         ],
-#         index=0
-#     )
-#     st.caption("Made with ❤️ for Delhi air quality.\nUse the pages in order for the best flow.")
+# ========================
+# Dummy Prediction Logic
+# (replace with model.predict later)
+# ========================
+def predict_aqi(pm25, pm10, no2, so2, co, o3):
+    score = pm25*0.4 + pm10*0.2 + no2*0.15 + so2*0.1 + co*10 + o3*0.15
+    if score <= 50:
+        return "Good 😊"
+    elif score <= 100:
+        return "Moderate 🙂"
+    elif score <= 200:
+        return "Unhealthy for Sensitive Groups 😷"
+    elif score <= 300:
+        return "Unhealthy 😟"
+    elif score <= 400:
+        return "Very Unhealthy ☠️"
+    else:
+        return "Hazardous 💀"
 
+# ========================
+# Prediction Button
+# ========================
+if st.button("🔮 Predict AQI Category"):
+    result = predict_aqi(pm25, pm10, no2, so2, co, o3)
 
-# # # ──────────────────────────────
-# # # 1) UNDERSTAND POLLUTANTS & SHARE (QR on right + Download)
-# # # ──────────────────────────────
-# # if page.startswith("1)"):
-# #     st.title("🔎 Understand the Pollutants & Their Impact")
+    st.success(f"### 🏷️ Predicted AQI Category: **{result}**")
 
-# #     c1, c2 = st.columns([3, 1], vertical_alignment="top")
+    # Health Recommendations
+    st.markdown("### 🩺 Health Recommendations")
+    if "Good" in result:
+        st.info("Air quality is good. Enjoy outdoor activities! 🌳")
+    elif "Moderate" in result:
+        st.warning("Air quality is acceptable, but sensitive individuals should take care.")
+    elif "Unhealthy for Sensitive" in result:
+        st.error("Sensitive groups (children, elderly, patients) should limit outdoor exposure.")
+    elif "Unhealthy" in result:
+        st.error("Everyone may experience health effects. Limit outdoor activities.")
+    elif "Very Unhealthy" in result:
+        st.error("Serious health effects. Avoid outdoor activities.")
+    else:
+        st.error("Hazardous levels! Stay indoors and wear N95 masks if going outside.")
 
-# #     with c1:
-# #         st.markdown("Get familiar with the key pollutants that drive Delhi’s AQI:")
-# #         colA, colB, colC = st.columns(3)
-# #         items = list(POLLUTANT_INFO.items())
-# #         for idx, (poll, desc) in enumerate(items):
-# #             box = [colA, colB, colC][idx % 3]
-# #             with box:
-# #                 st.markdown(f"""
-# #                 <div class="card">
-# #                   <strong>{poll}</strong><br/>
-# #                   <small>{desc}</small>
-# #                 </div>
-# #                 """, unsafe_allow_html=True)
+# ========================
+# QR Code for Sharing App
+# ========================
+st.markdown("---")
+st.subheader("📲 Share This App")
 
-# #         st.markdown("---")
-# #         st.subheader("📣 Share on Social Media")
-# #         share_text = "Check out this Delhi AQI app — predict air quality and see health tips!"
-# #         latest = st.session_state.last_prediction
-# #         if latest is not None:
-# #             aqi_val, aqi_label = latest
-# #             share_text = f"My Delhi AQI prediction: {aqi_val} ({aqi_label}). Try yours!"
+def make_qr_image(data: str):
+    qr = qrcode.QRCode(box_size=6, border=2)
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    return img
 
-# #         twitter_url = f"https://twitter.com/intent/tweet?text={base64.urlsafe_b64encode(share_text.encode()).decode()}&url={APP_URL}"
-# #         whatsapp_url = f"https://api.whatsapp.com/send?text={share_text} {APP_URL}"
-# #         st.markdown(
-# #             f"[🐦 Share on Twitter]({twitter_url}) &nbsp;&nbsp; | &nbsp;&nbsp; [💬 Share on WhatsApp]({whatsapp_url})",
-# #             unsafe_allow_html=True
-# #         )
+qr_img = make_qr_image(APP_URL)
 
-# #     with c2:
-# #         st.markdown('<div class="card qr-box">', unsafe_allow_html=True)
-# #         st.markdown('<div class="qr-title">Share This AQI Summary via QR</div>', unsafe_allow_html=True)
-# #         if st.session_state.last_prediction is not None:
-# #             aqi_val, aqi_label = st.session_state.last_prediction
-# #             qr_content = f"AQI: {aqi_val} ({aqi_label}) • Delhi AQI App\n{APP_URL}"
-# #         else:
-# #             qr_content = f"Delhi AQI App — Predict & Learn\n{APP_URL}"
+buf = BytesIO()
+qr_img.save(buf, format="PNG")
+st.image(buf.getvalue(), caption="Scan to Open App", width=150)
 
-# #         qr_png = make_qr_bytes(qr_content, size_px=160)
-# #         st.image(qr_png, caption="Scan to open", use_container_width=True)
-
-# #         st.download_button(
-# #             "⬇️ Download QR Code",
-# #             data=qr_png,
-# #             file_name="Delhi_AQI_QR.png",
-# #             mime="image/png",
-# #             use_container_width=True
-# #         )
-# #         st.markdown('</div>', unsafe_allow_html=True)
-
-
-# import streamlit as st
-# import qrcode
-# from io import BytesIO
-# from PIL import Image
-
-# # ========================
-# # Configurations
-# # ========================
-# st.set_page_config(page_title="Delhi AQI Predictor", layout="wide")
-
-# APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
-
-# # ========================
-# # Top Layout: Title + Logo
-# # ========================
-# c1, c2 = st.columns([6, 1])  # left big, right small
-
-# with c1:
-#     st.title("🌆 Delhi AQI Predictor")
-#     st.markdown("Enter pollutant levels to predict the **Air Quality Index (AQI)** category.")
-
-# with c2:
-#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=60)
-
-# st.markdown("---")
-
-# # ========================
-# # Input Section
-# # ========================
-# st.subheader("🧾 Enter Pollutant Levels")
-
-# col1, col2, col3 = st.columns(3)
-# with col1:
-#     pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, step=1.0, value=50.0)
-#     pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, step=1.0, value=80.0)
-# with col2:
-#     no2 = st.number_input("NO₂ (µg/m³)", min_value=0.0, step=1.0, value=30.0)
-#     so2 = st.number_input("SO₂ (µg/m³)", min_value=0.0, step=1.0, value=15.0)
-# with col3:
-#     co = st.number_input("CO (mg/m³)", min_value=0.0, step=0.1, value=0.5)
-#     o3 = st.number_input("O₃ (µg/m³)", min_value=0.0, step=1.0, value=40.0)
-
-# # ========================
-# # Dummy Prediction Logic
-# # (replace with model.predict later)
-# # ========================
-# def predict_aqi(pm25, pm10, no2, so2, co, o3):
-#     score = pm25*0.4 + pm10*0.2 + no2*0.15 + so2*0.1 + co*10 + o3*0.15
-#     if score <= 50:
-#         return "Good 😊"
-#     elif score <= 100:
-#         return "Moderate 🙂"
-#     elif score <= 200:
-#         return "Unhealthy for Sensitive Groups 😷"
-#     elif score <= 300:
-#         return "Unhealthy 😟"
-#     elif score <= 400:
-#         return "Very Unhealthy ☠️"
-#     else:
-#         return "Hazardous 💀"
-
-# # ========================
-# # Prediction Button
-# # ========================
-# if st.button("🔮 Predict AQI Category"):
-#     result = predict_aqi(pm25, pm10, no2, so2, co, o3)
-
-#     st.success(f"### 🏷️ Predicted AQI Category: **{result}**")
-
-#     # Health Recommendations
-#     st.markdown("### 🩺 Health Recommendations")
-#     if "Good" in result:
-#         st.info("Air quality is good. Enjoy outdoor activities! 🌳")
-#     elif "Moderate" in result:
-#         st.warning("Air quality is acceptable, but sensitive individuals should take care.")
-#     elif "Unhealthy for Sensitive" in result:
-#         st.error("Sensitive groups (children, elderly, patients) should limit outdoor exposure.")
-#     elif "Unhealthy" in result:
-#         st.error("Everyone may experience health effects. Limit outdoor activities.")
-#     elif "Very Unhealthy" in result:
-#         st.error("Serious health effects. Avoid outdoor activities.")
-#     else:
-#         st.error("Hazardous levels! Stay indoors and wear N95 masks if going outside.")
-
-# # ========================
-# # QR Code for Sharing App
-# # ========================
-# st.markdown("---")
-# st.subheader("📲 Share This App")
-
-# def make_qr_image(data: str):
-#     qr = qrcode.QRCode(box_size=6, border=2)
-#     qr.add_data(data)
-#     qr.make(fit=True)
-#     img = qr.make_image(fill_color="black", back_color="white")
-#     return img
-
-# qr_img = make_qr_image(APP_URL)
-
-# buf = BytesIO()
-# qr_img.save(buf, format="PNG")
-# st.image(buf.getvalue(), caption="Scan to Open App", width=150)
-
-# st.markdown(f"[🌐 Open App Directly]({APP_URL})")
+st.markdown(f"[🌐 Open App Directly]({APP_URL})")
 
 
 
