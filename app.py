@@ -1877,14 +1877,12 @@ with st.sidebar:
     )
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-# ──────────────────────────────
-# 1) UNDERSTAND + SHARE (QR + Intro)
-# ──────────────────────────────
 # ---------------- Page-1 : Home ----------------
-if st.session_state["nav"] == "1) Home":
-    # Two columns layout
-    c1, c2 = st.columns([2, 1])
+if page.startswith("1)"):
+    st.title("🌍 Delhi AQI Prediction App")
+    st.markdown("📌 Scan the QR code to open this app on your mobile!")
 
+    c1, c2 = st.columns([2, 1])
     with c1:
         st.subheader("Welcome!")
         st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
@@ -1892,12 +1890,17 @@ if st.session_state["nav"] == "1) Home":
 
         # Navigation button
         if st.button("➡️ Take Analysis"):
-            # Switch to Page-5
+            # Update page safely without direct overwrite
             st.session_state["nav"] = "5) Predict Delhi AQI Category"
-            st.experimental_rerun()
+            st.rerun()
 
     with c2:
-        st.image("delhi_aqi_banner.png", caption="Delhi AQI Prediction", use_container_width=True)
+        st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
+
+    st.markdown("---")
+    st.markdown("#### Pollutants you can track")
+    for k, v in POLLUTANT_INFO.items():
+        st.markdown(f"**{k}** — {v}")
 
 
 # ──────────────────────────────
