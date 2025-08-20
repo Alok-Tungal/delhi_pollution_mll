@@ -1902,11 +1902,13 @@ import streamlit as st
 import joblib
 import shap
 import matplotlib.pyplot as plt
+import streamlit as st
+import pandas as pd
+# other imports...
 
 # --- Utility: ensure session state defaults ---
 def ensure_session_defaults():
     if "values" not in st.session_state:
-        # Default pollutants (set realistic defaults, not 0s)
         st.session_state.values = {
             "PM2.5": 40.0,
             "PM10": 80.0,
@@ -1919,8 +1921,15 @@ def ensure_session_defaults():
         st.session_state.last_prediction = None
     if "scenario_applied" not in st.session_state:
         st.session_state.scenario_applied = False
-    if "last_present" not in st.session_state:  # fixed typo
+    if "last_present" not in st.session_state:
         st.session_state.last_present = None
+
+# --- CALL HERE ---
+ensure_session_defaults()
+
+# --- Load model, encoders, and continue with pages ---
+MODEL, ENCODER = load_model_and_encoder()
+
 
 # ──────────────────────────────
 # INIT & LOAD MODEL ONCE
