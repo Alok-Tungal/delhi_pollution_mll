@@ -2415,27 +2415,27 @@ page = st.session_state["nav"]
 # ──────────────────────────────
 # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
 # ──────────────────────────────
-elif page.startswith("6)"):
-    st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
+# elif page.startswith("6)"):
+#     st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
 
-    values = normalize_values(st.session_state.values)
-    df_cmp = comparison_frame(values)
+#     values = normalize_values(st.session_state.values)
+#     df_cmp = comparison_frame(values)
 
-    st.dataframe(df_cmp, use_container_width=True)
+#     st.dataframe(df_cmp, use_container_width=True)
+ 
+#     st.markdown("#### Visual Comparison")
+#     df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
 
-    st.markdown("#### Visual Comparison")
-    df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
+#     for p in COLUMNS:
+#         sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+#         st.markdown(f"**{p}**")
+#         st.bar_chart(sub, use_container_width=True)
 
-    for p in COLUMNS:
-        sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
-        st.markdown(f"**{p}**")
-        st.bar_chart(sub, use_container_width=True)
+#     st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
 
-    st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
-
-# ──────────────────────────────
-# FOOTER
-# ──────────────────────────────
-st.markdown("---")
-st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
+# # ──────────────────────────────
+# # FOOTER
+# # ──────────────────────────────
+# st.markdown("---")
+# st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
 
