@@ -1586,8 +1586,8 @@ st.markdown(f"[🌐 Open App Directly]({APP_URL})")
 # ──────────────────────────────
 # 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
 # ──────────────────────────────
- elif page.startswith("2)"):
-    st.title("📚 Learn About AQI & Health Tips")
+    elif page.startswith("2)"):
+        st.title("📚 Learn About AQI & Health Tips")
 
     st.markdown("""
 **AQI Categories (India - simplified):**
