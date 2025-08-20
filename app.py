@@ -1880,30 +1880,25 @@ with st.sidebar:
 # ──────────────────────────────
 # 1) UNDERSTAND + SHARE (QR + Intro)
 # ──────────────────────────────
-if page.startswith("1)"):
-    st.title("🌍 Delhi AQI Prediction App")
-    st.markdown("📌 Scan the QR code to open this app on your mobile!")
-
+# ---------------- Page-1 : Home ----------------
+if st.session_state["nav"] == "1) Home":
+    # Two columns layout
     c1, c2 = st.columns([2, 1])
+
     with c1:
         st.subheader("Welcome!")
         st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
         st.write("👉 Click below to jump to prediction.")
-    
+
+        # Navigation button
         if st.button("➡️ Take Analysis"):
-            if "nav" not in st.session_state:
-                st.session_state["nav"] = "5) Predict Delhi AQI Category"
-            else:
-                st.session_state.nav = "5) Predict Delhi AQI Category"
+            # Switch to Page-5
+            st.session_state["nav"] = "5) Predict Delhi AQI Category"
             st.experimental_rerun()
 
     with c2:
-        st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
+        st.image("delhi_aqi_banner.png", caption="Delhi AQI Prediction", use_container_width=True)
 
-    st.markdown("---")
-    st.markdown("#### Pollutants you can track")
-    for k, v in POLLUTANT_INFO.items():
-        st.markdown(f"**{k}** — {v}")
 
 # ──────────────────────────────
 # 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
