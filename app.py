@@ -1877,22 +1877,48 @@ with st.sidebar:
     )
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
+# # ---------------- Page-1 : Home ----------------
+# if page.startswith("1)"):
+#     st.title("🌍 Delhi AQI Prediction App")
+#     st.markdown("📌 Scan the QR code to open this app on your mobile!")
+
+#     c1, c2 = st.columns([2, 1])
+#     with c1:
+#         st.subheader("Welcome!")
+#         st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
+#         st.write("👉 Click below to jump to prediction.")
+
+#         # Navigation button
+#         if st.button("➡️ Take Analysis"):
+#             # Update page safely without direct overwrite
+#             st.session_state.page = "analysis"
+#             st.rerun()
+
+#     with c2:
+#         st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
+
+#     st.markdown("---")
+#     st.markdown("#### Pollutants you can track")
+#     for k, v in POLLUTANT_INFO.items():
+#         st.markdown(f"**{k}** — {v}")
+
+
 # ---------------- Page-1 : Home ----------------
 if page.startswith("1)"):
     st.title("🌍 Delhi AQI Prediction App")
     st.markdown("📌 Scan the QR code to open this app on your mobile!")
 
     c1, c2 = st.columns([2, 1])
+
     with c1:
         st.subheader("Welcome!")
         st.write("This app predicts **Delhi's Air Quality Index (AQI)** and provides health recommendations.")
         st.write("👉 Click below to jump to prediction.")
 
         # Navigation button
-        if st.button("➡️ Take Analysis"):
-            # Update page safely without direct overwrite
-            st.session_state.page = "analysis"
-            st.rerun()
+        if st.button("➡️ Take Analysis", key="go_predict"):
+            st.session_state["nav"] = "5) Predict Delhi AQI Category"
+            st.experimental_rerun()   # 🔑 force rerun so Page-5 loads immediately
 
     with c2:
         st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open the app", use_container_width=True)
@@ -1901,6 +1927,7 @@ if page.startswith("1)"):
     st.markdown("#### Pollutants you can track")
     for k, v in POLLUTANT_INFO.items():
         st.markdown(f"**{k}** — {v}")
+
 
 
 # ──────────────────────────────
