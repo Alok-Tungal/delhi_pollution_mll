@@ -2115,40 +2115,61 @@ elif page.startswith("3)"):
 #     st.dataframe(values_table(st.session_state.values), use_container_width=True)
 
 
-elif page.startswith("4)"):
-    st.title("🎛️ Preset or Custom Inputs")
+# -----------------------------
+# Page 4: Preset or Custom Inputs
+# -----------------------------
+elif page == "Preset or Custom Inputs":
+    st.header("🎛️ Preset or Custom Inputs")
 
-    # Presets
-    preset = st.selectbox("Choose Preset AQI Level", list(PRESETS.keys()))
-    defaults = list(map(float, PRESETS[preset]))
-
-    # Load preset or keep existing values
-    if "values" not in st.session_state or st.session_state.get("last_preset") != preset:
+    # Initialize session state values safely
+    if "values" not in st.session_state:
         st.session_state.values = {
-            "PM2.5": defaults[0], "PM10": defaults[1],
-            "NO2": defaults[2], "SO2": defaults[3],
-            "CO": defaults[4], "Ozone": defaults[5],
+            "PM2.5": 0.0, "PM10": 0.0,
+            "NO2": 0.0, "SO2": 0.0,
+            "CO": 0.0, "Ozone": 0.0,
         }
-        st.session_state.last_preset = preset
 
-    # Input fields
-    c1, c2 = st.columns(2)
-    with c1:
-        st.session_state.values["PM2.5"] = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=st.session_state.values["PM2.5"], step=1.0)
-        st.session_state.values["NO2"]   = st.number_input("NO2 (µg/m³)", min_value=0.0, value=st.session_state.values["NO2"], step=1.0)
-        st.session_state.values["CO"]    = st.number_input("CO (mg/m³)", min_value=0.0, value=st.session_state.values["CO"], step=0.1)
-    with c2:
-        st.session_state.values["PM10"]  = st.number_input("PM10 (µg/m³)", min_value=0.0, value=st.session_state.values["PM10"], step=1.0)
-        st.session_state.values["SO2"]   = st.number_input("SO2 (µg/m³)", min_value=0.0, value=st.session_state.values["SO2"], step=1.0)
-        st.session_state.values["Ozone"] = st.number_input("Ozone (µg/m³)", min_value=0.0, value=st.session_state.values["Ozone"], step=1.0)
+    # User input fields
+    st.subheader("Enter Pollution Levels Manually")
 
-    # Final display
-    st.markdown("### 📋 Your Entered Pollution Levels")
-    st.dataframe(
-        pd.DataFrame(st.session_state.values, index=["Value"]).T,
-        use_container_width=True
-    )
+    pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0,
+                           value=float(st.session_state.values.get("PM2.5", 0.0)), step=1.0)
 
+    pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0,
+                           value=float(st.session_state.values.get("PM10", 0.0)), step=1.0)
+
+    no2 = st.number_input("NO2 (µg/m³)", min_value=0.0,
+                          value=float(st.session_state.values.get("NO2", 0.0)), step=1.0)
+
+    so2 = st.number_input("SO2 (µg/m³)", min_value=0.0,
+                          value=float(st.session_state.values.get("SO2", 0.0)), step=1.0)
+
+    co = st.number_input("CO (mg/m³)", min_value=0.0,
+                         value=float(st.session_state.values.get("CO", 0.0)), step=0.1)
+
+    ozone = st.number_input("Ozone (µg/m³)", min_value=0.0,
+                            value=float(st.session_state.values.get("Ozone", 0.0)), step=1.0)
+
+    # Update session state with current values
+    st.session_state.values.update({
+        "PM2.5": pm25, "PM10": pm10,
+        "NO2": no2, "SO2": so2,
+        "CO": co, "Ozone": ozone
+    })
+
+    # Show user-entered values
+    st.subheader("📋 Your Entered Pollution Level")
+    st.table({
+        "Pollutant": ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"],
+        "Value": [
+            st.session_state.values["PM2.5"],
+            st.session_state.values["PM10"],
+            st.session_state.values["NO2"],
+            st.session_state.values["SO2"],
+            st.session_state.values["CO"],
+            st.session_state.values["Ozone"]
+        ]
+    })
 
 
 # ──────────────────────────────
