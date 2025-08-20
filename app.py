@@ -2298,137 +2298,89 @@ elif page.startswith("4)"):
 
 
 # ──────────────────────────────
-# elif page.startswith("5)"):
-#     st.title("🔮 Predict Delhi AQI Category")
+elif page.startswith("5)"):
+    st.title("🔮 Predict Delhi AQI Category")
 
-#     values = st.session_state.values   # ✅ no double normalization
-#     st.markdown("Review your inputs before predicting:")
-#     st.dataframe(values_table(values), use_container_width=True)
+    values = st.session_state.values   # ✅ no double normalization
+    st.markdown("Review your inputs before predicting:")
+    st.dataframe(values_table(values), use_container_width=True)
 
-#     if st.button("🚀 Run Prediction", use_container_width=True):
-#         aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
-#         st.session_state.last_prediction = (aqi_val, aqi_label)
-
-#         bc = badge_class(aqi_label)
-#         st.markdown(
-#             f"""
-#             <div class=\"card\" style=\"text-align:center\">\n
-#                 <div style=\"font-size:46px; font-weight:800; line-height:1\">AQI {aqi_val}</div>\n
-#                 <div class=\"badge {bc}\" style=\"margin-top:8px; font-size:16px\">{aqi_label}</div>\n
-#                 <div style=\"margin-top:6px\"><small class=\"mono\">Model: Random Forest (+safe fallback)</small></div>\n
-#             </div>
-#             """,
-#             unsafe_allow_html=True,
-#         )
-
-#         # Logging
-#         try:
-#             log_to_csv(values, aqi_val, aqi_label)
-#             st.success("✅ Prediction logged to aqi_logs.csv")
-#         except Exception as e:
-    #         st.info(f"CSV logging skipped: {e}")
-    #     try:
-    #         try_log_to_sheets(values, aqi_val, aqi_label)
-    #     except Exception:
-    #         pass
-    #     st.toast("Prediction done!", icon="✅")
-
-    # if st.session_state.last_prediction:
-    #     aqi_val, aqi_label = st.session_state.last_prediction
-    #     st.caption(f"Last prediction: **AQI {aqi_val} ({aqi_label})**")
-
-
-# elif page.startswith("5)"):
-#     st.title("🔮 Predict Delhi AQI Category")
-
-#     # Show current entered values
-#     values = normalize_values(st.session_state.values)
-#     st.markdown("Review your inputs before predicting:")
-#     st.dataframe(values_table(values), use_container_width=True)
-
-#     # Run Prediction button
-#     if st.button("🚀 Run Prediction", use_container_width=True):
-#         # --- PLACE YOUR CODE HERE ---
-#         aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
-
-#         # Save prediction to session
-#         st.session_state.last_prediction = (aqi_val, aqi_label)
-
-#         # Display result
-#         bc = badge_class(aqi_label)
-#         st.markdown(
-#             f"""
-#             <div class="card" style="text-align:center">
-#                 <div style="font-size:46px; font-weight:800; line-height:1">AQI {aqi_val}</div>
-#                 <div class="badge {bc}" style="margin-top:8px; font-size:16px">{aqi_label}</div>
-#                 <div style="margin-top:6px"><small class="mono">Model: Random Forest (+safe fallback)</small></div>
-#             </div>
-#             """,
-#             unsafe_allow_html=True,
-#         )
-
-#         # Logging
-#         try:
-#             log_to_csv(values, aqi_val, aqi_label)
-#             st.success("✅ Prediction logged to aqi_logs.csv")
-#         except Exception as e:
-#             st.info(f"CSV logging skipped: {e}")
-
-#         try:
-#             try_log_to_sheets(values, aqi_val, aqi_label)
-#         except Exception:
-#             pass
-
-#         st.toast("Prediction done!", icon="✅")
-
-
-# ------------------- AQI Prediction Section -------------------
-st.header("🔮 Predict Delhi AQI Category")
-
-# Make sure session defaults exist
-ensure_session_defaults()
-
-# Create input form
-with st.form("aqi_form"):
-    st.subheader("Enter pollutant levels:")
-
-    # Use safe defaults if session values are None or missing
-    pm25  = float(st.session_state.values.get("PM2.5", 0.0))
-    pm10  = float(st.session_state.values.get("PM10", 0.0))
-    no2   = float(st.session_state.values.get("NO2", 0.0))
-    so2   = float(st.session_state.values.get("SO2", 0.0))
-    co    = float(st.session_state.values.get("CO", 0.0))
-    ozone = float(st.session_state.values.get("Ozone", 0.0))
-
-    # Number inputs (update session state on change)
-    st.session_state.values["PM2.5"] = st.number_input("PM2.5 (µg/m³)", value=pm25, step=1.0)
-    st.session_state.values["PM10"]  = st.number_input("PM10 (µg/m³)",  value=pm10, step=1.0)
-    st.session_state.values["NO2"]   = st.number_input("NO2 (µg/m³)",   value=no2, step=1.0)
-    st.session_state.values["SO2"]   = st.number_input("SO2 (µg/m³)",   value=so2, step=1.0)
-    st.session_state.values["CO"]    = st.number_input("CO (mg/m³)",    value=co, step=0.1, format="%.2f")
-    st.session_state.values["Ozone"] = st.number_input("Ozone (µg/m³)", value=ozone, step=1.0)
-
-    # ✅ The missing submit button (inside the form!)
-    submitted = st.form_submit_button("➡️ Predict AQI")
-
-# Handle prediction only if button pressed
-if submitted:
-    # Debug raw input values
-    st.write("🔎 Raw Input Values:", st.session_state.values)
-
-    # Normalize values
-    values = normalize_values(st.session_state.values)
-    st.write("✅ Normalized Values:", values)
-
-    # Run prediction safely
-    try:
+    if st.button("🚀 Run Prediction", use_container_width=True):
         aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
         st.session_state.last_prediction = (aqi_val, aqi_label)
 
-        # Show result
-        st.success(f"🌍 Predicted AQI: **{aqi_val}** → Category: **{aqi_label}**")
-    except Exception as e:
-        st.error(f"⚠️ Prediction failed: {e}")
+        bc = badge_class(aqi_label)
+        st.markdown(
+            f"""
+            <div class=\"card\" style=\"text-align:center\">\n
+                <div style=\"font-size:46px; font-weight:800; line-height:1\">AQI {aqi_val}</div>\n
+                <div class=\"badge {bc}\" style=\"margin-top:8px; font-size:16px\">{aqi_label}</div>\n
+                <div style=\"margin-top:6px\"><small class=\"mono\">Model: Random Forest (+safe fallback)</small></div>\n
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Logging
+        try:
+            log_to_csv(values, aqi_val, aqi_label)
+            st.success("✅ Prediction logged to aqi_logs.csv")
+        except Exception as e:
+            st.info(f"CSV logging skipped: {e}")
+        try:
+            try_log_to_sheets(values, aqi_val, aqi_label)
+        except Exception:
+            pass
+        st.toast("Prediction done!", icon="✅")
+
+    if st.session_state.last_prediction:
+        aqi_val, aqi_label = st.session_state.last_prediction
+        st.caption(f"Last prediction: **AQI {aqi_val} ({aqi_label})**")
+
+
+elif page.startswith("5)"):
+    st.title("🔮 Predict Delhi AQI Category")
+
+    # Show current entered values
+    values = normalize_values(st.session_state.values)
+    st.markdown("Review your inputs before predicting:")
+    st.dataframe(values_table(values), use_container_width=True)
+
+    # Run Prediction button
+    if st.button("🚀 Run Prediction", use_container_width=True):
+        # --- PLACE YOUR CODE HERE ---
+        aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
+
+        # Save prediction to session
+        st.session_state.last_prediction = (aqi_val, aqi_label)
+
+        # Display result
+        bc = badge_class(aqi_label)
+        st.markdown(
+            f"""
+            <div class="card" style="text-align:center">
+                <div style="font-size:46px; font-weight:800; line-height:1">AQI {aqi_val}</div>
+                <div class="badge {bc}" style="margin-top:8px; font-size:16px">{aqi_label}</div>
+                <div style="margin-top:6px"><small class="mono">Model: Random Forest (+safe fallback)</small></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        # Logging
+        try:
+            log_to_csv(values, aqi_val, aqi_label)
+            st.success("✅ Prediction logged to aqi_logs.csv")
+        except Exception as e:
+            st.info(f"CSV logging skipped: {e}")
+
+        try:
+            try_log_to_sheets(values, aqi_val, aqi_label)
+        except Exception:
+            pass
+
+        st.toast("Prediction done!", icon="✅")
+
 
 
 
