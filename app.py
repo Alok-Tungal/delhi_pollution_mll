@@ -1910,8 +1910,16 @@ MODEL, ENCODER = load_model_and_encoder()
 # ──────────────────────────────
 # SIDEBAR NAVIGATION — SINGLE ROUTER
 # ──────────────────────────────
+# --- Ensure nav default exists ---
+if "nav" not in st.session_state:
+    st.session_state.nav = "1) Understand + Share"
+
+# Sidebar navigation
 with st.sidebar:
-    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+    st.image(
+        "https://img.icons8.com/?size=100&id=12448&format=png&color=000000",
+        width=32
+    )
     st.markdown("### Delhi AQI App")
 
     page_options = [
@@ -1923,13 +1931,19 @@ with st.sidebar:
         "6) Compare with Delhi Avg & WHO",
     ]
 
+    # Safe index: use get with fallback
+    default_nav = st.session_state.get("nav", "1) Understand + Share")
+    default_index = page_options.index(default_nav) if default_nav in page_options else 0
+
     page = st.radio(
         "Navigation",
         options=page_options,
-        index=page_options.index(st.session_state.nav),  # now safe
+        index=default_index,
         key="nav",
     )
+
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+
 
 
 
