@@ -1119,7 +1119,7 @@
 #             file_name="Delhi_AQI_QR.png",
 #             mime="image/png",
 #             use_container_width=True
-        )
+        # )
 
 
 
