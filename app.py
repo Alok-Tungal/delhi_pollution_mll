@@ -1721,7 +1721,7 @@ DELHI_AVG = {
 }
 
 
-from typing import Dict
+from typing import Dict, List, Tuple, Optional
 
 
 POLLUTANT_INFO: Dict[str, str] = {
