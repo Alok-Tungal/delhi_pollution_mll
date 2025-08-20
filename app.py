@@ -1641,303 +1641,303 @@
 
 
 
-# import numpy as np
-# import pandas as pd
-# from PIL import Image
-# import qrcode
-# from qrcode.constants import ERROR_CORRECT_H
+import numpy as np
+import pandas as pd
+from PIL import Image
+import qrcode
+from qrcode.constants import ERROR_CORRECT_H
 
-# import streamlit as st
+import streamlit as st
 
-# # Optional: external deps (guarded)
-# try:
-#     import joblib
-# except Exception:
-#     joblib = None
+# Optional: external deps (guarded)
+try:
+    import joblib
+except Exception:
+    joblib = None
 
-# try:
-#     import gspread
-# except Exception:
-#     gspread = None
+try:
+    import gspread
+except Exception:
+    gspread = None
 
-# # ──────────────────────────────
-# # PAGE CONFIG & GLOBAL STYLES
-# # ──────────────────────────────
-# st.set_page_config(
-#     page_title="Delhi AQI – Prediction & Insights",
-#     page_icon="🌫️",
-#     layout="wide"
-# )
+# ──────────────────────────────
+# PAGE CONFIG & GLOBAL STYLES
+# ──────────────────────────────
+st.set_page_config(
+    page_title="Delhi AQI – Prediction & Insights",
+    page_icon="🌫️",
+    layout="wide"
+)
 
-# st.markdown(
-#     """
-#     <style>
-#     .badge { padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block; }
-#     .badge.good { background:#e7f5e9; color:#1e7e34; }
-#     .badge.moderate { background:#fff3cd; color:#856404; }
-#     .badge.poor { background:#ffe5d0; color:#a1490c; }
-#     .badge.verypoor { background:#fde2e1; color:#9b1c1c; }
-#     .badge.severe { background:#f8d7da; color:#721c24; }
-#     .card { border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%; }
-#     .qr-box { text-align:center; }
-#     .qr-title { font-weight:700; margin-bottom:0.3rem; }
-#     small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
-#     </style>
-#     """,
-#     unsafe_allow_html=True,
-# )
+st.markdown(
+    """
+    <style>
+    .badge { padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block; }
+    .badge.good { background:#e7f5e9; color:#1e7e34; }
+    .badge.moderate { background:#fff3cd; color:#856404; }
+    .badge.poor { background:#ffe5d0; color:#a1490c; }
+    .badge.verypoor { background:#fde2e1; color:#9b1c1c; }
+    .badge.severe { background:#f8d7da; color:#721c24; }
+    .card { border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%; }
+    .qr-box { text-align:center; }
+    .qr-title { font-weight:700; margin-bottom:0.3rem; }
+    small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# # ──────────────────────────────
-# # CONSTANTS & HELPERS
-# # ──────────────────────────────
-# APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
+# ──────────────────────────────
+# CONSTANTS & HELPERS
+# ──────────────────────────────
+APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
 
-# COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
-# PRESENTS = {
-#     "Good":       [30,  40,  20,  5,  0.4, 10],
-#     "Moderate":   [90, 110,  40, 10,  1.2, 30],
-#     "Poor":       [200, 250, 90, 20,  2.0, 50],
-#     "Very Poor":  [300, 350, 120, 30,  3.5, 70],
-#     "Severe":     [400, 500, 150, 40,  4.5, 90],
-# }
+PRESENTS = {
+    "Good":       [30,  40,  20,  5,  0.4, 10],
+    "Moderate":   [90, 110,  40, 10,  1.2, 30],
+    "Poor":       [200, 250, 90, 20,  2.0, 50],
+    "Very Poor":  [300, 350, 120, 30,  3.5, 70],
+    "Severe":     [400, 500, 150, 40,  4.5, 90],
+}
 
-# WHO_LIMITS = {
-#     "PM2.5": 15,
-#     "PM10": 45,
-#     "NO2": 25,
-#     "SO2": 40,
-#     "CO": 4.0,    # mg/m3 (8-hour guideline)
-#     "Ozone": 100,
-# }
+WHO_LIMITS = {
+    "PM2.5": 15,
+    "PM10": 45,
+    "NO2": 25,
+    "SO2": 40,
+    "CO": 4.0,    # mg/m3 (8-hour guideline)
+    "Ozone": 100,
+}
 
-# DELHI_AVG = {
-#     "PM2.5": 120,
-#     "PM10": 200,
-#     "NO2": 45,
-#     "SO2": 12,
-#     "CO": 1.7,
-#     "Ozone": 60,
-# }
+DELHI_AVG = {
+    "PM2.5": 120,
+    "PM10": 200,
+    "NO2": 45,
+    "SO2": 12,
+    "CO": 1.7,
+    "Ozone": 60,
+}
 
-# POLLUTANT_INFO: Dict[str, str] = {
-#     "PM2.5": "Fine particles (≤2.5μm) penetrate deep into lungs; linked to heart & lung disease.",
-#     "PM10": "Coarse particles (≤10μm) irritate airways; worsen asthma and bronchitis.",
-#     "NO2":  "Traffic/industrial gas; inflames airways; reduces lung function over time.",
-#     "SO2":  "From coal/oil burning; triggers wheezing, coughing; forms secondary PM.",
-#     "CO":   "Colorless gas; reduces oxygen delivery in body; dangerous in high doses.",
-#     "Ozone":"Formed in sunlight; irritates airways; causes chest pain & coughing.",
-# }
-
-
-# def ensure_session_defaults():
-#     if "values" not in st.session_state:
-#         st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
-#     if "last_prediction" not in st.session_state:
-#         st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
-#     if "scenario_applied" not in st.session_state:
-#         st.session_state.scenario_applied = ""
-#     if "nav" not in st.session_state:
-#         st.session_state.nav = "1) Understand + Share"
+POLLUTANT_INFO: Dict[str, str] = {
+    "PM2.5": "Fine particles (≤2.5μm) penetrate deep into lungs; linked to heart & lung disease.",
+    "PM10": "Coarse particles (≤10μm) irritate airways; worsen asthma and bronchitis.",
+    "NO2":  "Traffic/industrial gas; inflames airways; reduces lung function over time.",
+    "SO2":  "From coal/oil burning; triggers wheezing, coughing; forms secondary PM.",
+    "CO":   "Colorless gas; reduces oxygen delivery in body; dangerous in high doses.",
+    "Ozone":"Formed in sunlight; irritates airways; causes chest pain & coughing.",
+}
 
 
-# def normalize_values(values: Dict[str, float]) -> Dict[str, float]:
-#     """Ensure we always have all COLUMNS with float values. Prevents shape/key errors."""
-#     safe = {}
-#     if isinstance(values, dict):
-#         for c in COLUMNS:
-#             try:
-#                 safe[c] = float(values.get(c, 0.0))
-#             except Exception:
-#                 safe[c] = 0.0
-#     else:
-#         # if someone accidentally put a list/tuple in session_state.values
-#         for i, c in enumerate(COLUMNS):
-#             try:
-#                 safe[c] = float(values[i])
-#             except Exception:
-#                 safe[c] = 0.0
-#     return safe
+def ensure_session_defaults():
+    if "values" not in st.session_state:
+        st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
+    if "scenario_applied" not in st.session_state:
+        st.session_state.scenario_applied = ""
+    if "nav" not in st.session_state:
+        st.session_state.nav = "1) Understand + Share"
 
 
-# def load_model_and_encoder():
-#     """Load RF model + label encoder. Safe fallback if missing."""
-#     model, encoder = None, None
-#     try:
-#         if joblib is not None and os.path.exists("aqi_rf_model.joblib"):
-#             model = joblib.load("aqi_rf_model.joblib")
-#     except Exception:
-#         model = None
-#     try:
-#         # Use the most common filename first
-#         if joblib is not None and os.path.exists("label_encoder.joblib"):
-#             encoder = joblib.load("label_encoder.joblib")
-#         elif joblib is not None and os.path.exists("label_encoder_.joblib"):
-#             encoder = joblib.load("label_encoder_.joblib")
-#     except Exception:
-#         encoder = None
-#     return model, encoder
+def normalize_values(values: Dict[str, float]) -> Dict[str, float]:
+    """Ensure we always have all COLUMNS with float values. Prevents shape/key errors."""
+    safe = {}
+    if isinstance(values, dict):
+        for c in COLUMNS:
+            try:
+                safe[c] = float(values.get(c, 0.0))
+            except Exception:
+                safe[c] = 0.0
+    else:
+        # if someone accidentally put a list/tuple in session_state.values
+        for i, c in enumerate(COLUMNS):
+            try:
+                safe[c] = float(values[i])
+            except Exception:
+                safe[c] = 0.0
+    return safe
 
 
-# def simple_category_from_aqi(aqi: int) -> str:
-#     if aqi <= 50: return "Good"
-#     if aqi <= 100: return "Satisfactory"
-#     if aqi <= 200: return "Moderate"
-#     if aqi <= 300: return "Poor"
-#     if aqi <= 400: return "Very Poor"
-#     return "Severe"
+def load_model_and_encoder():
+    """Load RF model + label encoder. Safe fallback if missing."""
+    model, encoder = None, None
+    try:
+        if joblib is not None and os.path.exists("aqi_rf_model.joblib"):
+            model = joblib.load("aqi_rf_model.joblib")
+    except Exception:
+        model = None
+    try:
+        # Use the most common filename first
+        if joblib is not None and os.path.exists("label_encoder.joblib"):
+            encoder = joblib.load("label_encoder.joblib")
+        elif joblib is not None and os.path.exists("label_encoder_.joblib"):
+            encoder = joblib.load("label_encoder_.joblib")
+    except Exception:
+        encoder = None
+    return model, encoder
 
 
-# def badge_class(label: str) -> str:
-#     key = label.replace(" ", "").lower()
-#     if key in ["good"]: return "good"
-#     if key in ["moderate", "satisfactory"]: return "moderate"
-#     if key == "poor": return "poor"
-#     if key in ["verypoor", "verybad"]: return "verypoor"
-#     return "severe"
+def simple_category_from_aqi(aqi: int) -> str:
+    if aqi <= 50: return "Good"
+    if aqi <= 100: return "Satisfactory"
+    if aqi <= 200: return "Moderate"
+    if aqi <= 300: return "Poor"
+    if aqi <= 400: return "Very Poor"
+    return "Severe"
 
 
-# def predict_aqi(values: Dict[str, float], model, encoder) -> Tuple[int, str]:
-#     values = normalize_values(values)
-#     row = pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
-
-#     # Predict number or class code
-#     if model is not None:
-#         try:
-#             pred_raw = model.predict(row)[0]
-#             aqi_val = int(np.array(pred_raw).item())
-#         except Exception:
-#             try:
-#                 aqi_val = int(pred_raw)
-#             except Exception:
-#                 aqi_val = int(np.clip(np.average(list(values.values())), 0, 500))
-#     else:
-#         w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.2, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
-#         aqi_val = int(sum(values[k] * w[k] for k in COLUMNS) / (sum(w.values()) or 1.0))
-#         aqi_val = int(np.clip(aqi_val, 0, 500))
-
-#     # Decode label if encoder truly encodes categories, else fallback from number
-#     if encoder is not None:
-#         try:
-#             label = encoder.inverse_transform([aqi_val])[0]
-#             if isinstance(label, (np.generic, np.integer)):
-#                 label = simple_category_from_aqi(int(label))
-#         except Exception:
-#             label = simple_category_from_aqi(aqi_val)
-#     else:
-#         label = simple_category_from_aqi(aqi_val)
-
-#     return aqi_val, label
+def badge_class(label: str) -> str:
+    key = label.replace(" ", "").lower()
+    if key in ["good"]: return "good"
+    if key in ["moderate", "satisfactory"]: return "moderate"
+    if key == "poor": return "poor"
+    if key in ["verypoor", "verybad"]: return "verypoor"
+    return "severe"
 
 
-# def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
-#     qr = qrcode.QRCode(version=None, error_correction=ERROR_CORRECT_H, box_size=10, border=2)
-#     qr.add_data(content)
-#     qr.make(fit=True)
-#     img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
-#     img = img.resize((size_px, size_px), resample=Image.Resampling.LANCZOS)
-#     buf = io.BytesIO()
-#     img.save(buf, format="PNG", optimize=True)
-#     return buf.getvalue()
+def predict_aqi(values: Dict[str, float], model, encoder) -> Tuple[int, str]:
+    values = normalize_values(values)
+    row = pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
+
+    # Predict number or class code
+    if model is not None:
+        try:
+            pred_raw = model.predict(row)[0]
+            aqi_val = int(np.array(pred_raw).item())
+        except Exception:
+            try:
+                aqi_val = int(pred_raw)
+            except Exception:
+                aqi_val = int(np.clip(np.average(list(values.values())), 0, 500))
+    else:
+        w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.2, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+        aqi_val = int(sum(values[k] * w[k] for k in COLUMNS) / (sum(w.values()) or 1.0))
+        aqi_val = int(np.clip(aqi_val, 0, 500))
+
+    # Decode label if encoder truly encodes categories, else fallback from number
+    if encoder is not None:
+        try:
+            label = encoder.inverse_transform([aqi_val])[0]
+            if isinstance(label, (np.generic, np.integer)):
+                label = simple_category_from_aqi(int(label))
+        except Exception:
+            label = simple_category_from_aqi(aqi_val)
+    else:
+        label = simple_category_from_aqi(aqi_val)
+
+    return aqi_val, label
 
 
-# def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
-#     if gspread is None: return
-#     if "gspread" not in st.secrets: return
-#     try:
-#         gc = gspread.service_account_from_dict(st.secrets["gspread"])
-#         sheet = gc.open("Delhi AQI Predictions").sheet1
-#         now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#         values = normalize_values(values)
-#         row = [
-#             now,
-#             float(values["PM2.5"]), float(values["PM10"]), float(values["NO2"]),
-#             float(values["SO2"]), float(values["CO"]), float(values["Ozone"]),
-#             int(aqi_val), str(aqi_label),
-#         ]
-#         sheet.append_row(row)
-#         st.toast("Logged to Google Sheets.", icon="☁️")
-#     except Exception as e:
-#         st.info(f"Sheets logging skipped: {e}")
+def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
+    qr = qrcode.QRCode(version=None, error_correction=ERROR_CORRECT_H, box_size=10, border=2)
+    qr.add_data(content)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    img = img.resize((size_px, size_px), resample=Image.Resampling.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
 
 
-# def log_to_csv(values: Dict[str, float], aqi_val: int, aqi_label: str):
-#     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#     values = normalize_values(values)
-#     row = {
-#         "Timestamp": now,
-#         "PM2.5": float(values["PM2.5"]),
-#         "PM10": float(values["PM10"]),
-#         "NO2": float(values["NO2"]),
-#         "SO2": float(values["SO2"]),
-#         "CO": float(values["CO"]),
-#         "Ozone": float(values["Ozone"]),
-#         "PredictedAQI": int(aqi_val),
-#         "AQICategory": str(aqi_label),
-#     }
-#     df_row = pd.DataFrame([row])
-#     if os.path.exists("aqi_logs.csv"):
-#         try:
-#             df_old = pd.read_csv("aqi_logs.csv")
-#             df_new = pd.concat([df_old, df_row], ignore_index=True)
-#         except Exception:
-#             df_new = df_row
-#     else:
-#         df_new = df_row
-#     df_new.to_csv("aqi_logs.csv", index=False)
+def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
+    if gspread is None: return
+    if "gspread" not in st.secrets: return
+    try:
+        gc = gspread.service_account_from_dict(st.secrets["gspread"])
+        sheet = gc.open("Delhi AQI Predictions").sheet1
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        values = normalize_values(values)
+        row = [
+            now,
+            float(values["PM2.5"]), float(values["PM10"]), float(values["NO2"]),
+            float(values["SO2"]), float(values["CO"]), float(values["Ozone"]),
+            int(aqi_val), str(aqi_label),
+        ]
+        sheet.append_row(row)
+        st.toast("Logged to Google Sheets.", icon="☁️")
+    except Exception as e:
+        st.info(f"Sheets logging skipped: {e}")
 
 
-# def values_table(values: Dict[str, float]) -> pd.DataFrame:
-#     values = normalize_values(values)
-#     return pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
+def log_to_csv(values: Dict[str, float], aqi_val: int, aqi_label: str):
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    values = normalize_values(values)
+    row = {
+        "Timestamp": now,
+        "PM2.5": float(values["PM2.5"]),
+        "PM10": float(values["PM10"]),
+        "NO2": float(values["NO2"]),
+        "SO2": float(values["SO2"]),
+        "CO": float(values["CO"]),
+        "Ozone": float(values["Ozone"]),
+        "PredictedAQI": int(aqi_val),
+        "AQICategory": str(aqi_label),
+    }
+    df_row = pd.DataFrame([row])
+    if os.path.exists("aqi_logs.csv"):
+        try:
+            df_old = pd.read_csv("aqi_logs.csv")
+            df_new = pd.concat([df_old, df_row], ignore_index=True)
+        except Exception:
+            df_new = df_row
+    else:
+        df_new = df_row
+    df_new.to_csv("aqi_logs.csv", index=False)
 
 
-# def comparison_frame(values: Dict[str, float]) -> pd.DataFrame:
-#     values = normalize_values(values)
-#     rows = []
-#     for p in COLUMNS:
-#         rows.append({
-#             "Pollutant": p,
-#             "Your Level": float(values.get(p, 0.0)),
-#             "Delhi Avg": float(DELHI_AVG[p]),
-#             "WHO Limit": float(WHO_LIMITS[p]),
-#         })
-#     return pd.DataFrame(rows)
+def values_table(values: Dict[str, float]) -> pd.DataFrame:
+    values = normalize_values(values)
+    return pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
 
-# # ──────────────────────────────
-# # INIT & LOAD MODEL ONCE
-# # ──────────────────────────────
-# ensure_session_defaults()
-# MODEL, ENCODER = load_model_and_encoder()
 
-# # ──────────────────────────────
-# # SIDEBAR NAVIGATION — SINGLE ROUTER
-# # (Fixes: no duplicate imports, no stray pages outside conditions)
-# # ──────────────────────────────
-# with st.sidebar:
-#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-#     st.markdown("### Delhi AQI App")
-#     page = st.radio(
-#         "Navigation",
-#         options=[
-#             "1) Understand + Share",
-#             "2) Learn About AQI & Health Tips",
-#             "3) Try a Sample AQI Scenario",
-#             "4) Preset or Custom Inputs",
-#             "5) Predict Delhi AQI Category",
-#             "6) Compare with Delhi Avg & WHO",
-#         ],
-#         index=[
-#             "1) Understand + Share",
-#             "2) Learn About AQI & Health Tips",
-#             "3) Try a Sample AQI Scenario",
-#             "4) Preset or Custom Inputs",
-#             "5) Predict Delhi AQI Category",
-#             "6) Compare with Delhi Avg & WHO",
-#         ].index(st.session_state.nav),
-#         key="nav",
-#     )
-#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+def comparison_frame(values: Dict[str, float]) -> pd.DataFrame:
+    values = normalize_values(values)
+    rows = []
+    for p in COLUMNS:
+        rows.append({
+            "Pollutant": p,
+            "Your Level": float(values.get(p, 0.0)),
+            "Delhi Avg": float(DELHI_AVG[p]),
+            "WHO Limit": float(WHO_LIMITS[p]),
+        })
+    return pd.DataFrame(rows)
+
+# ──────────────────────────────
+# INIT & LOAD MODEL ONCE
+# ──────────────────────────────
+ensure_session_defaults()
+MODEL, ENCODER = load_model_and_encoder()
+
+# ──────────────────────────────
+# SIDEBAR NAVIGATION — SINGLE ROUTER
+# (Fixes: no duplicate imports, no stray pages outside conditions)
+# ──────────────────────────────
+with st.sidebar:
+    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+    st.markdown("### Delhi AQI App")
+    page = st.radio(
+        "Navigation",
+        options=[
+            "1) Understand + Share",
+            "2) Learn About AQI & Health Tips",
+            "3) Try a Sample AQI Scenario",
+            "4) Preset or Custom Inputs",
+            "5) Predict Delhi AQI Category",
+            "6) Compare with Delhi Avg & WHO",
+        ],
+        index=[
+            "1) Understand + Share",
+            "2) Learn About AQI & Health Tips",
+            "3) Try a Sample AQI Scenario",
+            "4) Preset or Custom Inputs",
+            "5) Predict Delhi AQI Category",
+            "6) Compare with Delhi Avg & WHO",
+        ].index(st.session_state.nav),
+        key="nav",
+    )
+    st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
 import streamlit as st
 import joblib
