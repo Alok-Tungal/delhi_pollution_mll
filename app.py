@@ -1720,6 +1720,10 @@ DELHI_AVG = {
     "Ozone": 60,
 }
 
+
+from typing import Dict
+
+
 POLLUTANT_INFO: Dict[str, str] = {
     "PM2.5": "Fine particles (≤2.5μm) penetrate deep into lungs; linked to heart & lung disease.",
     "PM10": "Coarse particles (≤10μm) irritate airways; worsen asthma and bronchitis.",
