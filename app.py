@@ -1105,7 +1105,7 @@ small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
 # HELPERS
 # ──────────────────────────────
 
-APP_URL = st.secrets.get("app_url", "").strip() or "https://pollutionappcreatedbyalok.streamlit.app/"
+APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
 
 
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
