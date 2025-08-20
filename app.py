@@ -1670,7 +1670,7 @@ POLLUTANT_INFO: Dict[str, str] = {
 
 def ensure_session_defaults():
     if "values" not in st.session_state:
-        st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESETS["Moderate"])}
+        st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
     if "last_prediction" not in st.session_state:
         st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
     if "scenario_applied" not in st.session_state:
@@ -1842,15 +1842,73 @@ def comparison_frame(values: Dict[str, float]) -> pd.DataFrame:
         })
     return pd.DataFrame(rows)
 
+# # ──────────────────────────────
+# # INIT & LOAD MODEL ONCE
+# # ──────────────────────────────
+# ensure_session_defaults()
+# MODEL, ENCODER = load_model_and_encoder()
+
+# # ──────────────────────────────
+# # SIDEBAR NAVIGATION — SINGLE ROUTER
+# # (Fixes: no duplicate imports, no stray pages outside conditions)
+# # ──────────────────────────────
+# with st.sidebar:
+#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+#     st.markdown("### Delhi AQI App")
+#     page = st.radio(
+#         "Navigation",
+#         options=[
+#             "1) Understand + Share",
+#             "2) Learn About AQI & Health Tips",
+#             "3) Try a Sample AQI Scenario",
+#             "4) Preset or Custom Inputs",
+#             "5) Predict Delhi AQI Category",
+#             "6) Compare with Delhi Avg & WHO",
+#         ],
+#         index=[
+#             "1) Understand + Share",
+#             "2) Learn About AQI & Health Tips",
+#             "3) Try a Sample AQI Scenario",
+#             "4) Preset or Custom Inputs",
+#             "5) Predict Delhi AQI Category",
+#             "6) Compare with Delhi Avg & WHO",
+#         ].index(st.session_state.nav),
+#         key="nav",
+#     )
+#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+
+import streamlit as st
+import joblib
+import shap
+import matplotlib.pyplot as plt
+
+# --- Utility: ensure session state defaults ---
+def ensure_session_defaults():
+    if "values" not in st.session_state:
+        # Default pollutants (set realistic defaults, not 0s)
+        st.session_state.values = {
+            "PM2.5": 40.0,
+            "PM10": 80.0,
+            "NO2": 25.0,
+            "SO2": 15.0,
+            "CO": 0.8,
+            "Ozone": 30.0,
+        }
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None
+    if "scenario_applied" not in st.session_state:
+        st.session_state.scenario_applied = False
+    if "last_present" not in st.session_state:  # fixed typo
+        st.session_state.last_present = None
+
 # ──────────────────────────────
 # INIT & LOAD MODEL ONCE
 # ──────────────────────────────
-ensure_session_defaults()
+ensure_session_defaults()  # ✅ now works, since defined above
 MODEL, ENCODER = load_model_and_encoder()
 
 # ──────────────────────────────
 # SIDEBAR NAVIGATION — SINGLE ROUTER
-# (Fixes: no duplicate imports, no stray pages outside conditions)
 # ──────────────────────────────
 with st.sidebar:
     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
@@ -1876,6 +1934,7 @@ with st.sidebar:
         key="nav",
     )
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+
 
 # # ---------------- Page-1 : Home ----------------
 # if page.startswith("1)"):
