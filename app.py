@@ -1597,7 +1597,7 @@ def ensure_session_defaults():
     if "last_present" not in st.session_state:
         st.session_state.last_present = None
 
-ensure_session_defaults()
+
 
 
 import numpy as np
