@@ -2112,28 +2112,39 @@ elif page.startswith("3)"):
 #     })
 
 elif page.startswith("4)"):
-    st.title("🎛️ Custom Inputs for Pollution Levels")
+    st.title("🎛️ Present or Custom Inputs")
 
-    st.markdown("Enter the pollutant levels below to analyze AQI:")
+    # Present selector
+    present = st.selectbox("Choose Present AQI Level", list(PRESENTS.keys()))
+
+    # If a new present is selected, reset scenario_applied
+    if "last_present" not in st.session_state or st.session_state.last_present != present:
+        st.session_state.scenario_applied = False
+        st.session_state.last_present = present
+
+    # Defaults from present
+    defaults = list(map(float, PRESENTS[present]))
+
+    # If scenario was applied earlier, override with those values
+    if st.session_state.get("scenario_applied", False):
+        defaults = [normalize_values(st.session_state.values)[c] for c in COLUMNS]
 
     c1, c2 = st.columns(2)
     with c1:
-        pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=50.0, step=1.0)
-        no2  = st.number_input("NO2 (µg/m³)",   min_value=0.0, value=30.0, step=1.0)
-        co   = st.number_input("CO (mg/m³)",    min_value=0.0, value=1.0, step=0.1)
+        pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=float(defaults[0]))
+        no2  = st.number_input("NO2 (µg/m³)",   min_value=0.0, value=float(defaults[2]))
+        co   = st.number_input("CO (mg/m³)",    min_value=0.0, value=float(defaults[4]))
     with c2:
-        pm10 = st.number_input("PM10 (µg/m³)",  min_value=0.0, value=80.0, step=1.0)
-        so2  = st.number_input("SO2 (µg/m³)",   min_value=0.0, value=20.0, step=1.0)
-        o3   = st.number_input("Ozone (µg/m³)", min_value=0.0, value=25.0, step=1.0)
+        pm10 = st.number_input("PM10 (µg/m³)",  min_value=0.0, value=float(defaults[1]))
+        so2  = st.number_input("SO2 (µg/m³)",   min_value=0.0, value=float(defaults[3]))
+        o3   = st.number_input("Ozone (µg/m³)", min_value=0.0, value=float(defaults[5]))
 
-    # Update session with user custom inputs (normalized)
+    # Update session (always normalized)
     st.session_state.values = normalize_values({
         "PM2.5": pm25, "PM10": pm10, "NO2": no2,
         "SO2": so2,   "CO": co,    "Ozone": o3,
     })
 
-    st.subheader("📋 Your Entered Pollution Levels")
-    st.write(st.session_state.values)
 
 
 
