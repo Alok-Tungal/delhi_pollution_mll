@@ -2292,42 +2292,31 @@ elif page.startswith("4)"):
 
 # 5) PREDICT DELHI AQI CATEGORY
 # ──────────────────────────────
+# 5) PREDICT DELHI AQI CATEGORY
+# ──────────────────────────────
 elif page.startswith("5)"):
     st.title("🔮 Predict Delhi AQI Category")
 
-    # 1️⃣ Directly pull pollutant values from session state (NO extra variables)
-    values = {
-        "PM2.5": st.session_state.get("PM2.5", 40.0),
-        "PM10":  st.session_state.get("PM10", 80.0),
-        "NO2":   st.session_state.get("NO2", 25.0),
-        "SO2":   st.session_state.get("SO2", 15.0),
-        "CO":    st.session_state.get("CO", 0.8),
-        "Ozone": st.session_state.get("Ozone", 30.0),
-    }
-
-    # 2️⃣ Normalize values before feeding to model
-    norm_values = normalize_values(values)
-
-    # 3️⃣ Show what user gave
-    st.markdown("### 📊 Your current pollutant inputs:")
+    values = normalize_values(st.session_state.values)
+    st.markdown("Review your inputs before predicting:")
     st.dataframe(values_table(values), use_container_width=True)
 
-    # 4️⃣ Prediction
     if st.button("🚀 Run Prediction", use_container_width=True):
-        aqi_val, aqi_label = predict_aqi(norm_values, MODEL, ENCODER)
+        aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
         st.session_state.last_prediction = (aqi_val, aqi_label)
 
         bc = badge_class(aqi_label)
         st.markdown(
             f"""
-            <div class="card" style="text-align:center">\n
-                <div style="font-size:46px; font-weight:800; line-height:1">AQI {aqi_val}</div>\n
-                <div class="badge {bc}" style="margin-top:8px; font-size:16px">{aqi_label}</div>\n
-                <div style="margin-top:6px"><small class="mono">Model: Random Forest (+safe fallback)</small></div>\n
+            <div class=\"card\" style=\"text-align:center\">\n
+                <div style=\"font-size:46px; font-weight:800; line-height:1\">AQI {aqi_val}</div>\n
+                <div class=\"badge {bc}\" style=\"margin-top:8px; font-size:16px\">{aqi_label}</div>\n
+                <div style=\"margin-top:6px\"><small class=\"mono\">Model: Random Forest (+safe fallback)</small></div>\n
             </div>
             """,
             unsafe_allow_html=True,
         )
+
 
 
 
