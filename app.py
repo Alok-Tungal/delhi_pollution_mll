@@ -401,13 +401,6 @@ with st.sidebar:
         "6) Compare with Delhi Avg & WHO",
     ]
 
-    # # Safe index: use get with fallback
-    # default_nav = st.session_state.get("nav", "1) Understand + Share")
-    # default_index = page_options.index(default_nav) if default_nav in page_options else 0
-
-
-    st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
-
 if page.startswith("1)"):
     # Nice title + thin brand line
     st.markdown(
