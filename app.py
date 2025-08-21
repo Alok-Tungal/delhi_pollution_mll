@@ -2978,123 +2978,123 @@ elif page.startswith("5)"):
 
 # -------------------------
 # Page 6: Compare with Delhi Avg & WHO Limits (uses Page-5 saved prediction only)
-# -------------------------
-# elif page.startswith("6)"):
-#     import pandas as pd
-#     import numpy as np
-
-#     st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
-
-#     # 1) Read saved Page-5 outputs only (do NOT read present/custom inputs)
-#     last_inputs = st.session_state.get("last_inputs")
-#     last_prediction = st.session_state.get("last_prediction")
-
-#     if not last_inputs or not last_prediction:
-#         st.warning("⚠️ No previous prediction found. Please complete Step 5 (Predict) first; Page 6 reads the saved prediction only.")
-#         st.stop()
-
-#     # 2) Show the predicted AQI CATEGORY (no numeric AQI shown unless you opt-in)
-#     pred_cat = last_prediction.get("category", "Unknown")
-#     st.success(f"**Predicted AQI Category (from Step 5):** {pred_cat}")
-#     if last_prediction.get("time"):
-#         st.caption(f"Predicted at: {last_prediction['time']}")
-
-#     # 3) Build comparison table using the exact Page-5 inputs (Predicted Level)
-#     cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
-#     delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
-#     who = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
-
-#     rows = []
-#     for p in cols:
-#         pred_lvl = float(last_inputs.get(p, 0.0))
-#         delhi_lvl = float(delhi.get(p, np.nan)) if p in delhi else np.nan
-#         who_lvl = float(who.get(p, np.nan)) if p in who else np.nan
-#         rows.append({"Pollutant": p, "Predicted Level": pred_lvl, "Delhi Avg": delhi_lvl, "WHO Limit": who_lvl})
-
-#     df_cmp = pd.DataFrame(rows)
-
-#     # 4) Display table & visual comparison
-#     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
-
-#     st.markdown("#### Visual Comparison (Predicted Level vs Delhi Avg vs WHO Limit)")
-#     df_long = df_cmp.melt(id_vars=["Pollutant"], value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
-#                           var_name="Metric", value_name="Level")
-
-#     for p in cols:
-#         sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
-#         sub = sub.reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
-#         st.markdown(f"**{p}**")
-#         st.bar_chart(sub, use_container_width=True)
-
-#     # 5) Quick interpretation: warn if Predicted Level > WHO Limit (where WHO available)
-#     st.markdown("### ⚠️ Quick interpretation")
-#     any_exceed = False
-#     for _, r in df_cmp.iterrows():
-#         p = r["Pollutant"]
-#         pred_lvl = r["Predicted Level"]
-#         who_lvl = r["WHO Limit"]
-#         delhi_lvl = r["Delhi Avg"]
-
-#         if not np.isnan(who_lvl) and pred_lvl > who_lvl:
-#             st.error(f"**{p}** — Predicted level {pred_lvl} exceeds WHO limit {who_lvl}. Take precautions.")
-#             any_exceed = True
-#         elif (not np.isnan(delhi_lvl)) and pred_lvl > delhi_lvl:
-#             st.warning(f"**{p}** — Predicted level {pred_lvl} is above Delhi average ({delhi_lvl}).")
-#         else:
-#             st.success(f"**{p}** — Predicted level {pred_lvl} is at/under Delhi avg and WHO (where available).")
-
-#     if not any_exceed:
-#         st.info("None of the predicted pollutant levels exceed WHO limits (based on provided WHO values).")
-
-#     # 6) Download CSV of the exact Page-5 prediction vs baselines
-#     csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
-#     st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
-#                        file_name="predicted_vs_delhi_who.csv", mime="text/csv")
-
-
-
+-------------------------
 elif page.startswith("6)"):
+    import pandas as pd
+    import numpy as np
 
-    st.title("📊 Compare Predicted AQI with Delhi Avg & WHO Limits")
+    st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-    if "predicted_values" not in st.session_state:
-        st.warning("⚠️ No predicted values found. Please complete Page 5 first.")
-    else:
-        predicted = st.session_state["predicted_values"]
-        pred_label = st.session_state["predicted_label"]
+    # 1) Read saved Page-5 outputs only (do NOT read present/custom inputs)
+    last_inputs = st.session_state.get("last_inputs")
+    last_prediction = st.session_state.get("last_prediction")
 
-        # --- Delhi Average Values (replace with real data if available) ---
-        DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
+    if not last_inputs or not last_prediction:
+        st.warning("⚠️ No previous prediction found. Please complete Step 5 (Predict) first; Page 6 reads the saved prediction only.")
+        st.stop()
 
-        # --- WHO guideline values ---
-        WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
+    # 2) Show the predicted AQI CATEGORY (no numeric AQI shown unless you opt-in)
+    pred_cat = last_prediction.get("category", "Unknown")
+    st.success(f"**Predicted AQI Category (from Step 5):** {pred_cat}")
+    if last_prediction.get("time"):
+        st.caption(f"Predicted at: {last_prediction['time']}")
 
-        # --- Create comparison dataframe ---
-        import pandas as pd
-        df_compare = pd.DataFrame({
-            "Predicted": predicted,
-            "Delhi Avg": DELHI_AVG,
-            "WHO Limit": WHO_LIMITS
-        })
+    # 3) Build comparison table using the exact Page-5 inputs (Predicted Level)
+    cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+    delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
+    who = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
 
-        st.subheader(f"🌍 Predicted AQI Category: **{pred_label}**")
+    rows = []
+    for p in cols:
+        pred_lvl = float(last_inputs.get(p, 0.0))
+        delhi_lvl = float(delhi.get(p, np.nan)) if p in delhi else np.nan
+        who_lvl = float(who.get(p, np.nan)) if p in who else np.nan
+        rows.append({"Pollutant": p, "Predicted Level": pred_lvl, "Delhi Avg": delhi_lvl, "WHO Limit": who_lvl})
 
-        st.dataframe(df_compare)
+    df_cmp = pd.DataFrame(rows)
 
-        # --- Visualization ---
-        st.subheader("📊 Pollutant Comparison")
-        df_long = df_compare.reset_index().melt(id_vars='index', var_name='Metric', value_name='Level')
-        df_long.rename(columns={'index': 'Pollutant'}, inplace=True)
+    # 4) Display table & visual comparison
+    st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
 
-        import altair as alt
-        chart = alt.Chart(df_long).mark_bar().encode(
-            x=alt.X('Pollutant:N', title='Pollutant'),
-            y=alt.Y('Level:Q', title='Concentration'),
-            color='Metric:N',
-            tooltip=['Pollutant', 'Metric', 'Level']
-        ).properties(width=700, height=400)
+    st.markdown("#### Visual Comparison (Predicted Level vs Delhi Avg vs WHO Limit)")
+    df_long = df_cmp.melt(id_vars=["Pollutant"], value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
+                          var_name="Metric", value_name="Level")
 
-        st.altair_chart(chart, use_container_width=True)
+    for p in cols:
+        sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+        sub = sub.reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+        st.markdown(f"**{p}**")
+        st.bar_chart(sub, use_container_width=True)
 
-        st.info("Tip: Compare Predicted values with Delhi Avg and WHO limits. Keep pollutants below WHO limits whenever possible.")
+    # 5) Quick interpretation: warn if Predicted Level > WHO Limit (where WHO available)
+    st.markdown("### ⚠️ Quick interpretation")
+    any_exceed = False
+    for _, r in df_cmp.iterrows():
+        p = r["Pollutant"]
+        pred_lvl = r["Predicted Level"]
+        who_lvl = r["WHO Limit"]
+        delhi_lvl = r["Delhi Avg"]
+
+        if not np.isnan(who_lvl) and pred_lvl > who_lvl:
+            st.error(f"**{p}** — Predicted level {pred_lvl} exceeds WHO limit {who_lvl}. Take precautions.")
+            any_exceed = True
+        elif (not np.isnan(delhi_lvl)) and pred_lvl > delhi_lvl:
+            st.warning(f"**{p}** — Predicted level {pred_lvl} is above Delhi average ({delhi_lvl}).")
+        else:
+            st.success(f"**{p}** — Predicted level {pred_lvl} is at/under Delhi avg and WHO (where available).")
+
+    if not any_exceed:
+        st.info("None of the predicted pollutant levels exceed WHO limits (based on provided WHO values).")
+
+    # 6) Download CSV of the exact Page-5 prediction vs baselines
+    csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
+    st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
+                       file_name="predicted_vs_delhi_who.csv", mime="text/csv")
+
+
+
+# elif page.startswith("6)"):
+
+#     st.title("📊 Compare Predicted AQI with Delhi Avg & WHO Limits")
+
+#     if "predicted_values" not in st.session_state:
+#         st.warning("⚠️ No predicted values found. Please complete Page 5 first.")
+#     else:
+#         predicted = st.session_state["predicted_values"]
+#         pred_label = st.session_state["predicted_label"]
+
+#         # --- Delhi Average Values (replace with real data if available) ---
+#         DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
+
+#         # --- WHO guideline values ---
+#         WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
+
+#         # --- Create comparison dataframe ---
+#         import pandas as pd
+#         df_compare = pd.DataFrame({
+#             "Predicted": predicted,
+#             "Delhi Avg": DELHI_AVG,
+#             "WHO Limit": WHO_LIMITS
+#         })
+
+#         st.subheader(f"🌍 Predicted AQI Category: **{pred_label}**")
+
+#         st.dataframe(df_compare)
+
+#         # --- Visualization ---
+#         st.subheader("📊 Pollutant Comparison")
+#         df_long = df_compare.reset_index().melt(id_vars='index', var_name='Metric', value_name='Level')
+#         df_long.rename(columns={'index': 'Pollutant'}, inplace=True)
+
+#         import altair as alt
+#         chart = alt.Chart(df_long).mark_bar().encode(
+#             x=alt.X('Pollutant:N', title='Pollutant'),
+#             y=alt.Y('Level:Q', title='Concentration'),
+#             color='Metric:N',
+#             tooltip=['Pollutant', 'Metric', 'Level']
+#         ).properties(width=700, height=400)
+
+#         st.altair_chart(chart, use_container_width=True)
+
+#         st.info("Tip: Compare Predicted values with Delhi Avg and WHO limits. Keep pollutants below WHO limits whenever possible.")
 
