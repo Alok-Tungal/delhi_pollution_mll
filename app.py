@@ -2375,71 +2375,135 @@ elif page.startswith("4)"):
 # Put this AFTER ensure_session_defaults() and model loading.
 
 # page options (same format you already use)
-page_options = [
-    "1) Understand + Share",
-    "2) Learn About AQI & Health Tips",
-    "3) Try a Sample AQI Scenario",
-    "4) Preset or Custom Inputs",
-    "5) Predict Delhi AQI Category",
-    "6) Compare with Delhi Avg & WHO",
-]
+# page_options = [
+#     "1) Understand + Share",
+#     "2) Learn About AQI & Health Tips",
+#     "3) Try a Sample AQI Scenario",
+#     "4) Preset or Custom Inputs",
+#     "5) Predict Delhi AQI Category",
+#     "6) Compare with Delhi Avg & WHO",
+# ]
 
-# Ensure a safe default nav exists before we compute index
-if "nav" not in st.session_state:
-    st.session_state["nav"] = page_options[0]   # default: first page
+# # Ensure a safe default nav exists before we compute index
+# if "nav" not in st.session_state:
+#     st.session_state["nav"] = page_options[0]   # default: first page
 
-# Compute safe index (handles the case where nav somehow isn't in page_options)
-default_nav = st.session_state.get("nav", page_options[0])
-default_index = page_options.index(default_nav) if default_nav in page_options else 0
+# # Compute safe index (handles the case where nav somehow isn't in page_options)
+# default_nav = st.session_state.get("nav", page_options[0])
+# default_index = page_options.index(default_nav) if default_nav in page_options else 0
 
-with st.sidebar:
-    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-    st.markdown("### Delhi AQI App")
-    # Use a DIFFERENT widget key so we can modify st.session_state['nav'] later
-    sidebar_choice = st.radio(
-        "Navigation",
-        options=page_options,
-        index=default_index,
-        key="sidebar_nav",
-    )
-    st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+# with st.sidebar:
+#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+#     st.markdown("### Delhi AQI App")
+#     # Use a DIFFERENT widget key so we can modify st.session_state['nav'] later
+#     sidebar_choice = st.radio(
+#         "Navigation",
+#         options=page_options,
+#         index=default_index,
+#         key="sidebar_nav",
+#     )
+#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-# Sync the routing state to the sidebar selection (safe assignment)
-# This line sets the canonical 'nav' used by your page checks.
-st.session_state["nav"] = sidebar_choice
+# # Sync the routing state to the sidebar selection (safe assignment)
+# # This line sets the canonical 'nav' used by your page checks.
+# st.session_state["nav"] = sidebar_choice
 
-# Now set a local variable `page` (so your existing `elif page.startswith("4)"):` works)
-page = st.session_state["nav"]
-
-
+# # Now set a local variable `page` (so your existing `elif page.startswith("4)"):` works)
+# page = st.session_state["nav"]
 
 
 
 
-# ──────────────────────────────
-# 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
-# ──────────────────────────────
+
+
+# # ──────────────────────────────
+# # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
+# # ──────────────────────────────
+# elif page.startswith("6)"):
+#     st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
+
+#     values = normalize_values(st.session_state.values)
+#     df_cmp = comparison_frame(values)
+
+#     st.dataframe(df_cmp, use_container_width=True)
+ 
+#     st.markdown("#### Visual Comparison")
+#     df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
+
+#     for p in COLUMNS:
+#         sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+#         st.markdown(f"**{p}**")
+#         st.bar_chart(sub, use_container_width=True)
+
+#     st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
+
+# # ──────────────────────────────
+# # FOOTER
+# # ──────────────────────────────
+# st.markdown("---")
+# st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
+
+
+
+
+# ---------- PAGES 5 & 6: Predict & Compare ----------
+# NOTE: Make sure `page = st.session_state["nav"]` (or equivalent) has been set BEFORE this,
+# and that pages 1-4 appear above as `if page.startswith("1)"):` / `elif ...`.
+
+if page.startswith("5)"):
+    st.title("🔮 Predict Delhi AQI Category")
+
+    # Safe: read session values (falls back to reasonable defaults if missing)
+    values = normalize_values(st.session_state.get("values", {
+        "PM2.5": 40.0, "PM10": 80.0, "NO2": 25.0, "SO2": 15.0, "CO": 0.8, "Ozone": 30.0
+    }))
+
+    st.markdown("Review your inputs before predicting:")
+    st.dataframe(values_table(values), use_container_width=True)
+
+    if st.button("🚀 Run Prediction", use_container_width=True):
+        # Predict (model or fallback inside predict_aqi)
+        aqi_val, aqi_label = predict_aqi(values, MODEL, ENCODER)
+
+        # Save and show
+        st.session_state["last_prediction"] = (int(aqi_val), str(aqi_label))
+        bc = badge_class(aqi_label)
+        st.markdown(
+            f"""
+            <div class="card" style="text-align:center">
+                <div style="font-size:46px; font-weight:800; line-height:1">AQI {aqi_val}</div>
+                <div class="badge {bc}" style="margin-top:8px; font-size:16px">{aqi_label}</div>
+                <div style="margin-top:6px"><small class="mono">Model: Random Forest (+safe fallback)</small></div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # If there's a last prediction, show it compactly
+    if "last_prediction" in st.session_state and st.session_state["last_prediction"] is not None:
+        lp_val, lp_label = st.session_state["last_prediction"]
+        st.caption(f"Last prediction: **AQI {lp_val} ({lp_label})**")
+
+
 elif page.startswith("6)"):
     st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
 
-    values = normalize_values(st.session_state.values)
-    df_cmp = comparison_frame(values)
+    # Read values (safe fallback)
+    values = normalize_values(st.session_state.get("values", {
+        "PM2.5": 40.0, "PM10": 80.0, "NO2": 25.0, "SO2": 15.0, "CO": 0.8, "Ozone": 30.0
+    }))
 
+    # Build comparison dataframe and show
+    df_cmp = comparison_frame(values)
     st.dataframe(df_cmp, use_container_width=True)
- 
+
     st.markdown("#### Visual Comparison")
     df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
 
+    # Per-pollutant small charts (keeps layout compact)
     for p in COLUMNS:
         sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
         st.markdown(f"**{p}**")
         st.bar_chart(sub, use_container_width=True)
 
     st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
-
-# ──────────────────────────────
-# FOOTER
-# ──────────────────────────────
-st.markdown("---")
-st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
-
