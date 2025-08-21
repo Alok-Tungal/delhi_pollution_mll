@@ -385,20 +385,20 @@ if "nav" not in st.session_state:
     st.session_state.nav = "1) Understand + Share"
 
 # Sidebar navigation
-with st.sidebar:
-    st.image(
-        "https://img.icons8.com/?size=100&id=12448&format=png&color=000000",
-        width=32
-    )
-    st.markdown("### Delhi AQI App")
+# with st.sidebar:
+#     st.image(
+#         "https://img.icons8.com/?size=100&id=12448&format=png&color=000000",
+#         width=32
+#     )
+#     st.markdown("### Delhi AQI App")
 
-    page_options = [
-        "1) Understand + Share",
-        "2) Learn About AQI & Health Tips",
-        "3) Try a Sample AQI Scenario",
-        "4) Preset or Custom Inputs",
-        "5) Predict Delhi AQI Category",
-        "6) Compare with Delhi Avg & WHO",
+#     page_options = [
+#         "1) Understand + Share",
+#         "2) Learn About AQI & Health Tips",
+#         "3) Try a Sample AQI Scenario",
+#         "4) Preset or Custom Inputs",
+#         "5) Predict Delhi AQI Category",
+#         "6) Compare with Delhi Avg & WHO",
     ]
 
 if page.startswith("1)"):
