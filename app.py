@@ -1646,6 +1646,7 @@ import pandas as pd
 from PIL import Image
 import qrcode
 from qrcode.constants import ERROR_CORRECT_H
+import io
 
 import streamlit as st
 
