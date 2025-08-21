@@ -2547,8 +2547,7 @@ elif page.startswith("4)"):
 import streamlit as st
 import numpy as np
 elif page.startswith("5)"):
-
-    st.title("📝 Enter Custom Pollutant Values")
+        st.title("📝 Enter Custom Pollutant Values")
     
     # Input form for all 6 features
     with st.form("custom_input_form"):
