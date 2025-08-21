@@ -3051,37 +3051,3 @@ elif page.startswith("5)"):
 #     st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
 #                        file_name="predicted_vs_delhi_who.csv", mime="text/csv")
 
-import joblib
-import matplotlib.pyplot as plt
-
-elif page.startswith("5)"):
-
-    # Load your trained model and encoder
-    MODEL = joblib.load("aqi_rf_model.joblib")
-    ENCODER = joblib.load("label_encoder.joblib")
-    
-    st.title("🔮 AQI Prediction & Analysis")
-    
-    if "custom_inputs" in st.session_state:
-        inputs = st.session_state["custom_inputs"]
-    
-        # Convert to numpy array in correct order
-        X_input = np.array([[inputs["PM2.5"], inputs["PM10"], inputs["NO2"], 
-                             inputs["SO2"], inputs["CO"], inputs["O3"]]])
-    
-        # Prediction
-        y_pred = MODEL.predict(X_input)[0]
-        aqi_category = ENCODER.inverse_transform([y_pred])[0]
-    
-        st.subheader(f"🌍 Predicted AQI Category: **{aqi_category}**")
-    
-        # 📊 Visualization (bar chart of pollutants)
-        st.subheader("📊 Pollutant Contribution")
-        fig, ax = plt.subplots()
-        ax.bar(inputs.keys(), inputs.values())
-        ax.set_ylabel("Concentration")
-        ax.set_title("Pollutant Levels (Custom Input)")
-        st.pyplot(fig)
-    
-    else:
-        st.warning("⚠️ Please enter custom values on the previous page.")
