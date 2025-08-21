@@ -1919,10 +1919,36 @@ MODEL, ENCODER = load_model_and_encoder()
 # SIDEBAR NAVIGATION — SINGLE ROUTER
 # (Fixes: no duplicate imports, no stray pages outside conditions)
 # ──────────────────────────────
+# with st.sidebar:
+#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+#     st.markdown("### Delhi AQI App")
+    
+#     options_list = [
+#         "1) Understand + Share",
+#         "2) Learn About AQI & Health Tips",
+#         "3) Try a Sample AQI Scenario",
+#         "4) Preset or Custom Inputs",
+#         "5) Predict Delhi AQI Category",
+#         "6) Compare with Delhi Avg & WHO",
+#     ]
+
+#     page = st.radio(
+#         "Navigation",
+#         options=options_list,
+#         index=options_list.index(st.session_state.nav),
+#         key="nav",
+#     )
+    
+#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+
+# ✅ Ensure default session state
+if "nav" not in st.session_state:
+    st.session_state.nav = "1) Understand + Share"
+
 with st.sidebar:
     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
     st.markdown("### Delhi AQI App")
-    
+
     options_list = [
         "1) Understand + Share",
         "2) Learn About AQI & Health Tips",
@@ -1938,8 +1964,9 @@ with st.sidebar:
         index=options_list.index(st.session_state.nav),
         key="nav",
     )
-    
+
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+
 
 
 import streamlit as st
