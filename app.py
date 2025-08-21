@@ -1802,37 +1802,83 @@ def badge_class(label: str) -> str:
     return "severe"
 
 
-def predict_aqi(values: Dict[str, float], model, encoder) -> Tuple[int, str]:
-    values = normalize_values(values)
-    row = pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
+# def predict_aqi(values: Dict[str, float], model, encoder) -> Tuple[int, str]:
+#     values = normalize_values(values)
+#     row = pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
 
-    # Predict number or class code
-    if model is not None:
-        try:
-            pred_raw = model.predict(row)[0]
-            aqi_val = int(np.array(pred_raw).item())
-        except Exception:
-            try:
-                aqi_val = int(pred_raw)
-            except Exception:
-                aqi_val = int(np.clip(np.average(list(values.values())), 0, 500))
-    else:
-        w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.2, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
-        aqi_val = int(sum(values[k] * w[k] for k in COLUMNS) / (sum(w.values()) or 1.0))
-        aqi_val = int(np.clip(aqi_val, 0, 500))
+#     # Predict number or class code
+#     if model is not None:
+#         try:
+#             pred_raw = model.predict(row)[0]
+#             aqi_val = int(np.array(pred_raw).item())
+#         except Exception:
+#             try:
+#                 aqi_val = int(pred_raw)
+#             except Exception:
+#                 aqi_val = int(np.clip(np.average(list(values.values())), 0, 500))
+#     else:
+#         w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.2, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+#         aqi_val = int(sum(values[k] * w[k] for k in COLUMNS) / (sum(w.values()) or 1.0))
+#         aqi_val = int(np.clip(aqi_val, 0, 500))
 
-    # Decode label if encoder truly encodes categories, else fallback from number
-    if encoder is not None:
-        try:
-            label = encoder.inverse_transform([aqi_val])[0]
-            if isinstance(label, (np.generic, np.integer)):
-                label = simple_category_from_aqi(int(label))
-        except Exception:
-            label = simple_category_from_aqi(aqi_val)
-    else:
-        label = simple_category_from_aqi(aqi_val)
+#     # Decode label if encoder truly encodes categories, else fallback from number
+#     if encoder is not None:
+#         try:
+#             label = encoder.inverse_transform([aqi_val])[0]
+#             if isinstance(label, (np.generic, np.integer)):
+#                 label = simple_category_from_aqi(int(label))
+#         except Exception:
+#             label = simple_category_from_aqi(aqi_val)
+#     else:
+#         label = simple_category_from_aqi(aqi_val)
 
-    return aqi_val, label
+#     return aqi_val, label
+
+def predict_aqi(pm25, pm10, no2, so2, co, ozone):
+    """
+    Predicts AQI value & category based on pollutant levels.
+    Returns (aqi_value, aqi_category).
+    """
+    try:
+        # Load model + encoder only once
+        if "MODEL" not in st.session_state:
+            st.session_state.MODEL, st.session_state.ENCODER = load_model()
+
+        MODEL = st.session_state.MODEL
+        ENCODER = st.session_state.ENCODER
+
+        # Prepare input array
+        X = np.array([[pm25, pm10, no2, so2, co, ozone]])
+
+        # Predict AQI value (regression output)
+        aqi_val = MODEL.predict(X)[0]
+
+        # Predict AQI category (classification output if available)
+        if hasattr(MODEL, "predict_proba"):  
+            # If classification model with label encoding
+            y_class = MODEL.predict(X)
+            aqi_label = ENCODER.inverse_transform(y_class)[0]
+        else:
+            # Fallback: manually classify based on AQI range
+            if aqi_val <= 50:
+                aqi_label = "Good"
+            elif aqi_val <= 100:
+                aqi_label = "Satisfactory"
+            elif aqi_val <= 200:
+                aqi_label = "Moderate"
+            elif aqi_val <= 300:
+                aqi_label = "Poor"
+            elif aqi_val <= 400:
+                aqi_label = "Very Poor"
+            else:
+                aqi_label = "Severe"
+
+        return round(aqi_val, 2), aqi_label
+
+    except Exception as e:
+        st.error(f"⚠️ Prediction error: {e}")
+        return None, None
+
 
 
 def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
@@ -1942,29 +1988,41 @@ MODEL, ENCODER = load_model_and_encoder()
 #     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
 # ✅ Ensure default session state
-if "nav" not in st.session_state:
-    st.session_state.nav = "1) Understand + Share"
+options_list = [
+    "1) Understand + Share",
+    "2) Learn About AQI & Health Tips",
+    "3) Try a Sample AQI Scenario",
+    "4) Preset or Custom Inputs",
+    "5) Predict Delhi AQI Category",
+    "6) Compare with Delhi Avg & WHO",
+]
+
+if "nav" not in st.session_state or st.session_state.nav not in options_list:
+    # default to the prediction page if you want to be at the end of the project,
+    # otherwise set to options_list[0]
+    st.session_state.nav = "5) Predict Delhi AQI Category"
+
+# default pollutant values (safe defaults so UI doesn't break)
+if "values" not in st.session_state:
+    st.session_state.values = {
+        "pm25": 80.0,
+        "pm10": 120.0,
+        "no2": 40.0,
+        "so2": 10.0,
+        "co": 1.0,
+        "ozone": 50.0,
+    }
 
 with st.sidebar:
     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
     st.markdown("### Delhi AQI App")
-
-    options_list = [
-        "1) Understand + Share",
-        "2) Learn About AQI & Health Tips",
-        "3) Try a Sample AQI Scenario",
-        "4) Preset or Custom Inputs",
-        "5) Predict Delhi AQI Category",
-        "6) Compare with Delhi Avg & WHO",
-    ]
-
+    # safe index lookup (we already ensured st.session_state.nav is valid)
     page = st.radio(
         "Navigation",
         options=options_list,
         index=options_list.index(st.session_state.nav),
         key="nav",
     )
-
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
 
