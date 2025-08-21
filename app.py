@@ -94,15 +94,25 @@ POLLUTANT_INFO: Dict[str, str] = {
 }
 
 
+# def ensure_session_defaults():
+#     if "values" not in st.session_state:
+#         st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
+#     if "last_prediction" not in st.session_state:
+#         st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
+#     if "scenario_applied" not in st.session_state:
+#         st.session_state.scenario_applied = ""
+#     if "nav" not in st.session_state:
+#         st.session_state.nav = "1) Understand + Share"
+
+
 def ensure_session_defaults():
-    if "values" not in st.session_state:
-        st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
+    """Initialize session state values for the app."""
     if "last_prediction" not in st.session_state:
-        st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
-    if "scenario_applied" not in st.session_state:
-        st.session_state.scenario_applied = ""
+        # Store Random Forest predicted outputs
+        st.session_state.last_prediction = None  # {"value": int, "category": str, "inputs": dict, "time": str}
     if "nav" not in st.session_state:
         st.session_state.nav = "1) Understand + Share"
+
 
 
 def normalize_values(values: Dict[str, float]) -> Dict[str, float]:
@@ -538,46 +548,38 @@ if page.startswith("1)"):
 
 elif page.startswith("2)"):
     st.title("📚 Learn About AQI & Health Tips")
-    
-    st.markdown(
-        """
-        **AQI Categories (India - simplified):**
-        - **Good (0–50):** Enjoy outdoor activities.
-        - **Satisfactory/Moderate (51–100):** Sensitive groups take care.
-        - **Moderate (101–200):** Reduce prolonged outdoor exertion.
-        - **Poor (201–300):** Consider masks; limit outdoor time.
-        - **Very Poor (301–400):** Avoid outdoor exertion; use purifiers.
-        - **Severe (401–500):** Stay indoors; seek medical advice for symptoms.
 
-        **General Health Tips:**
-        - Track AQI daily and plan outdoor tasks on lower-AQI hours.
-        - Use N95/FFP2 masks during poor days.
-        - Keep windows closed during peak pollution; ventilate when cleaner.
-        - Use HEPA purifiers indoors.
-        - Stay hydrated; saline/nasal rinse after heavy exposure.
-        """
-    )
+    st.markdown("""
+    **AQI Categories (India - simplified):**
+    - **Good (0–50):** Enjoy outdoor activities.
+    - **Satisfactory/Moderate (51–100):** Sensitive groups take care.
+    - **Moderate (101–200):** Reduce prolonged outdoor exertion.
+    - **Poor (201–300):** Consider masks; limit outdoor time.
+    - **Very Poor (301–400):** Avoid outdoor exertion; use purifiers.
+    - **Severe (401–500):** Stay indoors; seek medical advice for symptoms.
 
-    # ✅ Show latest prediction from Page 5
+    **General Health Tips:**
+    - Track AQI daily and plan outdoor tasks on lower-AQI hours.
+    - Use N95/FFP2 masks during poor days.
+    - Keep windows closed during peak pollution; ventilate when cleaner.
+    - Use HEPA purifiers indoors.
+    - Stay hydrated; saline/nasal rinse after heavy exposure.
+    """)
+
+    # Show latest prediction
     last_pred = st.session_state.get("last_prediction")
-    if last_pred is not None:
-        pred_time = last_pred.get("time", "Unknown Time")
-        aqi_val = last_pred.get("value", "N/A")
-        aqi_label = last_pred.get("category", "Unknown")
-        pred_inputs = last_pred.get("inputs", {})
-
-        st.markdown(f"### Latest Prediction (from Random Forest Model)")
-        st.success(f"**AQI Value:** {aqi_val}  |  **Category:** {aqi_label}")
-        st.caption(f"Predicted at: {pred_time}")
-
-        # ✅ Display predicted pollutant levels in readable format
+    if last_pred:
+        st.markdown("### Latest Random Forest Prediction")
+        st.success(f"AQI Value: {last_pred['value']} | Category: {last_pred['category']}")
+        st.caption(f"Predicted at: {last_pred['time']}")
+        
         st.markdown("#### Predicted Pollutant Levels:")
-        for pollutant in ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]:
-            value = pred_inputs.get(pollutant, "N/A")
-            st.markdown(f"- **{pollutant}:** {value} µg/m³" if pollutant != "CO" else f"- **{pollutant}:** {value} mg/m³")
-
+        for p in ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]:
+            val = last_pred["inputs"].get(p, "N/A")
+            st.markdown(f"- **{p}:** {val} µg/m³" if p != "CO" else f"- **{p}:** {val} mg/m³")
     else:
-        st.info("⚠️ No prediction found yet. Please run Step 5 (Predict Delhi AQI) first.")
+        st.info("⚠️ No prediction found. Run Step 5 first.")
+
 
 
 
@@ -654,45 +656,92 @@ elif page.startswith("4)"):
 # -------------------------
 # Page 5: Predict Delhi AQI Category (isolated)
 # -------------------------
+# elif page.startswith("5)"):
+
+#     st.title("🔮 Predict Delhi AQI Category (Random Forest)")
+
+#     # --- Inputs for all 6 pollutants ---
+#     pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+#     pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+#     no2  = st.number_input("NO2 (µg/m³)", min_value=0.0, value=40.0, step=1.0)
+#     so2  = st.number_input("SO2 (µg/m³)", min_value=0.0, value=10.0, step=1.0)
+#     co   = st.number_input("CO (mg/m³)", min_value=0.0, value=1.0, step=0.1)
+#     o3   = st.number_input("O3 (µg/m³)", min_value=0.0, value=50.0, step=1.0)
+
+#     if st.button("🚀 Predict AQI"):
+
+#         # Convert input into array
+#         X_input = np.array([[pm25, pm10, no2, so2, co, o3]])
+
+#         try:
+#             # Load trained Random Forest model & label encoder
+#             MODEL = joblib.load("aqi_rf_model.joblib")
+#             ENCODER = joblib.load("label_encoder.joblib")
+
+#             # Predict category
+#             y_pred_class = MODEL.predict(X_input)[0]
+#             y_pred_label = ENCODER.inverse_transform([y_pred_class])[0]
+
+#             # Save predicted values & category to session_state
+#             st.session_state["predicted_values"] = {
+#                 "PM2.5": pm25,
+#                 "PM10": pm10,
+#                 "NO2": no2,
+#                 "SO2": so2,
+#                 "CO": co,
+#                 "O3": o3
+#             }
+#             st.session_state["predicted_label"] = y_pred_label
+
+#             st.success(f"Predicted AQI Category: **{y_pred_label}**")
+#             st.write("✅ Values stored! Now go to **Page 6** for comparison with Delhi Avg & WHO.")
+
+#         except Exception as e:
+#             st.error(f"Prediction failed: {e}")
+
+
 elif page.startswith("5)"):
+    st.title("🔮 Predict Delhi AQI Category")
 
-    st.title("🔮 Predict Delhi AQI Category (Random Forest)")
+    # Load model and encoder
+    model, encoder = load_model_and_encoder()
+    if model is None or encoder is None:
+        st.error("Model or encoder not found. Make sure 'aqi_rf_model.joblib' and 'label_encoder.joblib' exist.")
+        st.stop()
 
-    # --- Inputs for all 6 pollutants ---
-    pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
-    pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
-    no2  = st.number_input("NO2 (µg/m³)", min_value=0.0, value=40.0, step=1.0)
-    so2  = st.number_input("SO2 (µg/m³)", min_value=0.0, value=10.0, step=1.0)
-    co   = st.number_input("CO (mg/m³)", min_value=0.0, value=1.0, step=0.1)
-    o3   = st.number_input("O3 (µg/m³)", min_value=0.0, value=50.0, step=1.0)
+    st.markdown("Enter pollutant levels below to predict AQI category:")
 
-    if st.button("🚀 Predict AQI"):
+    # Input form (independent of other pages)
+    col1, col2, col3 = st.columns(3)
+    pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+    pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+    no2  = col3.number_input("NO2 (µg/m³)", min_value=0.0, value=40.0, step=1.0)
 
-        # Convert input into array
-        X_input = np.array([[pm25, pm10, no2, so2, co, o3]])
+    col4, col5, col6 = st.columns(3)
+    so2  = col4.number_input("SO2 (µg/m³)", min_value=0.0, value=10.0, step=1.0)
+    co   = col5.number_input("CO (mg/m³)", min_value=0.0, value=1.0, step=0.1)
+    ozone= col6.number_input("O3 (µg/m³)", min_value=0.0, value=50.0, step=1.0)
 
+    if st.button("🚀 Predict", use_container_width=True):
         try:
-            # Load trained Random Forest model & label encoder
-            MODEL = joblib.load("aqi_rf_model.joblib")
-            ENCODER = joblib.load("label_encoder.joblib")
+            # Prepare input features for RF
+            input_features = [[pm25, pm10, no2, so2, co, ozone]]
+            predicted_value = model.predict(input_features)[0]
+            predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
 
-            # Predict category
-            y_pred_class = MODEL.predict(X_input)[0]
-            y_pred_label = ENCODER.inverse_transform([y_pred_class])[0]
-
-            # Save predicted values & category to session_state
-            st.session_state["predicted_values"] = {
-                "PM2.5": pm25,
-                "PM10": pm10,
-                "NO2": no2,
-                "SO2": so2,
-                "CO": co,
-                "O3": o3
+            # Save prediction in session state
+            st.session_state.last_prediction = {
+                "value": int(predicted_value),
+                "category": predicted_category,
+                "inputs": {
+                    "PM2.5": pm25, "PM10": pm10, "NO2": no2,
+                    "SO2": so2, "CO": co, "O3": ozone
+                },
+                "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            st.session_state["predicted_label"] = y_pred_label
 
-            st.success(f"Predicted AQI Category: **{y_pred_label}**")
-            st.write("✅ Values stored! Now go to **Page 6** for comparison with Delhi Avg & WHO.")
+            st.success(f"**Predicted AQI Category:** {predicted_category}")
+            st.caption(f"Prediction saved. You can now view comparison in Page 6 or tips in Page 2.")
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
@@ -706,84 +755,149 @@ elif page.startswith("5)"):
 # # ──────────────────────────────
 # # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
 # # ──────────────────────────────
+# elif page.startswith("6)"):
+
+#     import pandas as pd
+#     import numpy as np
+#     import altair as alt
+#     import datetime
+
+#     st.title("📊 Compare Predicted AQI with Delhi Avg & WHO Limits")
+
+#     # 1) Load Page-5 prediction from session_state
+#     predicted_values = st.session_state.get("predicted_values")
+#     predicted_label = st.session_state.get("predicted_label")
+#     prediction_time = st.session_state.get("prediction_time", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+#     if not predicted_values or not predicted_label:
+#         st.warning("⚠️ No predicted values found. Please complete Page 5 (Predict AQI) first.")
+#         st.stop()
+
+#     st.success(f"**Predicted AQI Category (from Step 5): {predicted_label}**")
+#     st.caption(f"Prediction made at: {prediction_time}")
+
+#     # 2) Build comparison DataFrame
+#     cols = ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]
+#     DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
+#     WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
+
+#     df_cmp = pd.DataFrame([
+#         {
+#             "Pollutant": p,
+#             "Predicted Level": float(predicted_values.get(p, 0.0)),
+#             "Delhi Avg": float(DELHI_AVG.get(p, np.nan)),
+#             "WHO Limit": float(WHO_LIMITS.get(p, np.nan))
+#         } for p in cols
+#     ])
+
+#     # 3) Display table
+#     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
+
+#     # 4) Visualization using Altair
+#     st.markdown("#### Visual Comparison: Predicted vs Delhi Avg vs WHO")
+#     df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
+
+#     chart = alt.Chart(df_long).mark_bar().encode(
+#         x=alt.X('Pollutant:N', title='Pollutant'),
+#         y=alt.Y('Level:Q', title='Concentration'),
+#         color=alt.Color('Metric:N', scale=alt.Scale(scheme='set1')),
+#         tooltip=['Pollutant', 'Metric', 'Level']
+#     ).properties(width=700, height=400)
+
+#     st.altair_chart(chart, use_container_width=True)
+
+#     # 5) Quick interpretation: check predicted vs WHO and Delhi Avg
+#     st.markdown("### ⚠️ Quick Interpretation")
+#     any_exceed = False
+#     for _, row in df_cmp.iterrows():
+#         p = row["Pollutant"]
+#         pred = row["Predicted Level"]
+#         delhi = row["Delhi Avg"]
+#         who = row["WHO Limit"]
+
+#         if not np.isnan(who) and pred > who:
+#             st.error(f"**{p}** — Predicted level {pred} exceeds WHO limit {who}. Take precautions!")
+#             any_exceed = True
+#         elif not np.isnan(delhi) and pred > delhi:
+#             st.warning(f"**{p}** — Predicted level {pred} is above Delhi average ({delhi}).")
+#         else:
+#             st.success(f"**{p}** — Predicted level {pred} is within Delhi Avg and WHO limit.")
+
+#     if not any_exceed:
+#         st.info("✅ None of the predicted pollutant levels exceed WHO limits.")
+
+#     # 6) Download CSV
+#     csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
+#     st.download_button(
+#         "⬇️ Download Predicted vs Delhi Avg & WHO (CSV)",
+#         data=csv_bytes,
+#         file_name="predicted_vs_delhi_who.csv",
+#         mime="text/csv"
+#     )
+
+
 elif page.startswith("6)"):
+    st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-    import pandas as pd
-    import numpy as np
-    import altair as alt
-    import datetime
-
-    st.title("📊 Compare Predicted AQI with Delhi Avg & WHO Limits")
-
-    # 1) Load Page-5 prediction from session_state
-    predicted_values = st.session_state.get("predicted_values")
-    predicted_label = st.session_state.get("predicted_label")
-    prediction_time = st.session_state.get("prediction_time", datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-
-    if not predicted_values or not predicted_label:
-        st.warning("⚠️ No predicted values found. Please complete Page 5 (Predict AQI) first.")
+    # Load previous prediction
+    last_pred = st.session_state.get("last_prediction")
+    if not last_pred:
+        st.warning("⚠️ No previous prediction found. Please complete Step 5 first.")
         st.stop()
 
-    st.success(f"**Predicted AQI Category (from Step 5): {predicted_label}**")
-    st.caption(f"Prediction made at: {prediction_time}")
+    pred_inputs = last_pred["inputs"]
+    pred_time = last_pred["time"]
+    pred_category = last_pred["category"]
 
-    # 2) Build comparison DataFrame
-    cols = ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]
-    DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
-    WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
+    st.success(f"**Predicted AQI Category (from Step 5):** {pred_category}")
+    st.caption(f"Prediction made at: {pred_time}")
 
+    # Build comparison table
     df_cmp = pd.DataFrame([
         {
             "Pollutant": p,
-            "Predicted Level": float(predicted_values.get(p, 0.0)),
-            "Delhi Avg": float(DELHI_AVG.get(p, np.nan)),
-            "WHO Limit": float(WHO_LIMITS.get(p, np.nan))
-        } for p in cols
+            "Predicted Level": pred_inputs.get(p, 0.0),
+            "Delhi Avg": DELHI_AVG.get(p, np.nan),
+            "WHO Limit": WHO_LIMITS.get(p, np.nan)
+        }
+        for p in ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]
     ])
 
-    # 3) Display table
     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
 
-    # 4) Visualization using Altair
-    st.markdown("#### Visual Comparison: Predicted vs Delhi Avg vs WHO")
-    df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
-
-    chart = alt.Chart(df_long).mark_bar().encode(
-        x=alt.X('Pollutant:N', title='Pollutant'),
-        y=alt.Y('Level:Q', title='Concentration'),
-        color=alt.Color('Metric:N', scale=alt.Scale(scheme='set1')),
-        tooltip=['Pollutant', 'Metric', 'Level']
-    ).properties(width=700, height=400)
-
-    st.altair_chart(chart, use_container_width=True)
-
-    # 5) Quick interpretation: check predicted vs WHO and Delhi Avg
-    st.markdown("### ⚠️ Quick Interpretation")
-    any_exceed = False
-    for _, row in df_cmp.iterrows():
-        p = row["Pollutant"]
-        pred = row["Predicted Level"]
-        delhi = row["Delhi Avg"]
-        who = row["WHO Limit"]
-
-        if not np.isnan(who) and pred > who:
-            st.error(f"**{p}** — Predicted level {pred} exceeds WHO limit {who}. Take precautions!")
-            any_exceed = True
-        elif not np.isnan(delhi) and pred > delhi:
-            st.warning(f"**{p}** — Predicted level {pred} is above Delhi average ({delhi}).")
-        else:
-            st.success(f"**{p}** — Predicted level {pred} is within Delhi Avg and WHO limit.")
-
-    if not any_exceed:
-        st.info("✅ None of the predicted pollutant levels exceed WHO limits.")
-
-    # 6) Download CSV
-    csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
-    st.download_button(
-        "⬇️ Download Predicted vs Delhi Avg & WHO (CSV)",
-        data=csv_bytes,
-        file_name="predicted_vs_delhi_who.csv",
-        mime="text/csv"
+    # Visual comparison: grouped bar chart for all pollutants
+    df_long = df_cmp.melt(
+        id_vars=["Pollutant"],
+        value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
+        var_name="Metric", value_name="Level"
     )
 
+    for p in df_cmp["Pollutant"]:
+        sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+        sub = sub.reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+        st.markdown(f"**{p}**")
+        st.bar_chart(sub, use_container_width=True)
 
+    # Quick interpretation
+    st.markdown("### ⚠️ Quick interpretation")
+    any_exceed = False
+    for _, r in df_cmp.iterrows():
+        pred_lvl = r["Predicted Level"]
+        who_lvl = r["WHO Limit"]
+        delhi_lvl = r["Delhi Avg"]
+
+        if not np.isnan(who_lvl) and pred_lvl > who_lvl:
+            st.error(f"**{r['Pollutant']}** — Predicted {pred_lvl} exceeds WHO limit {who_lvl}. Take precautions.")
+            any_exceed = True
+        elif not np.isnan(delhi_lvl) and pred_lvl > delhi_lvl:
+            st.warning(f"**{r['Pollutant']}** — Predicted {pred_lvl} is above Delhi avg ({delhi_lvl}).")
+        else:
+            st.success(f"**{r['Pollutant']}** — Predicted {pred_lvl} is within safe limits.")
+
+    if not any_exceed:
+        st.info("No predicted pollutant levels exceed WHO limits.")
+    
+    # CSV download
+    csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
+    st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
+                       file_name="predicted_vs_delhi_who.csv", mime="text/csv")
