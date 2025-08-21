@@ -2536,22 +2536,64 @@ elif page.startswith("5)"):
 
 
 # # ──────────────────────────────
+# # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
+# # ──────────────────────────────
+# elif page.startswith("6)"):
+
+#     st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
+
+#     values = normalize_values(st.session_state.values)
+#     df_cmp = comparison_frame(values)
+
+#     st.dataframe(df_cmp, use_container_width=True)
+ 
+#     st.markdown("#### Visual Comparison")
+#     df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
+
+#     for p in COLUMNS:
+#         sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+#         st.markdown(f"**{p}**")
+#         st.bar_chart(sub, use_container_width=True)
+
+#     st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
+
+# # ──────────────────────────────
+# # FOOTER
+# # ──────────────────────────────
+# st.markdown("---")
+# st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build") 
+
+
 # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
 # ──────────────────────────────
 elif page.startswith("6)"):
 
-    st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
+    st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
+    # Use the same inputs you used on Page 5
     values = normalize_values(st.session_state.values)
-    df_cmp = comparison_frame(values)
 
-    st.dataframe(df_cmp, use_container_width=True)
- 
+    # Build comparison frame and rename the first column
+    df_cmp = comparison_frame(values).rename(columns={"Your Level": "Predicted Level"})
+
+    # Nice display with Pollutant as index
+    st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
+
     st.markdown("#### Visual Comparison")
-    df_long = df_cmp.melt(id_vars="Pollutant", var_name="Metric", value_name="Level")
+    # Keep a consistent order of bars in the charts
+    df_long = df_cmp.melt(
+        id_vars="Pollutant",
+        value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
+        var_name="Metric",
+        value_name="Level"
+    )
 
     for p in COLUMNS:
-        sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+        sub = (
+            df_long[df_long["Pollutant"] == p]
+            .set_index("Metric")["Level"]
+            .reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+        )
         st.markdown(f"**{p}**")
         st.bar_chart(sub, use_container_width=True)
 
@@ -2561,4 +2603,8 @@ elif page.startswith("6)"):
 # FOOTER
 # ──────────────────────────────
 st.markdown("---")
-st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build") 
+st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
+
+
+
+
