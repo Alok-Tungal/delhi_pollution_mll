@@ -105,13 +105,7 @@ POLLUTANT_INFO: Dict[str, str] = {
 #         st.session_state.nav = "1) Understand + Share"
 
 
-def ensure_session_defaults():
-    """Initialize session state values for the app."""
-    if "last_prediction" not in st.session_state:
-        # Store Random Forest predicted outputs
-        st.session_state.last_prediction = None  # {"value": int, "category": str, "inputs": dict, "time": str}
-    if "nav" not in st.session_state:
-        st.session_state.nav = "1) Understand + Share"
+
 
 
 
@@ -304,28 +298,6 @@ MODEL, ENCODER = load_model_and_encoder()
 # SIDEBAR NAVIGATION — SINGLE ROUTER
 # (Fixes: no duplicate imports, no stray pages outside conditions)
 # ──────────────────────────────
-# with st.sidebar:
-#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-#     st.markdown("### Delhi AQI App")
-    
-#     options_list = [
-#         "1) Understand + Share",
-#         "2) Learn About AQI & Health Tips",
-#         "3) Try a Sample AQI Scenario",
-#         "4) Preset or Custom Inputs",
-#         "5) Predict Delhi AQI Category",
-#         "6) Compare with Delhi Avg & WHO",
-#     ]
-
-#     page = st.radio(
-#         "Navigation",
-#         options=options_list,
-#         index=options_list.index(st.session_state.nav),
-#         key="nav",
-#     )
-    
-#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
-
 # ✅ Ensure default session state
 options_list = [
     "1) Understand + Share",
@@ -429,9 +401,9 @@ with st.sidebar:
         "6) Compare with Delhi Avg & WHO",
     ]
 
-    # Safe index: use get with fallback
-    default_nav = st.session_state.get("nav", "1) Understand + Share")
-    default_index = page_options.index(default_nav) if default_nav in page_options else 0
+    # # Safe index: use get with fallback
+    # default_nav = st.session_state.get("nav", "1) Understand + Share")
+    # default_index = page_options.index(default_nav) if default_nav in page_options else 0
 
 
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
@@ -511,41 +483,6 @@ if page.startswith("1)"):
 # ──────────────────────────────
 # 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
 # ──────────────────────────────
-# elif page.startswith("2)"):
-#     st.title("📚 Learn About AQI & Health Tips")
-#     st.markdown(
-#         """
-#         **AQI Categories (India - simplified):**
-#         - **Good (0–50):** Enjoy outdoor activities.
-#         - **Satisfactory/Moderate (51–100):** Sensitive groups take care.
-#         - **Moderate (101–200):** Reduce prolonged outdoor exertion.
-#         - **Poor (201–300):** Consider masks; limit outdoor time.
-#         - **Very Poor (301–400):** Avoid outdoor exertion; use purifiers.
-#         - **Severe (401–500):** Stay indoors; seek medical advice for symptoms.
-
-#         **General Health Tips:**
-#         - Track AQI daily and plan outdoor tasks on lower-AQI hours.
-#         - Use N95/FFP2 masks during poor days.
-#         - Keep windows closed during peak pollution; ventilate when cleaner.
-#         - Use HEPA purifiers indoors.
-#         - Stay hydrated; saline/nasal rinse after heavy exposure.
-#         """
-#     )
-
-#     latest_txt = ""
-#     if st.session_state.last_prediction is not None:
-#         aqi_val, aqi_label = st.session_state.last_prediction
-#         latest_txt = f"\nLatest Prediction: {aqi_val} ({aqi_label})"
-
-#     tips_md = (
-#         f"# Delhi AQI – Quick Guide\n{latest_txt}\n\n"
-#         "• AQI buckets and what they mean\n"
-#         "• Tips for masks, purifiers, timing outdoor activities\n"
-#         "• Monitor pollutants: PM2.5, PM10, NO2, SO2, CO, Ozone\n"
-#         f"\nApp: {APP_URL}\n"
-#     )
-
-
 elif page.startswith("2)"):
     st.title("📚 Learn About AQI & Health Tips")
 
@@ -633,12 +570,6 @@ elif page.startswith("4)"):
     "Ozone": o3,
 }
 
-
-
-
-
-
-
 # -------------------------
 # Page 5: Predict Delhi AQI Category (isolated)
 # -------------------------
@@ -687,9 +618,9 @@ elif page.startswith("5)"):
 
 
 
-# # ──────────────────────────────
-# # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
-# # ──────────────────────────────
+#  ──────────────────────────────
+# 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
+#  ──────────────────────────────
 elif page.startswith("6)"):
 
     import pandas as pd
