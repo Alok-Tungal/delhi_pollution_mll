@@ -2619,30 +2619,138 @@ elif page.startswith("5)"):
 
 # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
 # ──────────────────────────────
+# elif page.startswith("6)"):
+
+#     st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
+
+#     # --- 1) Get the same pollutant inputs used on Page 5 (persisted in session) ---
+#     # Try to reuse existing values; if unavailable, fall back to the Page-5 defaults.
+#     values = st.session_state.get("values")
+#     if not isinstance(values, dict) or not values:
+#         try:
+#             # if your app defines ensure_session_defaults(), use it
+#             ensure_session_defaults()
+#             values = st.session_state.values
+#         except Exception:
+#             # Safe fallback matching your Page 5 defaults
+#             values = {"PM2.5": 80.0, "PM10": 120.0, "NO2": 40.0, "SO2": 10.0, "CO": 1.0, "Ozone": 50.0}
+
+#     # --- 2) Show predicted AQI category based on same inputs (no numeric value shown) ---
+#     predicted_category = None
+#     try:
+#         model, encoder = load_model_and_encoder()
+#     except Exception:
+#         model, encoder = None, None
+
+#     # Helper to map numeric AQI → category (local, so Page 6 works standalone)
+#     def _simple_category_from_aqi(aqi: float) -> str:
+#         try:
+#             aqi = float(aqi)
+#         except Exception:
+#             return "Unknown"
+#         if aqi <= 50:   return "Good"
+#         if aqi <= 100:  return "Satisfactory"
+#         if aqi <= 200:  return "Moderate"
+#         if aqi <= 300:  return "Poor"
+#         if aqi <= 400:  return "Very Poor"
+#         return "Severe"
+
+#     # Try predicting category using your model/encoder; fall back gracefully if anything fails.
+#     try:
+#         cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+#         X = [[float(values.get(c, 0.0)) for c in cols]]
+#         if model is not None:
+#             pred_val = model.predict(X)[0]
+#             if encoder is not None:
+#                 # If encoder encodes categories by AQI bins
+#                 predicted_category = encoder.inverse_transform([int(round(float(pred_val)))])[0]
+#             else:
+#                 predicted_category = _simple_category_from_aqi(pred_val)
+#         else:
+#             # No model available → infer category from a simple heuristic on inputs
+#             # (keeps UI working without crashing)
+#             weighted = 0.35*values["PM2.5"] + 0.25*values["PM10"] + 0.20*values["NO2"] + \
+#                        0.07*values["SO2"] + 0.05*values["CO"] + 0.08*values["Ozone"]
+#             predicted_category = _simple_category_from_aqi(weighted)
+#     except Exception:
+#         # Final fallback if anything above fails
+#         weighted = 0.35*values.get("PM2.5",0) + 0.25*values.get("PM10",0) + 0.20*values.get("NO2",0) + \
+#                    0.07*values.get("SO2",0) + 0.05*values.get("CO",0) + 0.08*values.get("Ozone",0)
+#         predicted_category = _simple_category_from_aqi(weighted)
+
+#     # Show only the category (as you requested)
+#     if predicted_category:
+#         st.success(f"**Predicted AQI Category:** {predicted_category}")
+
+#     # --- 3) Build comparison table: replace "Your Level" → "Predicted Level" ---
+#     try:
+#         df_cmp = comparison_frame(values).rename(columns={"Your Level": "Predicted Level"})
+#     except Exception:
+#         # Robust fallback if comparison_frame isn't available
+#         try:
+#             delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
+#             who   = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
+#             rows = []
+#             cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5","PM10","NO2","SO2","CO","Ozone"]
+#             for p in cols:
+#                 rows.append({
+#                     "Pollutant": p,
+#                     "Predicted Level": float(values.get(p, 0.0)),
+#                     "Delhi Avg": float(delhi.get(p, 0.0)),
+#                     "WHO Limit": float(who.get(p, float("inf"))),
+#                 })
+#             df_cmp = pd.DataFrame(rows)
+#         except Exception as e:
+#             st.error(f"Could not build comparison table: {e}")
+#             st.stop()
+
+#     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
+
+#     # --- 4) Visual Comparison (bar charts per pollutant) ---
+#     st.markdown("#### Visual Comparison")
+#     df_long = df_cmp.melt(
+#         id_vars="Pollutant",
+#         value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
+#         var_name="Metric",
+#         value_name="Level"
+#     )
+
+#     # Use the COLUMNS order if available; else derive from the dataframe
+#     _pollutants = (COLUMNS if "COLUMNS" in globals() else list(df_cmp["Pollutant"]))
+#     for p in _pollutants:
+#         sub = (
+#             df_long[df_long["Pollutant"] == p]
+#             .set_index("Metric")["Level"]
+#             .reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+#         )
+#         st.markdown(f"**{p}**")
+#         st.bar_chart(sub, use_container_width=True)
+
+#     st.info("Tip: Aim to keep each pollutant at or below the WHO guideline whenever possible.")
+
+
+# # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
+# ──────────────────────────────
 elif page.startswith("6)"):
 
     st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-    # --- 1) Get the same pollutant inputs used on Page 5 (persisted in session) ---
-    # Try to reuse existing values; if unavailable, fall back to the Page-5 defaults.
+    # 1) Get the same pollutant inputs used on Page 5 (persist in session)
+    #    If not present, try to create safe defaults so this page never breaks.
     values = st.session_state.get("values")
     if not isinstance(values, dict) or not values:
         try:
-            # if your app defines ensure_session_defaults(), use it
             ensure_session_defaults()
             values = st.session_state.values
         except Exception:
-            # Safe fallback matching your Page 5 defaults
             values = {"PM2.5": 80.0, "PM10": 120.0, "NO2": 40.0, "SO2": 10.0, "CO": 1.0, "Ozone": 50.0}
 
-    # --- 2) Show predicted AQI category based on same inputs (no numeric value shown) ---
-    predicted_category = None
-    try:
-        model, encoder = load_model_and_encoder()
-    except Exception:
-        model, encoder = None, None
+    # 2) Show the predicted AQI CATEGORY derived from the same inputs as Page 5
+    #    (No numeric AQI shown.)
+    #    We prefer to reuse a label saved by Page 5 if you added it; if not, we compute it here.
+    predicted_label = st.session_state.get("predicted_label")
 
-    # Helper to map numeric AQI → category (local, so Page 6 works standalone)
+    # local fallback categorizer (in case label not stored and no encoder)
     def _simple_category_from_aqi(aqi: float) -> str:
         try:
             aqi = float(aqi)
@@ -2655,47 +2763,52 @@ elif page.startswith("6)"):
         if aqi <= 400:  return "Very Poor"
         return "Severe"
 
-    # Try predicting category using your model/encoder; fall back gracefully if anything fails.
-    try:
-        cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
-        X = [[float(values.get(c, 0.0)) for c in cols]]
-        if model is not None:
-            pred_val = model.predict(X)[0]
-            if encoder is not None:
-                # If encoder encodes categories by AQI bins
-                predicted_category = encoder.inverse_transform([int(round(float(pred_val)))])[0]
+    if not predicted_label:
+        # Try to reconstruct the category using your model + encoder on the same inputs
+        try:
+            model, encoder = load_model_and_encoder()
+        except Exception:
+            model, encoder = None, None
+
+        try:
+            cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+            X = [[float(values.get(c, 0.0)) for c in cols]]
+            if model is not None:
+                pred_val = model.predict(X)[0]
+                if encoder is not None:
+                    predicted_label = encoder.inverse_transform([int(round(float(pred_val)))])[0]
+                else:
+                    predicted_label = _simple_category_from_aqi(pred_val)
             else:
-                predicted_category = _simple_category_from_aqi(pred_val)
-        else:
-            # No model available → infer category from a simple heuristic on inputs
-            # (keeps UI working without crashing)
-            weighted = 0.35*values["PM2.5"] + 0.25*values["PM10"] + 0.20*values["NO2"] + \
-                       0.07*values["SO2"] + 0.05*values["CO"] + 0.08*values["Ozone"]
-            predicted_category = _simple_category_from_aqi(weighted)
-    except Exception:
-        # Final fallback if anything above fails
-        weighted = 0.35*values.get("PM2.5",0) + 0.25*values.get("PM10",0) + 0.20*values.get("NO2",0) + \
-                   0.07*values.get("SO2",0) + 0.05*values.get("CO",0) + 0.08*values.get("Ozone",0)
-        predicted_category = _simple_category_from_aqi(weighted)
+                # Heuristic fallback if no model is available
+                weighted = (
+                    0.35*values.get("PM2.5",0) + 0.25*values.get("PM10",0) + 0.20*values.get("NO2",0) +
+                    0.07*values.get("SO2",0)  + 0.05*values.get("CO",0)   + 0.08*values.get("Ozone",0)
+                )
+                predicted_label = _simple_category_from_aqi(weighted)
+        except Exception:
+            predicted_label = None
 
-    # Show only the category (as you requested)
-    if predicted_category:
-        st.success(f"**Predicted AQI Category:** {predicted_category}")
+    if predicted_label:
+        st.success(f"**Predicted AQI Category:** {predicted_label}")
+    else:
+        st.info("Predicted category not found. Please run prediction in Step 5 once.")
 
-    # --- 3) Build comparison table: replace "Your Level" → "Predicted Level" ---
+    # 3) Build the comparison table based on the **same inputs used to predict**
+    #    Replace "Your Level" → "Predicted Level"
     try:
         df_cmp = comparison_frame(values).rename(columns={"Your Level": "Predicted Level"})
     except Exception:
-        # Robust fallback if comparison_frame isn't available
+        # Robust fallback if comparison_frame is unavailable
         try:
             delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
             who   = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
-            rows = []
             cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5","PM10","NO2","SO2","CO","Ozone"]
+            rows = []
             for p in cols:
                 rows.append({
                     "Pollutant": p,
-                    "Predicted Level": float(values.get(p, 0.0)),
+                    "Predicted Level": float(values.get(p, 0.0)),  # the levels that produced the prediction
                     "Delhi Avg": float(delhi.get(p, 0.0)),
                     "WHO Limit": float(who.get(p, float("inf"))),
                 })
@@ -2706,7 +2819,7 @@ elif page.startswith("6)"):
 
     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
 
-    # --- 4) Visual Comparison (bar charts per pollutant) ---
+    # 4) Visual comparison — keep order consistent and show "Predicted Level" vs baselines
     st.markdown("#### Visual Comparison")
     df_long = df_cmp.melt(
         id_vars="Pollutant",
@@ -2715,9 +2828,8 @@ elif page.startswith("6)"):
         value_name="Level"
     )
 
-    # Use the COLUMNS order if available; else derive from the dataframe
-    _pollutants = (COLUMNS if "COLUMNS" in globals() else list(df_cmp["Pollutant"]))
-    for p in _pollutants:
+    pollutants_order = (COLUMNS if "COLUMNS" in globals() else list(df_cmp["Pollutant"]))
+    for p in pollutants_order:
         sub = (
             df_long[df_long["Pollutant"] == p]
             .set_index("Metric")["Level"]
