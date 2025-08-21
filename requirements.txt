@@ -11,3 +11,4 @@ Pillow
 gspread
 google-auth
 openpyxl
+plotly
