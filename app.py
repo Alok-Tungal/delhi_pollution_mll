@@ -2564,6 +2564,7 @@ elif page.startswith("5)"):
 # st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build") 
 
 
+
 # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
 # ──────────────────────────────
 elif page.startswith("6)"):
@@ -2614,25 +2615,3 @@ elif page.startswith("6)"):
 # ──────────────────────────────
 st.markdown("---")
 st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
-
-
-    for p in COLUMNS:
-        sub = (
-            df_long[df_long["Pollutant"] == p]
-            .set_index("Metric")["Level"]
-            .reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
-        )
-        st.markdown(f"**{p}**")
-        st.bar_chart(sub, use_container_width=True)
-
-    st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
-
-# ──────────────────────────────
-# FOOTER
-# ──────────────────────────────
-st.markdown("---")
-st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
-
-
-
-
