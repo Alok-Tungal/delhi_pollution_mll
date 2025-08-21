@@ -1951,6 +1951,13 @@ import streamlit as st
 import pandas as pd
 # other imports...
 
+page = st.radio(
+    "Navigation",
+    ("1) Home", "2) Data Overview", "3) Visualizations", "4) Custom Inputs", 
+     "5) Prediction Results", "6) Download & Share"),
+    key="main_nav"
+)
+
 # --- Utility: ensure session state defaults ---
 def ensure_session_defaults():
     if "values" not in st.session_state:
