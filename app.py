@@ -7,14 +7,15 @@ from PIL import Image
 import qrcode
 from qrcode.constants import ERROR_CORRECT_H
 import io
-
 import streamlit as st
+import joblib
+import shap
+import matplotlib.pyplot as plt
 
 try:
     import joblib
 except Exception:
     joblib = None
-
 try:
     import gspread
 except Exception:
@@ -28,7 +29,6 @@ st.set_page_config(
     page_icon="🌫️",
     layout="wide"
 )
-
 st.markdown(
     """
     <style>
@@ -79,8 +79,6 @@ DELHI_AVG = {
     "CO": 1.7,
     "Ozone": 60,
 }
-
-
 from typing import Dict, List, Tuple, Optional
 
 
@@ -92,8 +90,6 @@ POLLUTANT_INFO: Dict[str, str] = {
     "CO":   "Colorless gas; reduces oxygen delivery in body; dangerous in high doses.",
     "Ozone":"Formed in sunlight; irritates airways; causes chest pain & coughing.",
 }
-
-
 def ensure_session_defaults():
     if "values" not in st.session_state:
         st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
@@ -103,12 +99,7 @@ def ensure_session_defaults():
         st.session_state.scenario_applied = ""
     if "nav" not in st.session_state:
         st.session_state.nav = "1) Understand + Share"
-
-
-
-
-
-
+        
 def normalize_values(values: Dict[str, float]) -> Dict[str, float]:
     """Ensure we always have all COLUMNS with float values. Prevents shape/key errors."""
     safe = {}
@@ -126,8 +117,7 @@ def normalize_values(values: Dict[str, float]) -> Dict[str, float]:
             except Exception:
                 safe[c] = 0.0
     return safe
-
-
+    
 def load_model_and_encoder():
     """Load RF model + label encoder. Safe fallback if missing."""
     model, encoder = None, None
@@ -145,8 +135,7 @@ def load_model_and_encoder():
     except Exception:
         encoder = None
     return model, encoder
-
-
+    
 def simple_category_from_aqi(aqi: int) -> str:
     if aqi <= 50: return "Good"
     if aqi <= 100: return "Satisfactory"
@@ -154,8 +143,7 @@ def simple_category_from_aqi(aqi: int) -> str:
     if aqi <= 300: return "Poor"
     if aqi <= 400: return "Very Poor"
     return "Severe"
-
-
+    
 def badge_class(label: str) -> str:
     key = label.replace(" ", "").lower()
     if key in ["good"]: return "good"
@@ -163,10 +151,7 @@ def badge_class(label: str) -> str:
     if key == "poor": return "poor"
     if key in ["verypoor", "verybad"]: return "verypoor"
     return "severe"
-
-
-
-
+    
 def predict_aqi(pm25, pm10, no2, so2, co, ozone):
     """
     Predicts AQI value & category based on pollutant levels.
@@ -211,9 +196,7 @@ def predict_aqi(pm25, pm10, no2, so2, co, ozone):
     except Exception as e:
         st.error(f"⚠️ Prediction error: {e}")
         return None, None
-
-
-
+        
 def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
     qr = qrcode.QRCode(version=None, error_correction=ERROR_CORRECT_H, box_size=10, border=2)
     qr.add_data(content)
@@ -223,8 +206,7 @@ def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
     buf = io.BytesIO()
     img.save(buf, format="PNG", optimize=True)
     return buf.getvalue()
-
-
+    
 def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
     if gspread is None: return
     if "gspread" not in st.secrets: return
@@ -243,8 +225,7 @@ def try_log_to_sheets(values: Dict[str, float], aqi_val: int, aqi_label: str):
         st.toast("Logged to Google Sheets.", icon="☁️")
     except Exception as e:
         st.info(f"Sheets logging skipped: {e}")
-
-
+        
 def log_to_csv(values: Dict[str, float], aqi_val: int, aqi_label: str):
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     values = normalize_values(values)
@@ -270,11 +251,9 @@ def log_to_csv(values: Dict[str, float], aqi_val: int, aqi_label: str):
         df_new = df_row
     df_new.to_csv("aqi_logs.csv", index=False)
 
-
 def values_table(values: Dict[str, float]) -> pd.DataFrame:
     values = normalize_values(values)
     return pd.DataFrame([[values[c] for c in COLUMNS]], columns=COLUMNS)
-
 
 def comparison_frame(values: Dict[str, float]) -> pd.DataFrame:
     values = normalize_values(values)
@@ -336,17 +315,6 @@ with st.sidebar:
     )
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-
-
-import streamlit as st
-import joblib
-import shap
-import matplotlib.pyplot as plt
-import streamlit as st
-import pandas as pd
-# other imports...
-
-# --- Utility: ensure session state defaults ---
 def ensure_session_defaults():
     if "values" not in st.session_state:
         st.session_state.values = {
@@ -383,24 +351,7 @@ MODEL, ENCODER = load_model_and_encoder()
 # --- Ensure nav default exists ---
 if "nav" not in st.session_state:
     st.session_state.nav = "1) Understand + Share"
-
-# Sidebar navigation
-# with st.sidebar:
-#     st.image(
-#         "https://img.icons8.com/?size=100&id=12448&format=png&color=000000",
-#         width=32
-#     )
-#     st.markdown("### Delhi AQI App")
-
-#     page_options = [
-#         "1) Understand + Share",
-#         "2) Learn About AQI & Health Tips",
-#         "3) Try a Sample AQI Scenario",
-#         "4) Preset or Custom Inputs",
-#         "5) Predict Delhi AQI Category",
-#         "6) Compare with Delhi Avg & WHO",
-    # ]
-
+    
 if page.startswith("1)"):
     # Nice title + thin brand line
     st.markdown(
