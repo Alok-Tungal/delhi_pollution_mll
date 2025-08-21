@@ -662,6 +662,8 @@ from PIL import Image
 import streamlit as st
 import joblib
 import qrcode
+import plotly.express as px
+import plotly.graph_objects as go
 from qrcode.constants import ERROR_CORRECT_H
 
 # Optional SHAP
