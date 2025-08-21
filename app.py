@@ -2342,10 +2342,10 @@ elif page.startswith("5)"):
   
 
 
-5) PREDICT DELHI AQI CATEGORY
-──────────────────────────────
-5) PREDICT DELHI AQI CATEGORY
-──────────────────────────────
+# 5) PREDICT DELHI AQI CATEGORY
+# ──────────────────────────────
+# 5) PREDICT DELHI AQI CATEGORY
+# ──────────────────────────────
 import streamlit as st
 import datetime
 
