@@ -2349,10 +2349,10 @@ elif page.startswith("5)"):
 import streamlit as st
 import datetime
 
-Assuming you already have predict_aqi function
+# Assuming you already have predict_aqi function
 def predict_aqi(pm25, pm10, no2, so2, co, ozone): ...
 
-Sidebar navigation
+# Sidebar navigation
 page = st.sidebar.selectbox("📑 Choose a page:", ["🏠 Home", "📊 Data Overview", "🔮 Prediction"])
 
 
@@ -2378,8 +2378,8 @@ if page == "🔮 Prediction":
         except Exception as e:
             st.error(f"Prediction failed: {e}")
 
----------------- Sidebar navigation (safe, single-router) ----------------
-Put this AFTER ensure_session_defaults() and model loading.
+# ---------------- Sidebar navigation (safe, single-router) ----------------
+# Put this AFTER ensure_session_defaults() and model loading.
 
 page options (same format you already use)
 page_options = [
