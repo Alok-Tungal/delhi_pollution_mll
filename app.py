@@ -501,8 +501,44 @@ if page.startswith("1)"):
 # ──────────────────────────────
 # 2) LEARN ABOUT AQI & HEALTH TIPS (Download)
 # ──────────────────────────────
+# elif page.startswith("2)"):
+#     st.title("📚 Learn About AQI & Health Tips")
+#     st.markdown(
+#         """
+#         **AQI Categories (India - simplified):**
+#         - **Good (0–50):** Enjoy outdoor activities.
+#         - **Satisfactory/Moderate (51–100):** Sensitive groups take care.
+#         - **Moderate (101–200):** Reduce prolonged outdoor exertion.
+#         - **Poor (201–300):** Consider masks; limit outdoor time.
+#         - **Very Poor (301–400):** Avoid outdoor exertion; use purifiers.
+#         - **Severe (401–500):** Stay indoors; seek medical advice for symptoms.
+
+#         **General Health Tips:**
+#         - Track AQI daily and plan outdoor tasks on lower-AQI hours.
+#         - Use N95/FFP2 masks during poor days.
+#         - Keep windows closed during peak pollution; ventilate when cleaner.
+#         - Use HEPA purifiers indoors.
+#         - Stay hydrated; saline/nasal rinse after heavy exposure.
+#         """
+#     )
+
+#     latest_txt = ""
+#     if st.session_state.last_prediction is not None:
+#         aqi_val, aqi_label = st.session_state.last_prediction
+#         latest_txt = f"\nLatest Prediction: {aqi_val} ({aqi_label})"
+
+#     tips_md = (
+#         f"# Delhi AQI – Quick Guide\n{latest_txt}\n\n"
+#         "• AQI buckets and what they mean\n"
+#         "• Tips for masks, purifiers, timing outdoor activities\n"
+#         "• Monitor pollutants: PM2.5, PM10, NO2, SO2, CO, Ozone\n"
+#         f"\nApp: {APP_URL}\n"
+#     )
+
+
 elif page.startswith("2)"):
     st.title("📚 Learn About AQI & Health Tips")
+    
     st.markdown(
         """
         **AQI Categories (India - simplified):**
@@ -522,26 +558,29 @@ elif page.startswith("2)"):
         """
     )
 
-    latest_txt = ""
-    if st.session_state.last_prediction is not None:
-        aqi_val, aqi_label = st.session_state.last_prediction
-        latest_txt = f"\nLatest Prediction: {aqi_val} ({aqi_label})"
+    # ✅ Show latest prediction from Page 5
+    last_pred = st.session_state.get("last_prediction")
+    if last_pred is not None:
+        pred_time = last_pred.get("time", "Unknown Time")
+        aqi_val = last_pred.get("value", "N/A")
+        aqi_label = last_pred.get("category", "Unknown")
+        pred_inputs = last_pred.get("inputs", {})
 
-    tips_md = (
-        f"# Delhi AQI – Quick Guide\n{latest_txt}\n\n"
-        "• AQI buckets and what they mean\n"
-        "• Tips for masks, purifiers, timing outdoor activities\n"
-        "• Monitor pollutants: PM2.5, PM10, NO2, SO2, CO, Ozone\n"
-        f"\nApp: {APP_URL}\n"
-    )
+        st.markdown(f"### Latest Prediction (from Random Forest Model)")
+        st.success(f"**AQI Value:** {aqi_val}  |  **Category:** {aqi_label}")
+        st.caption(f"Predicted at: {pred_time}")
 
-    st.download_button(
-        "⬇️ Download This Guide (Markdown)",
-        data=tips_md.encode(),
-        file_name="Delhi_AQI_Guide.md",
-        mime="text/markdown",
-        use_container_width=True,
-    )
+        # ✅ Display predicted pollutant levels in readable format
+        st.markdown("#### Predicted Pollutant Levels:")
+        for pollutant in ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]:
+            value = pred_inputs.get(pollutant, "N/A")
+            st.markdown(f"- **{pollutant}:** {value} µg/m³" if pollutant != "CO" else f"- **{pollutant}:** {value} mg/m³")
+
+    else:
+        st.info("⚠️ No prediction found yet. Please run Step 5 (Predict Delhi AQI) first.")
+
+
+
 
 # ──────────────────────────────
 # 3) TRY A SAMPLE AQI SCENARIO
