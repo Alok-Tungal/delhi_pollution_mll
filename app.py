@@ -2383,172 +2383,103 @@ elif page.startswith("4)"):
 
 
 
-# ──────────────────────────────
-# 5) PREDICT DELHI AQI CATEGORY
-# ──────────────────────────────
-# # ✅ Page 5: Predict Delhi AQI Category
-# elif page.startswith("5)"):
-#     st.title("🔮 Predict Delhi AQI Category")
-#     st.caption("Enter pollutant levels to predict AQI category.")
-
-#     # Input fields
-#     col1, col2, col3 = st.columns(3)
-#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
-#     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
-#     no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
-
-#     col4, col5, col6 = st.columns(3)
-#     so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
-#     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
-#     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
-
-#     # 🚀 Prediction button
-#     if st.button("🚀 Predict AQI", use_container_width=True):
-#         try:
-#             # Call your ML model function
-#             predicted_aqi, aqi_category = predict_aqi(pm25, pm10, no2, so2, co, ozone)
-
-#             # Display results
-#             st.success(f"**Predicted AQI Category:** {aqi_category}")
-#             st.metric(label="Predicted AQI Value", load_model_and_encoder)
-
-#         except Exception as e:
-#             st.error(f"Prediction failed: {e}")
-
-
-
-# elif page.startswith("5)"): 
-#     st.title("🔮 Predict Delhi AQI Category")
-
-#     # ✅ Load your model and encoder once
-#     model, encoder = load_model_and_encoder()
-
-#     st.markdown("Review your inputs before predicting:")
-
-#     # --- Input form for pollutants ---
-#     col1, col2, col3 = st.columns(3)
-#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
-#     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
-#     no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
-
-#     col4, col5, col6 = st.columns(3)
-#     so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
-#     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
-#     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
-
-#     # --- Predict Button ---
-#     if st.button("🚀 Predict", use_container_width=True):
-#         try:
-#             # ✅ Use your trained model for prediction
-#             input_features = [[pm25, pm10, no2, so2, co, ozone]]
-#             predicted_value = model.predict(input_features)[0]
-#             predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
-
-#             # ✅ Show only category (no numeric value)
-#             st.success(f"**Predicted AQI Category:** {predicted_category}")
-
-#         except Exception as e:
-#             st.error(f"Prediction failed: {e}")
-
-
 # -------------------------
-# Page 5: Predict Delhi AQI Category
+# Page 5: Predict Delhi AQI Category (isolated)
 # -------------------------
 # elif page.startswith("5)"):
 #     import datetime
 #     import numpy as np
 
 #     st.title("🔮 Predict Delhi AQI Category")
-#     st.markdown("Enter pollutant levels below and click **Predict**. Results are saved and used by Page 6.")
+#     st.markdown("Enter pollutant levels below and click **Predict**. This prediction is independent of other 'present/custom' controls.")
 
-#     # Load model & encoder (safe)
+#     # Try load model/encoder using your helper if it exists (safe fallback)
 #     try:
 #         model, encoder = load_model_and_encoder()
 #     except Exception:
 #         model, encoder = None, None
 
-#     # Safe default columns order
+#     # Use a safe canonical order for pollutants (will not read global 'values')
 #     cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
-#     # Prefill from session_state.values if present
-#     defaults = st.session_state.get("values", {c: 0.0 for c in cols})
-#     # If defaults missing, set sensible defaults
-#     if all(v == 0.0 for v in defaults.values()):
-#         defaults = {"PM2.5": 80.0, "PM10": 120.0, "NO2": 40.0, "SO2": 10.0, "CO": 1.0, "Ozone": 50.0}
-
-#     # Input layout (two rows of 3)
+#     # Page-5-specific widgets (unique keys so they don't clash)
 #     col1, col2, col3 = st.columns(3)
 #     col4, col5, col6 = st.columns(3)
 
-#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=float(defaults.get("PM2.5", 80.0)), step=1.0, key="p5_pm25")
-#     pm10 = col2.number_input("PM10 (µg/m³)",  min_value=0.0, value=float(defaults.get("PM10", 120.0)), step=1.0, key="p5_pm10")
-#     no2  = col3.number_input("NO2 (µg/m³)",   min_value=0.0, value=float(defaults.get("NO2", 40.0)), step=1.0, key="p5_no2")
-#     so2  = col4.number_input("SO2 (µg/m³)",   min_value=0.0, value=float(defaults.get("SO2", 10.0)), step=1.0, key="p5_so2")
-#     co   = col5.number_input("CO (mg/m³)",    min_value=0.0, value=float(defaults.get("CO", 1.0)), step=0.1, key="p5_co")
-#     ozone= col6.number_input("Ozone (µg/m³)", min_value=0.0, value=float(defaults.get("Ozone", 50.0)), step=1.0, key="p5_ozone")
+#     p5_pm25  = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0, key="p5_pm25")
+#     p5_pm10  = col2.number_input("PM10 (µg/m³)",  min_value=0.0, value=120.0, step=1.0, key="p5_pm10")
+#     p5_no2   = col3.number_input("NO2 (µg/m³)",   min_value=0.0, value=40.0,  step=1.0, key="p5_no2")
+#     p5_so2   = col4.number_input("SO2 (µg/m³)",   min_value=0.0, value=10.0,  step=1.0, key="p5_so2")
+#     p5_co    = col5.number_input("CO (mg/m³)",    min_value=0.0, value=1.0,   step=0.1, key="p5_co")
+#     p5_ozone = col6.number_input("Ozone (µg/m³)", min_value=0.0, value=50.0,  step=1.0, key="p5_ozone")
 
-#     # Predict button
-#     if st.button("🚀 Predict", use_container_width=True):
+#     # Small helper local mapper (used if model/encoder not present)
+#     def _simple_category_from_aqi(aqi: float) -> str:
+#         try: aqi = float(aqi)
+#         except: return "Unknown"
+#         if aqi <= 50: return "Good"
+#         if aqi <= 100: return "Satisfactory"
+#         if aqi <= 200: return "Moderate"
+#         if aqi <= 300: return "Poor"
+#         if aqi <= 400: return "Very Poor"
+#         return "Severe"
+
+#     # Predict button: uses only the Page-5 widgets (guaranteed independence)
+#     if st.button("🚀 Predict (use Page-5 inputs only)", use_container_width=True):
 #         try:
-#             # Build input vector in expected order
-#             input_vec = [[float(pm25), float(pm10), float(no2), float(so2), float(co), float(ozone)]]
+#             input_vec = [[float(p5_pm25), float(p5_pm10), float(p5_no2), float(p5_so2), float(p5_co), float(p5_ozone)]]
 
-#             # Local fallback category mapper
-#             def _simple_category_from_aqi(aqi: float) -> str:
-#                 try: aqi = float(aqi)
-#                 except: return "Unknown"
-#                 if aqi <= 50: return "Good"
-#                 if aqi <= 100: return "Satisfactory"
-#                 if aqi <= 200: return "Moderate"
-#                 if aqi <= 300: return "Poor"
-#                 if aqi <= 400: return "Very Poor"
-#                 return "Severe"
-
+#             predicted_value = None   # numeric AQI (kept internally but not shown)
 #             predicted_label = None
-#             predicted_value = None  # numeric AQI (kept but we won't display it)
 
-#             # Try model prediction if available
 #             if model is not None:
 #                 try:
 #                     raw = model.predict(input_vec)
 #                     y = raw[0] if hasattr(raw, "__len__") else raw
-#                     # numeric AQI attempt
+
+#                     # Try to get numeric AQI
 #                     try:
 #                         predicted_value = float(y)
 #                     except Exception:
 #                         predicted_value = None
 
-#                     # If encoder exists, try to decode label
+#                     # If encoder exists, try to decode class -> label (best-effort)
 #                     if encoder is not None:
 #                         try:
-#                             # If model outputs numeric AQI but encoder encodes by class index, round
-#                             if predicted_value is not None:
-#                                 label = encoder.inverse_transform([int(round(predicted_value))])[0]
-#                             else:
-#                                 label = encoder.inverse_transform([int(y)])[0]
-#                             predicted_label = label
+#                             # encoder likely expects integer class index or encoded label
+#                             # try both approaches
+#                             try:
+#                                 predicted_label = encoder.inverse_transform([int(round(predicted_value))])[0]
+#                             except Exception:
+#                                 predicted_label = encoder.inverse_transform([int(round(float(y)))])[0]
 #                         except Exception:
-#                             predicted_label = _simple_category_from_aqi(predicted_value if predicted_value is not None else 0.0)
-#                     else:
-#                         predicted_label = _simple_category_from_aqi(predicted_value if predicted_value is not None else 0.0)
+#                             predicted_label = None
+
+#                     # If no encoder or decoding failed, map numeric -> category
+#                     if not predicted_label:
+#                         if predicted_value is not None:
+#                             predicted_label = _simple_category_from_aqi(predicted_value)
+#                         else:
+#                             # final fallback: stringified model output (if meaningful)
+#                             predicted_label = str(y)
 
 #                 except Exception as e_model:
-#                     # If model predict fails, fallback to deterministic heuristic
-#                     st.info(f"Model prediction error (fallback used): {e_model}")
+#                     # model failed -> fallback deterministic
+#                     st.info(f"Model predict failed, using deterministic fallback: {e_model}")
 #                     model = None
 
 #             if model is None:
-#                 # deterministic fallback: weighted sum → pseudo-AQI
-#                 w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.20, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
-#                 vals = {"PM2.5": pm25, "PM10": pm10, "NO2": no2, "SO2": so2, "CO": co, "Ozone": ozone}
-#                 weighted = sum(float(vals[k]) * w[k] for k in w)
+#                 # Deterministic fallback: weighted pseudo-AQI
+#                 weights = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.20, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+#                 vals = {"PM2.5": p5_pm25, "PM10": p5_pm10, "NO2": p5_no2, "SO2": p5_so2, "CO": p5_co, "Ozone": p5_ozone}
+#                 weighted = sum(float(vals[k]) * weights[k] for k in weights)
 #                 predicted_value = float(max(0.0, min(weighted, 500.0)))
 #                 predicted_label = _simple_category_from_aqi(predicted_value)
 
-#             # Save inputs + prediction into session_state so Page 6 can use EXACTLY these results
+#             # Save authoritative prediction and inputs (these are the canonical Page-5 outputs)
 #             st.session_state["last_inputs"] = {
-#                 "PM2.5": float(pm25), "PM10": float(pm10), "NO2": float(no2),
-#                 "SO2": float(so2), "CO": float(co), "Ozone": float(ozone)
+#                 "PM2.5": float(p5_pm25), "PM10": float(p5_pm10), "NO2": float(p5_no2),
+#                 "SO2": float(p5_so2),   "CO": float(p5_co),      "Ozone": float(p5_ozone)
 #             }
 #             st.session_state["last_prediction"] = {
 #                 "category": str(predicted_label),
@@ -2556,132 +2487,59 @@ elif page.startswith("4)"):
 #                 "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 #             }
 
-#             # Also keep canonical current values in st.session_state.values for other pages
-#             st.session_state["values"] = st.session_state["last_inputs"].copy()
+#             # IMPORTANT: do NOT overwrite global present/custom session values here.
+#             # st.session_state.values is intentionally left unchanged to maintain independence.
 
-#             # Display only the category (no numeric value as you requested)
+#             # Show only category (no numeric AQI)
 #             st.success(f"**Predicted AQI Category:** {predicted_label}")
-#             st.caption("Prediction saved — go to Page 6 to compare Predicted Levels with Delhi Avg & WHO limits.")
+#             st.caption("Prediction saved. Go to Page 6 to compare Predicted Levels with Delhi Avg & WHO limits.")
 
 #         except Exception as e:
 #             st.error(f"Prediction failed: {e}")
 
-# -------------------------
-# Page 5: Predict Delhi AQI Category (isolated)
-# -------------------------
-elif page.startswith("5)"):
-    import datetime
-    import numpy as np
-
-    st.title("🔮 Predict Delhi AQI Category")
-    st.markdown("Enter pollutant levels below and click **Predict**. This prediction is independent of other 'present/custom' controls.")
-
-    # Try load model/encoder using your helper if it exists (safe fallback)
-    try:
-        model, encoder = load_model_and_encoder()
-    except Exception:
-        model, encoder = None, None
-
-    # Use a safe canonical order for pollutants (will not read global 'values')
-    cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
-
-    # Page-5-specific widgets (unique keys so they don't clash)
-    col1, col2, col3 = st.columns(3)
-    col4, col5, col6 = st.columns(3)
-
-    p5_pm25  = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0, key="p5_pm25")
-    p5_pm10  = col2.number_input("PM10 (µg/m³)",  min_value=0.0, value=120.0, step=1.0, key="p5_pm10")
-    p5_no2   = col3.number_input("NO2 (µg/m³)",   min_value=0.0, value=40.0,  step=1.0, key="p5_no2")
-    p5_so2   = col4.number_input("SO2 (µg/m³)",   min_value=0.0, value=10.0,  step=1.0, key="p5_so2")
-    p5_co    = col5.number_input("CO (mg/m³)",    min_value=0.0, value=1.0,   step=0.1, key="p5_co")
-    p5_ozone = col6.number_input("Ozone (µg/m³)", min_value=0.0, value=50.0,  step=1.0, key="p5_ozone")
-
-    # Small helper local mapper (used if model/encoder not present)
-    def _simple_category_from_aqi(aqi: float) -> str:
-        try: aqi = float(aqi)
-        except: return "Unknown"
-        if aqi <= 50: return "Good"
-        if aqi <= 100: return "Satisfactory"
-        if aqi <= 200: return "Moderate"
-        if aqi <= 300: return "Poor"
-        if aqi <= 400: return "Very Poor"
-        return "Severe"
-
-    # Predict button: uses only the Page-5 widgets (guaranteed independence)
-    if st.button("🚀 Predict (use Page-5 inputs only)", use_container_width=True):
-        try:
-            input_vec = [[float(p5_pm25), float(p5_pm10), float(p5_no2), float(p5_so2), float(p5_co), float(p5_ozone)]]
-
-            predicted_value = None   # numeric AQI (kept internally but not shown)
-            predicted_label = None
-
-            if model is not None:
-                try:
-                    raw = model.predict(input_vec)
-                    y = raw[0] if hasattr(raw, "__len__") else raw
-
-                    # Try to get numeric AQI
-                    try:
-                        predicted_value = float(y)
-                    except Exception:
-                        predicted_value = None
-
-                    # If encoder exists, try to decode class -> label (best-effort)
-                    if encoder is not None:
-                        try:
-                            # encoder likely expects integer class index or encoded label
-                            # try both approaches
-                            try:
-                                predicted_label = encoder.inverse_transform([int(round(predicted_value))])[0]
-                            except Exception:
-                                predicted_label = encoder.inverse_transform([int(round(float(y)))])[0]
-                        except Exception:
-                            predicted_label = None
-
-                    # If no encoder or decoding failed, map numeric -> category
-                    if not predicted_label:
-                        if predicted_value is not None:
-                            predicted_label = _simple_category_from_aqi(predicted_value)
-                        else:
-                            # final fallback: stringified model output (if meaningful)
-                            predicted_label = str(y)
-
-                except Exception as e_model:
-                    # model failed -> fallback deterministic
-                    st.info(f"Model predict failed, using deterministic fallback: {e_model}")
-                    model = None
-
-            if model is None:
-                # Deterministic fallback: weighted pseudo-AQI
-                weights = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.20, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
-                vals = {"PM2.5": p5_pm25, "PM10": p5_pm10, "NO2": p5_no2, "SO2": p5_so2, "CO": p5_co, "Ozone": p5_ozone}
-                weighted = sum(float(vals[k]) * weights[k] for k in weights)
-                predicted_value = float(max(0.0, min(weighted, 500.0)))
-                predicted_label = _simple_category_from_aqi(predicted_value)
-
-            # Save authoritative prediction and inputs (these are the canonical Page-5 outputs)
-            st.session_state["last_inputs"] = {
-                "PM2.5": float(p5_pm25), "PM10": float(p5_pm10), "NO2": float(p5_no2),
-                "SO2": float(p5_so2),   "CO": float(p5_co),      "Ozone": float(p5_ozone)
-            }
-            st.session_state["last_prediction"] = {
-                "category": str(predicted_label),
-                "value": float(predicted_value) if predicted_value is not None else None,
-                "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            }
-
-            # IMPORTANT: do NOT overwrite global present/custom session values here.
-            # st.session_state.values is intentionally left unchanged to maintain independence.
-
-            # Show only category (no numeric AQI)
-            st.success(f"**Predicted AQI Category:** {predicted_label}")
-            st.caption("Prediction saved. Go to Page 6 to compare Predicted Levels with Delhi Avg & WHO limits.")
-
-        except Exception as e:
-            st.error(f"Prediction failed: {e}")
 
 
+# ---------------- Page 5: Predict AQI ----------------
+import streamlit as st
+import joblib
 
+# Load Model + Encoder
+rf_model = joblib.load("aqi_rf_model.joblib")
+label_encoder = joblib.load("label_encoder.joblib")
+
+st.title("🔮 Delhi AQI Prediction")
+
+st.markdown("This page predicts **Delhi AQI Category** using your trained ML model. "
+            "All major pollutants (PM2.5, PM10, NO2, SO2, etc.) are considered.")
+
+# Example input (average values from dataset)
+pm25 = 120  
+pm10 = 180  
+no2 = 60  
+so2 = 20  
+
+# Prepare features
+features = [[pm25, pm10, no2, so2]]
+
+# Predict button
+if st.button("🚀 Predict AQI"):
+    prediction = rf_model.predict(features)
+    category = label_encoder.inverse_transform(prediction)[0]
+
+    # Save results to session_state
+    st.session_state.prediction_result = {
+        "AQI Value": prediction[0],
+        "Category": category,
+        "Inputs": {
+            "PM2.5": pm25,
+            "PM10": pm10,
+            "NO2": no2,
+            "SO2": so2
+        }
+    }
+
+    # Switch to next page
+    switch_page("Prediction Results")
 
 
 
