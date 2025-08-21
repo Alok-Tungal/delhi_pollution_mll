@@ -871,42 +871,127 @@ def ensure_session_defaults():
 # ──────────────────────────────
 # PAGE 1: WELCOME + QR
 # ──────────────────────────────
+# if page.startswith("1)"):
+#     st.markdown("<h1 style='text-align:center; color:#2E86C1;'>🌍 Delhi AQI Prediction Dashboard</h1>", unsafe_allow_html=True)
+#     c1, c2 = st.columns([2,1])
+#     with c1:
+#         st.subheader("✨ Welcome!")
+#         st.markdown("""
+#         This interactive dashboard helps you understand and predict
+#         <b>Delhi's Air Quality Index (AQI)</b> 📊.<br>
+#         ✅ Real-time like predictions &nbsp; ✅ Pollutant-wise insights &nbsp; ✅ Health recommendations 🩺
+#         """, unsafe_allow_html=True)
+#         st.markdown("### 🌟 Key Pollutants Tracked")
+#         def _card(bg_hex, title, subtitle):
+#             return f"<div style='background:#{bg_hex}; padding:16px; border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.04);'>{title}<br><small style='color:#333;'>{subtitle}</small></div>"
+#         r1c1,r1c2,r1c3 = st.columns(3)
+#         r1c1.markdown(_card("FADBD8","🌫️ <b>PM2.5</b>","Fine particulate matter"), unsafe_allow_html=True)
+#         r1c2.markdown(_card("D6EAF8","🌪️ <b>PM10</b>","Coarse particles"), unsafe_allow_html=True)
+#         r1c3.markdown(_card("E8DAEF","🌬️ <b>NO₂</b>","Nitrogen dioxide"), unsafe_allow_html=True)
+#         r2c1,r2c2,r2c3 = st.columns(3)
+#         r2c1.markdown(_card("FCF3CF","🔥 <b>SO₂</b>","Sulfur dioxide"), unsafe_allow_html=True)
+#         r2c2.markdown(_card("D5F5E3","🟢 <b>CO</b>","Carbon monoxide"), unsafe_allow_html=True)
+#         r2c3.markdown(_card("FDEDEC","☀️ <b>O₃</b>","Ozone"), unsafe_allow_html=True)
+#     with c2:
+#         st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open on mobile", use_container_width=True)
+
+
+if "nav" not in st.session_state:
+    st.session_state.nav = "1) Understand + Share"
+    
 if page.startswith("1)"):
-    st.markdown("<h1 style='text-align:center; color:#2E86C1;'>🌍 Delhi AQI Prediction Dashboard</h1>", unsafe_allow_html=True)
-    c1, c2 = st.columns([2,1])
+    # Nice title + thin brand line
+    st.markdown(
+        "<h1 style='text-align:center; color:#2E86C1;'>🌍 Delhi AQI Prediction Dashboard</h1>",
+        unsafe_allow_html=True
+    )
+    st.markdown("<hr style='border:2px solid #2E86C1; margin-top:4px;'>", unsafe_allow_html=True)
+
+    # Two-column layout: Left = intro + features + pollutant cards | Right = QR
+    c1, c2 = st.columns([2, 1], vertical_alignment="top")
+
     with c1:
         st.subheader("✨ Welcome!")
-        st.markdown("""
-        This interactive dashboard helps you understand and predict
-        <b>Delhi's Air Quality Index (AQI)</b> 📊.<br>
-        ✅ Real-time like predictions &nbsp; ✅ Pollutant-wise insights &nbsp; ✅ Health recommendations 🩺
-        """, unsafe_allow_html=True)
+        # Intro + features line (your request: pollutants section comes right below this)
+        st.markdown(
+            """
+            <div style="font-size:18px; line-height:1.6; color:#444;">
+              This interactive dashboard helps you understand and predict
+              <b>Delhi's Air Quality Index (AQI)</b> 📊.
+              <br><br>
+              ✅ Real-time like predictions &nbsp;&nbsp; ✅ Pollutant-wise insights &nbsp;&nbsp; ✅ Health recommendations 🩺
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # 🔻 Right below features: Key Pollutants Tracked
         st.markdown("### 🌟 Key Pollutants Tracked")
-        def _card(bg_hex, title, subtitle):
-            return f"<div style='background:#{bg_hex}; padding:16px; border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.04);'>{title}<br><small style='color:#333;'>{subtitle}</small></div>"
-        r1c1,r1c2,r1c3 = st.columns(3)
-        r1c1.markdown(_card("FADBD8","🌫️ <b>PM2.5</b>","Fine particulate matter"), unsafe_allow_html=True)
-        r1c2.markdown(_card("D6EAF8","🌪️ <b>PM10</b>","Coarse particles"), unsafe_allow_html=True)
-        r1c3.markdown(_card("E8DAEF","🌬️ <b>NO₂</b>","Nitrogen dioxide"), unsafe_allow_html=True)
-        r2c1,r2c2,r2c3 = st.columns(3)
-        r2c1.markdown(_card("FCF3CF","🔥 <b>SO₂</b>","Sulfur dioxide"), unsafe_allow_html=True)
-        r2c2.markdown(_card("D5F5E3","🟢 <b>CO</b>","Carbon monoxide"), unsafe_allow_html=True)
-        r2c3.markdown(_card("FDEDEC","☀️ <b>O₃</b>","Ozone"), unsafe_allow_html=True)
+
+        # Small helper for pretty colored cards
+        def _card(bg_hex: str, title_html: str, subtitle: str) -> str:
+            return (
+                f"<div style='background:#{bg_hex}; padding:16px; border-radius:16px;"
+                f"box-shadow:0 2px 10px rgba(0,0,0,.05); border:1px solid rgba(0,0,0,.04);'>"
+                f"{title_html}<br><small style='color:#333;'>{subtitle}</small></div>"
+            )
+
+        # Row 1
+        r1c1, r1c2, r1c3 = st.columns(3)
+        with r1c1:
+            st.markdown(_card("FADBD8", "🌫️ <b>PM2.5</b>", "Fine particulate matter"), unsafe_allow_html=True)
+        with r1c2:
+            st.markdown(_card("D6EAF8", "🌪️ <b>PM10</b>", "Coarse particles"), unsafe_allow_html=True)
+        with r1c3:
+            st.markdown(_card("E8DAEF", "🌬️ <b>NO₂</b>", "Nitrogen dioxide"), unsafe_allow_html=True)
+
+        # Row 2
+        r2c1, r2c2, r2c3 = st.columns(3)
+        with r2c1:
+            st.markdown(_card("FCF3CF", "🔥 <b>SO₂</b>", "Sulfur dioxide"), unsafe_allow_html=True)
+        with r2c2:
+            st.markdown(_card("D5F5E3", "🟢 <b>CO</b>", "Carbon monoxide"), unsafe_allow_html=True)
+        with r2c3:
+            st.markdown(_card("FDEDEC", "☀️ <b>O₃</b>", "Ozone"), unsafe_allow_html=True)
+
+        st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
     with c2:
-        st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open on mobile", use_container_width=True)
+        # Your QR remains exactly as before
+        st.image(
+            make_qr_bytes(APP_URL),
+            caption="📱 Scan to open on mobile",
+            use_container_width=True
+        )
+
+    # Subtle footer hint
+    st.markdown("<hr style='margin:18px 0 6px 0;'>", unsafe_allow_html=True)
+    st.markdown(
+        "<div style='text-align:center; color:#666;'>Use the sidebar to navigate the app</div>",
+        unsafe_allow_html=True
+    )
 
 # ──────────────────────────────
 # PAGE 2: AQI & HEALTH TIPS
 # ──────────────────────────────
 elif page.startswith("2)"):
     st.title("📚 Learn About AQI & Health Tips")
+
     st.markdown("""
     **AQI Categories (India - simplified):**
     - **Good (0–50):** Enjoy outdoor activities.
-    - **Moderate (51–200):** Reduce prolonged outdoor exertion.
+    - **Satisfactory/Moderate (51–100):** Sensitive groups take care.
+    - **Moderate (101–200):** Reduce prolonged outdoor exertion.
     - **Poor (201–300):** Consider masks; limit outdoor time.
     - **Very Poor (301–400):** Avoid outdoor exertion; use purifiers.
-    - **Severe (401–500):** Stay indoors; seek medical advice.
+    - **Severe (401–500):** Stay indoors; seek medical advice for symptoms.
+
+    **General Health Tips:**
+    - Track AQI daily and plan outdoor tasks on lower-AQI hours.
+    - Use N95/FFP2 masks during poor days.
+    - Keep windows closed during peak pollution; ventilate when cleaner.
+    - Use HEPA purifiers indoors.
+    - Stay hydrated; saline/nasal rinse after heavy exposure.
     """)
 
 # ──────────────────────────────
