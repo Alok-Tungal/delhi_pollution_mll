@@ -922,70 +922,47 @@ elif page.startswith("4)"):
 # 5) Predict Delhi AQI Category
 # ──────────────────────────────
 elif page.startswith("5)"):
-    st.title("🔮 Predict Delhi AQI Category")
 
-    # Ensure values exist in session_state
-    if "values" not in st.session_state or not st.session_state.values:
-        st.session_state.values = {
-            "PM2.5": 80,
-            "PM10": 120,
-            "NO2": 40,
-            "SO2": 10,
-            "CO": 1.0,
-            "Ozone": 50
-        }
+    st.title("🔮 Predict Delhi AQI Category (Random Forest)")
 
-    vals = st.session_state.values
+    # --- Inputs for all 6 pollutants ---
+    pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+    pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+    no2  = st.number_input("NO2 (µg/m³)", min_value=0.0, value=40.0, step=1.0)
+    so2  = st.number_input("SO2 (µg/m³)", min_value=0.0, value=10.0, step=1.0)
+    co   = st.number_input("CO (mg/m³)", min_value=0.0, value=1.0, step=0.1)
+    o3   = st.number_input("O3 (µg/m³)", min_value=0.0, value=50.0, step=1.0)
 
-    # Two-column layout for sliders
-    cols1, cols2 = st.columns(2)
-    with cols1:
-        pm25 = st.slider("PM2.5 (µg/m³)", 0, 500, int(vals.get("PM2.5", 80)))
-        pm10 = st.slider("PM10 (µg/m³)", 0, 500, int(vals.get("PM10", 120)))
-        no2  = st.slider("NO2 (µg/m³)", 0, 300, int(vals.get("NO2", 40)))
-    with cols2:
-        so2 = st.slider("SO2 (µg/m³)", 0, 200, int(vals.get("SO2", 10)))
-        co  = st.slider("CO (mg/m³)", 0, 10, float(vals.get("CO", 1.0)))
-        o3  = st.slider("Ozone (µg/m³)", 0, 300, int(vals.get("Ozone", 50)))
-
-    # Update session_state values
-    st.session_state.values.update({
-        "PM2.5": pm25,
-        "PM10": pm10,
-        "NO2": no2,
-        "SO2": so2,
-        "CO": co,
-        "Ozone": o3
-    })
-
-    # Predict button
     if st.button("🚀 Predict AQI"):
-        aqi_val, aqi_label = predict_aqi(st.session_state.values)
 
-        if aqi_label:
-            st.session_state.predicted_values = st.session_state.values.copy()
-            st.session_state.predicted_label = aqi_label
+        # Convert input into array
+        X_input = np.array([[pm25, pm10, no2, so2, co, o3]])
 
-            # Display badge + value
-            st.markdown(
-                f"<h2>AQI Prediction: <span class='badge {badge_class(aqi_label)}'>{aqi_label}</span> ({aqi_val})</h2>",
-                unsafe_allow_html=True
-            )
-            st.success("✅ Prediction complete!")
+        try:
+            # Load trained Random Forest model & label encoder
+            MODEL = joblib.load("aqi_rf_model.joblib")
+            ENCODER = joblib.load("label_encoder.joblib")
 
-            # Optional SHAP explanation
-            if shap and "MODEL" in st.session_state and st.session_state.MODEL:
-                if st.checkbox("Show SHAP Explanation", value=False):
-                    explainer = shap.Explainer(
-                        st.session_state.MODEL,
-                        np.array([list(st.session_state.values.values())])
-                    )
-                    shap_values = explainer(np.array([list(st.session_state.values.values())]))
-                    st.set_option('deprecation.showPyplotGlobalUse', False)
-                    shap.plots.bar(shap_values)
+            # Predict category
+            y_pred_class = MODEL.predict(X_input)[0]
+            y_pred_label = ENCODER.inverse_transform([y_pred_class])[0]
 
-        else:
-            st.error("Prediction failed! Check model availability.")
+            # Save predicted values & category to session_state
+            st.session_state["predicted_values"] = {
+                "PM2.5": pm25,
+                "PM10": pm10,
+                "NO2": no2,
+                "SO2": so2,
+                "CO": co,
+                "O3": o3
+            }
+            st.session_state["predicted_label"] = y_pred_label
+
+            st.success(f"Predicted AQI Category: **{y_pred_label}**")
+            st.write("✅ Values stored! Now go to **Page 6** for comparison with Delhi Avg & WHO.")
+
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
 
 
 # ──────────────────────────────
