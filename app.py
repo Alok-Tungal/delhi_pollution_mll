@@ -2412,6 +2412,105 @@ elif page.startswith("4)"):
 # page = st.session_state["nav"]
 
 
+# -------------------------
+# Page 5: Predict Delhi AQI Category
+# -------------------------
+elif page.startswith("5)"):
+    st.title("🔮 Predict Delhi AQI Category")
+
+    # Safe defaults if session values missing
+    default_vals = {
+        "PM2.5": 40.0, "PM10": 80.0, "NO2": 25.0, "SO2": 15.0, "CO": 0.8, "Ozone": 30.0
+    }
+    values_raw = st.session_state.get("values", default_vals)
+
+    # Show the current (raw) inputs to the user (do NOT double-normalize for display)
+    st.markdown("Review your inputs before predicting:")
+    try:
+        st.dataframe(values_table(values_raw), use_container_width=True)
+    except Exception:
+        # fallback if values_table is not available
+        st.dataframe(pd.DataFrame([values_raw]).T.rename(columns={0: "Value"}), use_container_width=True)
+
+    # When user clicks, prepare model input and predict
+    if st.button("🚀 Run Prediction", key="run_prediction", use_container_width=True):
+        # Normalize only for model input if normalizer exists
+        try:
+            model_input = normalize_values(values_raw)
+        except Exception:
+            model_input = values_raw
+
+        # Try the common predict_aqi signatures; fallback to heuristic if all fail
+        aqi_val, aqi_label = None, None
+        try:
+            aqi_val, aqi_label = predict_aqi(model_input, MODEL, ENCODER)
+        except Exception:
+            try:
+                aqi_val, aqi_label = predict_aqi(model_input, MODEL)
+            except Exception:
+                try:
+                    # Some legacy signatures take six numeric args
+                    aqi_val, aqi_label = predict_aqi(
+                        float(values_raw.get("PM2.5", 0.0)),
+                        float(values_raw.get("PM10", 0.0)),
+                        float(values_raw.get("NO2", 0.0)),
+                        float(values_raw.get("SO2", 0.0)),
+                        float(values_raw.get("CO", 0.0)),
+                        float(values_raw.get("Ozone", 0.0)),
+                    )
+                except Exception:
+                    # Final safe heuristic fallback (weighted sum, clipped)
+                    w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.20, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+                    score = 0.0
+                    try:
+                        score = sum(float(model_input.get(k, 0.0)) * w[k] for k in w) / sum(w.values())
+                    except Exception:
+                        score = sum(float(values_raw.get(k, 0.0)) * w[k] for k in w) / sum(w.values())
+                    aqi_val = int(max(0, min(500, score)))
+                    try:
+                        aqi_label = simple_category_from_aqi(aqi_val)
+                    except Exception:
+                        # small local fallback
+                        if aqi_val <= 50: aqi_label = "Good"
+                        elif aqi_val <= 100: aqi_label = "Satisfactory"
+                        elif aqi_val <= 200: aqi_label = "Moderate"
+                        elif aqi_val <= 300: aqi_label = "Poor"
+                        elif aqi_val <= 400: aqi_label = "Very Poor"
+                        else: aqi_label = "Severe"
+
+        # Coerce safe types
+        try:
+            aqi_val = int(aqi_val)
+        except Exception:
+            try:
+                aqi_val = int(float(aqi_val))
+            except Exception:
+                aqi_val = 0
+        aqi_label = str(aqi_label) if aqi_label is not None else simple_category_from_aqi(aqi_val)
+
+        # Save last prediction to session state
+        st.session_state["last_prediction"] = (aqi_val, aqi_label)
+
+        # Display nicely (uses your badge_class if available)
+        try:
+            bc = badge_class(aqi_label)
+            st.markdown(
+                f"""
+                <div class="card" style="text-align:center">
+                    <div style="font-size:46px; font-weight:800; line-height:1">AQI {aqi_val}</div>
+                    <div class="badge {bc}" style="margin-top:8px; font-size:16px">{aqi_label}</div>
+                    <div style="margin-top:6px"><small class="mono">Model: Random Forest (+safe fallback)</small></div>
+                </div>
+                """,
+                unsafe_allow_html=True,
+            )
+        except Exception:
+            st.success(f"🌍 Predicted AQI: **{aqi_val}** — {aqi_label}")
+
+    # Show last prediction compactly (if exists)
+    if "last_prediction" in st.session_state and st.session_state["last_prediction"] is not None:
+        lpv, lpl = st.session_state["last_prediction"]
+        st.caption(f"Last prediction: **AQI {int(lpv)} ({lpl})**")
 
 
 
@@ -2446,40 +2545,85 @@ elif page.startswith("4)"):
 
 
 # ---------------- Sidebar navigation (single-router, unique widget keys) ----------------
-page_options = [
-    "1) Understand + Share",
-    "2) Learn About AQI & Health Tips",
-    "3) Try a Sample AQI Scenario",
-    "4) Preset or Custom Inputs",
-    "5) Predict Delhi AQI Category",
-    "6) Compare with Delhi Avg & WHO",
-]
+# page_options = [
+#     "1) Understand + Share",
+#     "2) Learn About AQI & Health Tips",
+#     "3) Try a Sample AQI Scenario",
+#     "4) Preset or Custom Inputs",
+#     "5) Predict Delhi AQI Category",
+#     "6) Compare with Delhi Avg & WHO",
+# ]
 
-# Ensure canonical routing key exists in session
-if "nav" not in st.session_state:
-    st.session_state["nav"] = page_options[0]   # default: first page
+# # Ensure canonical routing key exists in session
+# if "nav" not in st.session_state:
+#     st.session_state["nav"] = page_options[0]   # default: first page
 
-# Compute safe index
-default_nav = st.session_state.get("nav", page_options[0])
-default_index = page_options.index(default_nav) if default_nav in page_options else 0
+# # Compute safe index
+# default_nav = st.session_state.get("nav", page_options[0])
+# default_index = page_options.index(default_nav) if default_nav in page_options else 0
 
-with st.sidebar:
-    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-    st.markdown("### Delhi AQI App")
-    # <- IMPORTANT: this radio uses key="sidebar_nav" (unique)
-    sidebar_choice = st.radio(
-        "Navigation",
-        options=page_options,
-        index=default_index,
-        key="sidebar_nav",
-    )
-    st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+# with st.sidebar:
+#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+#     st.markdown("### Delhi AQI App")
+#     # <- IMPORTANT: this radio uses key="sidebar_nav" (unique)
+#     sidebar_choice = st.radio(
+#         "Navigation",
+#         options=page_options,
+#         index=default_index,
+#         key="sidebar_nav",
+#     )
+#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-# Sync canonical routing variable with the widget choice
-# (only assign if changed to avoid unnecessary writes)
-if st.session_state.get("nav") != sidebar_choice:
-    st.session_state["nav"] = sidebar_choice
+# # Sync canonical routing variable with the widget choice
+# # (only assign if changed to avoid unnecessary writes)
+# if st.session_state.get("nav") != sidebar_choice:
+#     st.session_state["nav"] = sidebar_choice
 
-# local convenience variable for existing checks
-page = st.session_state["nav"]
+# # local convenience variable for existing checks
+# page = st.session_state["nav"]
+
+
+
+# -------------------------
+# Page 6: Compare with Delhi Averages & WHO Limits
+# -------------------------
+elif page.startswith("6)"):
+    st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
+
+    # Safe defaults used if canonical values missing
+    default_vals = {"PM2.5": 40.0, "PM10": 80.0, "NO2": 25.0, "SO2": 15.0, "CO": 0.8, "Ozone": 30.0}
+    values_raw = st.session_state.get("values", default_vals)
+
+    # Use comparison_frame if available; otherwise build dataframe safely
+    try:
+        df_cmp = comparison_frame(values_raw)
+    except Exception:
+        # Build DataFrame with columns: Pollutant, Your Level, Delhi Avg, WHO Limit
+        rows = []
+        for p in COLUMNS:
+            rows.append({
+                "Pollutant": p,
+                "Your Level": float(values_raw.get(p, 0.0)),
+                "Delhi Avg": float(DELHI_AVG.get(p, 0.0)) if "DELHI_AVG" in globals() else 0.0,
+                "WHO Limit": float(WHO_LIMITS.get(p, 0.0)) if "WHO_LIMITS" in globals() else 0.0,
+            })
+        df_cmp = pd.DataFrame(rows)
+
+    st.dataframe(df_cmp, use_container_width=True)
+
+    st.markdown("#### Visual Comparison")
+    # Melt long and plot per pollutant (robust to df shape)
+    for p in COLUMNS:
+        row = df_cmp[df_cmp["Pollutant"] == p]
+        if row.empty:
+            continue
+        your = float(row["Your Level"].iloc[0])
+        davg = float(row["Delhi Avg"].iloc[0])
+        who = float(row["WHO Limit"].iloc[0])
+        ser = pd.Series([your, davg, who], index=["Your Level", "Delhi Avg", "WHO Limit"])
+        st.markdown(f"**{p}**")
+        st.bar_chart(ser, use_container_width=True)
+
+    st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
+
 
