@@ -2570,27 +2570,51 @@ elif page.startswith("6)"):
 
     st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-    # 🔹 Get the same values stored from Page 5
-    if "values" in st.session_state:
-        values = st.session_state.values  
-    else:
+    # 🔹 Ensure values exist
+    if "values" not in st.session_state or "predicted_aqi" not in st.session_state:
         st.error("⚠️ No predicted values found. Please complete Step 5 first.")
         st.stop()
+
+    # Fetch values from session
+    values = st.session_state.values  
+    aqi_val = st.session_state.predicted_aqi
+    aqi_label = st.session_state.predicted_label
+
+    # Show predicted AQI (carried from Page 5)
+    st.metric(label="Predicted AQI", value=f"{aqi_val} ({aqi_label})")
 
     # Build comparison frame and rename "Your Level" → "Predicted Level"
     df_cmp = comparison_frame(values).rename(columns={"Your Level": "Predicted Level"})
 
-    # Display table (Predicted vs Delhi Avg vs WHO Limit)
+    # Display table
     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
 
     st.markdown("#### Visual Comparison")
-    # Melt for bar chart plotting
+    # Melt for plotting
     df_long = df_cmp.melt(
         id_vars="Pollutant",
         value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
         var_name="Metric",
         value_name="Level"
     )
+
+    for p in COLUMNS:
+        sub = (
+            df_long[df_long["Pollutant"] == p]
+            .set_index("Metric")["Level"]
+            .reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+        )
+        st.markdown(f"**{p}**")
+        st.bar_chart(sub, use_container_width=True)
+
+    st.info("Tip: Aim to keep each pollutant at or below the WHO guideline when possible.")
+
+# ──────────────────────────────
+# FOOTER
+# ──────────────────────────────
+st.markdown("---")
+st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
+
 
     for p in COLUMNS:
         sub = (
