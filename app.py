@@ -399,7 +399,7 @@ if "nav" not in st.session_state:
 #         "4) Preset or Custom Inputs",
 #         "5) Predict Delhi AQI Category",
 #         "6) Compare with Delhi Avg & WHO",
-    ]
+    # ]
 
 if page.startswith("1)"):
     # Nice title + thin brand line
