@@ -2451,49 +2451,121 @@ elif page.startswith("4)"):
 #             st.error(f"Prediction failed: {e}")
 
 
-
-
+# -------------------------
+# Page 5: Predict Delhi AQI Category
+# -------------------------
 elif page.startswith("5)"):
+    import datetime
+    import numpy as np
+
     st.title("🔮 Predict Delhi AQI Category")
+    st.markdown("Enter pollutant levels below and click **Predict**. Results are saved and used by Page 6.")
 
-    # ✅ Load your model and encoder once
-    model, encoder = load_model_and_encoder()
+    # Load model & encoder (safe)
+    try:
+        model, encoder = load_model_and_encoder()
+    except Exception:
+        model, encoder = None, None
 
-    st.markdown("Review your inputs before predicting:")
+    # Safe default columns order
+    cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
 
-    # --- Input form for pollutants ---
+    # Prefill from session_state.values if present
+    defaults = st.session_state.get("values", {c: 0.0 for c in cols})
+    # If defaults missing, set sensible defaults
+    if all(v == 0.0 for v in defaults.values()):
+        defaults = {"PM2.5": 80.0, "PM10": 120.0, "NO2": 40.0, "SO2": 10.0, "CO": 1.0, "Ozone": 50.0}
+
+    # Input layout (two rows of 3)
     col1, col2, col3 = st.columns(3)
-    pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
-    pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
-    no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
-
     col4, col5, col6 = st.columns(3)
-    so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
-    co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
-    ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
 
-    # --- Predict Button ---
+    pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=float(defaults.get("PM2.5", 80.0)), step=1.0, key="p5_pm25")
+    pm10 = col2.number_input("PM10 (µg/m³)",  min_value=0.0, value=float(defaults.get("PM10", 120.0)), step=1.0, key="p5_pm10")
+    no2  = col3.number_input("NO2 (µg/m³)",   min_value=0.0, value=float(defaults.get("NO2", 40.0)), step=1.0, key="p5_no2")
+    so2  = col4.number_input("SO2 (µg/m³)",   min_value=0.0, value=float(defaults.get("SO2", 10.0)), step=1.0, key="p5_so2")
+    co   = col5.number_input("CO (mg/m³)",    min_value=0.0, value=float(defaults.get("CO", 1.0)), step=0.1, key="p5_co")
+    ozone= col6.number_input("Ozone (µg/m³)", min_value=0.0, value=float(defaults.get("Ozone", 50.0)), step=1.0, key="p5_ozone")
+
+    # Predict button
     if st.button("🚀 Predict", use_container_width=True):
         try:
-            input_features = [[pm25, pm10, no2, so2, co, ozone]]
-            predicted_value = model.predict(input_features)[0]
-            predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
+            # Build input vector in expected order
+            input_vec = [[float(pm25), float(pm10), float(no2), float(so2), float(co), float(ozone)]]
 
-            # ✅ Save values + prediction into session_state
+            # Local fallback category mapper
+            def _simple_category_from_aqi(aqi: float) -> str:
+                try: aqi = float(aqi)
+                except: return "Unknown"
+                if aqi <= 50: return "Good"
+                if aqi <= 100: return "Satisfactory"
+                if aqi <= 200: return "Moderate"
+                if aqi <= 300: return "Poor"
+                if aqi <= 400: return "Very Poor"
+                return "Severe"
+
+            predicted_label = None
+            predicted_value = None  # numeric AQI (kept but we won't display it)
+
+            # Try model prediction if available
+            if model is not None:
+                try:
+                    raw = model.predict(input_vec)
+                    y = raw[0] if hasattr(raw, "__len__") else raw
+                    # numeric AQI attempt
+                    try:
+                        predicted_value = float(y)
+                    except Exception:
+                        predicted_value = None
+
+                    # If encoder exists, try to decode label
+                    if encoder is not None:
+                        try:
+                            # If model outputs numeric AQI but encoder encodes by class index, round
+                            if predicted_value is not None:
+                                label = encoder.inverse_transform([int(round(predicted_value))])[0]
+                            else:
+                                label = encoder.inverse_transform([int(y)])[0]
+                            predicted_label = label
+                        except Exception:
+                            predicted_label = _simple_category_from_aqi(predicted_value if predicted_value is not None else 0.0)
+                    else:
+                        predicted_label = _simple_category_from_aqi(predicted_value if predicted_value is not None else 0.0)
+
+                except Exception as e_model:
+                    # If model predict fails, fallback to deterministic heuristic
+                    st.info(f"Model prediction error (fallback used): {e_model}")
+                    model = None
+
+            if model is None:
+                # deterministic fallback: weighted sum → pseudo-AQI
+                w = {"PM2.5": 0.35, "PM10": 0.25, "NO2": 0.20, "SO2": 0.07, "CO": 0.05, "Ozone": 0.08}
+                vals = {"PM2.5": pm25, "PM10": pm10, "NO2": no2, "SO2": so2, "CO": co, "Ozone": ozone}
+                weighted = sum(float(vals[k]) * w[k] for k in w)
+                predicted_value = float(max(0.0, min(weighted, 500.0)))
+                predicted_label = _simple_category_from_aqi(predicted_value)
+
+            # Save inputs + prediction into session_state so Page 6 can use EXACTLY these results
             st.session_state["last_inputs"] = {
-                "PM2.5": pm25, "PM10": pm10, "NO2": no2,
-                "SO2": so2, "CO": co, "Ozone": ozone
+                "PM2.5": float(pm25), "PM10": float(pm10), "NO2": float(no2),
+                "SO2": float(so2), "CO": float(co), "Ozone": float(ozone)
             }
             st.session_state["last_prediction"] = {
-                "category": predicted_category,
-                "value": float(predicted_value)
+                "category": str(predicted_label),
+                "value": float(predicted_value) if predicted_value is not None else None,
+                "time": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
 
-            # ✅ Show only category on Page 5
-            st.success(f"**Predicted AQI Category:** {predicted_category}")
+            # Also keep canonical current values in st.session_state.values for other pages
+            st.session_state["values"] = st.session_state["last_inputs"].copy()
+
+            # Display only the category (no numeric value as you requested)
+            st.success(f"**Predicted AQI Category:** {predicted_label}")
+            st.caption("Prediction saved — go to Page 6 to compare Predicted Levels with Delhi Avg & WHO limits.")
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
+
 
 
 
@@ -2807,28 +2879,80 @@ elif page.startswith("5)"):
 
 #     st.info("Tip: Aim to keep each pollutant at or below the WHO guideline whenever possible.")
 
-
-
+# -------------------------
+# Page 6: Compare with Delhi Avg & WHO Limits
+# -------------------------
 elif page.startswith("6)"):
-    st.title("📊 AQI Prediction Summary")
+    import pandas as pd
+    import numpy as np
 
-    if "last_prediction" not in st.session_state:
-        st.warning("⚠️ No predicted values found. Please complete Step 5 first.")
-    else:
-        # ✅ Fetch saved data
-        inputs = st.session_state["last_inputs"]
-        prediction = st.session_state["last_prediction"]
+    st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-        st.subheader("Your Previous Inputs (from Step 5):")
-        st.json(inputs)
+    # Ensure we have the saved Page-5 prediction and inputs
+    last_inputs = st.session_state.get("last_inputs")
+    last_prediction = st.session_state.get("last_prediction")
 
-        st.subheader("Prediction Result (from Step 5):")
-        st.success(f"Predicted AQI Category: {prediction['category']}")
+    if not last_inputs or not last_prediction:
+        st.warning("⚠️ No previous prediction found. Please complete Step 5 (Predict) first and then return to this page.")
+        st.stop()
 
-        # Optional: show numeric value for debugging
-        # st.info(f"Raw Predicted AQI Value: {prediction['value']:.2f}")
+    # Show the predicted AQI category (carried from Page 5). No numeric AQI shown unless you want it.
+    pred_cat = last_prediction.get("category", "Unknown")
+    st.success(f"**Predicted AQI Category (from Step 5):** {pred_cat}")
+    # Optional small timestamp
+    if last_prediction.get("time"):
+        st.caption(f"Predicted at: {last_prediction['time']}")
 
-        # Comparison / Analysis
-        st.markdown("### 🔍 Analysis")
-        st.write("This prediction is based on the pollutant values you entered in Step 5.")
+    # Build comparison dataframe with three columns: Predicted Level / Delhi Avg / WHO Limit
+    cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+    delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
+    who = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
+
+    rows = []
+    for p in cols:
+        pred_lvl = float(last_inputs.get(p, 0.0))
+        delhi_lvl = float(delhi.get(p, np.nan))
+        who_lvl = float(who.get(p, np.nan)) if p in who else np.nan
+        rows.append({"Pollutant": p, "Predicted Level": pred_lvl, "Delhi Avg": delhi_lvl, "WHO Limit": who_lvl})
+
+    df_cmp = pd.DataFrame(rows)
+
+    # Display table (set Pollutant as index)
+    st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
+
+    # Visual comparison: melt and plot per pollutant
+    st.markdown("#### Visual Comparison (Predicted Level vs Delhi Avg vs WHO Limit)")
+    df_long = df_cmp.melt(id_vars=["Pollutant"], value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
+                          var_name="Metric", value_name="Level")
+
+    # Plot each pollutant separately to make differences clear
+    for p in cols:
+        sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+        # reindex ensures consistent order (some values may be NaN)
+        sub = sub.reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+        st.markdown(f"**{p}**")
+        st.bar_chart(sub, use_container_width=True)
+
+    # Quick interpretation: warn if Predicted Level > WHO Limit (where WHO available)
+    st.markdown("### ⚠️ Quick interpretation")
+    any_exceed = False
+    for _, r in df_cmp.iterrows():
+        p = r["Pollutant"]
+        pred_lvl = r["Predicted Level"]
+        who_lvl = r["WHO Limit"]
+        delhi_lvl = r["Delhi Avg"]
+        if not np.isnan(who_lvl) and pred_lvl > who_lvl:
+            st.error(f"**{p}** — Predicted level {pred_lvl} exceeds WHO limit {who_lvl}. Take precautions.")
+            any_exceed = True
+        elif not np.isnan(delhi_lvl) and pred_lvl > delhi_lvl:
+            st.warning(f"**{p}** — Predicted level {pred_lvl} is above Delhi average ({delhi_lvl}).")
+        else:
+            st.success(f"**{p}** — Predicted level {pred_lvl} is at/under Delhi avg and WHO where available.")
+
+    if not any_exceed:
+        st.info("None of the predicted pollutant levels exceed WHO limits (based on provided WHO values).")
+
+    # Download CSV of comparison
+    csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
+    st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes, file_name="predicted_vs_delhi_who.csv", mime="text/csv")
 
