@@ -3051,3 +3051,50 @@ elif page.startswith("5)"):
 #     st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
 #                        file_name="predicted_vs_delhi_who.csv", mime="text/csv")
 
+
+
+elif page.startswith("6)"):
+
+    st.title("📊 Compare Predicted AQI with Delhi Avg & WHO Limits")
+
+    if "predicted_values" not in st.session_state:
+        st.warning("⚠️ No predicted values found. Please complete Page 5 first.")
+    else:
+        predicted = st.session_state["predicted_values"]
+        pred_label = st.session_state["predicted_label"]
+
+        # --- Delhi Average Values (replace with real data if available) ---
+        DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
+
+        # --- WHO guideline values ---
+        WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
+
+        # --- Create comparison dataframe ---
+        import pandas as pd
+        df_compare = pd.DataFrame({
+            "Predicted": predicted,
+            "Delhi Avg": DELHI_AVG,
+            "WHO Limit": WHO_LIMITS
+        })
+
+        st.subheader(f"🌍 Predicted AQI Category: **{pred_label}**")
+
+        st.dataframe(df_compare)
+
+        # --- Visualization ---
+        st.subheader("📊 Pollutant Comparison")
+        df_long = df_compare.reset_index().melt(id_vars='index', var_name='Metric', value_name='Level')
+        df_long.rename(columns={'index': 'Pollutant'}, inplace=True)
+
+        import altair as alt
+        chart = alt.Chart(df_long).mark_bar().encode(
+            x=alt.X('Pollutant:N', title='Pollutant'),
+            y=alt.Y('Level:Q', title='Concentration'),
+            color='Metric:N',
+            tooltip=['Pollutant', 'Metric', 'Level']
+        ).properties(width=700, height=400)
+
+        st.altair_chart(chart, use_container_width=True)
+
+        st.info("Tip: Compare Predicted values with Delhi Avg and WHO limits. Keep pollutants below WHO limits whenever possible.")
+
