@@ -2386,12 +2386,46 @@ elif page.startswith("4)"):
 # ──────────────────────────────
 # 5) PREDICT DELHI AQI CATEGORY
 # ──────────────────────────────
-# ✅ Page 5: Predict Delhi AQI Category
-elif page.startswith("5)"):
-    st.title("🔮 Predict Delhi AQI Category")
-    st.caption("Enter pollutant levels to predict AQI category.")
+# # ✅ Page 5: Predict Delhi AQI Category
+# elif page.startswith("5)"):
+#     st.title("🔮 Predict Delhi AQI Category")
+#     st.caption("Enter pollutant levels to predict AQI category.")
 
-    # Input fields
+#     # Input fields
+#     col1, col2, col3 = st.columns(3)
+#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+#     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+#     no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
+
+#     col4, col5, col6 = st.columns(3)
+#     so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
+#     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
+#     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
+
+#     # 🚀 Prediction button
+#     if st.button("🚀 Predict AQI", use_container_width=True):
+#         try:
+#             # Call your ML model function
+#             predicted_aqi, aqi_category = predict_aqi(pm25, pm10, no2, so2, co, ozone)
+
+#             # Display results
+#             st.success(f"**Predicted AQI Category:** {aqi_category}")
+#             st.metric(label="Predicted AQI Value", load_model_and_encoder)
+
+#         except Exception as e:
+#             st.error(f"Prediction failed: {e}")
+
+
+
+elif page.startswith("5)"): 
+    st.title("🔮 Predict Delhi AQI Category")
+
+    # ✅ Load your model and encoder once
+    model, encoder = load_model_and_encoder()
+
+    st.markdown("Review your inputs before predicting:")
+
+    # --- Input form for pollutants ---
     col1, col2, col3 = st.columns(3)
     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
@@ -2402,18 +2436,21 @@ elif page.startswith("5)"):
     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
 
-    # 🚀 Prediction button
-    if st.button("🚀 Predict AQI", use_container_width=True):
+    # --- Predict Button ---
+    if st.button("🚀 Predict", use_container_width=True):
         try:
-            # Call your ML model function
-            predicted_aqi, aqi_category = predict_aqi(pm25, pm10, no2, so2, co, ozone)
+            # ✅ Use your trained model for prediction
+            input_features = [[pm25, pm10, no2, so2, co, ozone]]
+            predicted_value = model.predict(input_features)[0]
+            predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
 
-            # Display results
-            st.success(f"**Predicted AQI Category:** {aqi_category}")
-            st.metric(label="Predicted AQI Value", load_model_and_encoder)
+            # ✅ Show results
+            st.success(f"**Predicted AQI Category:** {predicted_category}")
+            st.metric(label="Predicted AQI Value", value=round(predicted_value, 2))
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
+
 
 
 
