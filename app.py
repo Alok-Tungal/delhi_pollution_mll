@@ -968,14 +968,100 @@ elif page.startswith("5)"):
 # ──────────────────────────────
 # PAGE 6: COMPARE WITH DELHI AVG
 # ──────────────────────────────
+# elif page.startswith("6)"):
+#     st.title("📊 Compare with Delhi Avg & WHO")
+#     df_cmp = comparison_dataframe(st.session_state.predicted_values or st.session_state.values)
+#     fig = px.bar(
+#         df_cmp.melt(id_vars="Pollutant", value_vars=["Predicted","Delhi Avg","WHO"]),
+#         x="Pollutant", y="value", color="variable", barmode="group",
+#         labels={"value":"Concentration (µg/m³ / ppm)", "variable":"Source"}
+#     )
+#     st.plotly_chart(fig, use_container_width=True)
+#     csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
+#     st.download_button("📥 Download CSV", data=csv_bytes, file_name="aqi_comparison.csv", mime="text/csv")
+
+
+
 elif page.startswith("6)"):
-    st.title("📊 Compare with Delhi Avg & WHO")
-    df_cmp = comparison_dataframe(st.session_state.predicted_values or st.session_state.values)
+    import pandas as pd
+    import numpy as np
+    import plotly.express as px
+    import datetime
+
+    st.title("📊 Compare Predicted AQI with Delhi Avg & WHO Limits")
+
+    # 1) Load prediction from Page 5
+    predicted_values = st.session_state.get("predicted_values")
+    predicted_label = st.session_state.get("predicted_label")
+    prediction_time = st.session_state.get(
+        "prediction_time",
+        datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    )
+
+    if not predicted_values or not predicted_label:
+        st.warning("⚠️ No predicted values found. Please complete Page 5 (Predict AQI) first.")
+        st.stop()
+
+    st.success(f"**Predicted AQI Category (from Step 5): {predicted_label}**")
+    st.caption(f"Prediction made at: {prediction_time}")
+
+    # 2) Build comparison DataFrame
+    cols = ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]
+    DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
+    WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
+
+    df_cmp = pd.DataFrame([
+        {
+            "Pollutant": p,
+            "Predicted": float(predicted_values.get(p, 0.0)),
+            "Delhi Avg": float(DELHI_AVG.get(p, np.nan)),
+            "WHO": float(WHO_LIMITS.get(p, np.nan))
+        } for p in cols
+    ])
+
+    # 3) Display table
+    st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
+
+    # 4) Plotly visualization (grouped bar chart)
+    df_long = df_cmp.melt(id_vars="Pollutant", value_vars=["Predicted", "Delhi Avg", "WHO"])
     fig = px.bar(
-        df_cmp.melt(id_vars="Pollutant", value_vars=["Predicted","Delhi Avg","WHO"]),
-        x="Pollutant", y="value", color="variable", barmode="group",
-        labels={"value":"Concentration (µg/m³ / ppm)", "variable":"Source"}
+        df_long,
+        x="Pollutant",
+        y="value",
+        color="variable",
+        barmode="group",
+        labels={"value": "Concentration (µg/m³ / ppm)", "variable": "Source"},
+        height=450,
+        title="Predicted vs Delhi Avg vs WHO"
     )
     st.plotly_chart(fig, use_container_width=True)
+
+    # 5) Quick interpretation: check predicted vs WHO and Delhi Avg
+    st.markdown("### ⚠️ Quick Interpretation")
+    any_exceed = False
+    for _, row in df_cmp.iterrows():
+        p = row["Pollutant"]
+        pred = row["Predicted"]
+        delhi = row["Delhi Avg"]
+        who = row["WHO"]
+
+        if not np.isnan(who) and pred > who:
+            st.error(f"**{p}** — Predicted level {pred} exceeds WHO limit {who}. Take precautions!")
+            any_exceed = True
+        elif not np.isnan(delhi) and pred > delhi:
+            st.warning(f"**{p}** — Predicted level {pred} is above Delhi average ({delhi}).")
+        else:
+            st.success(f"**{p}** — Predicted level {pred} is within Delhi Avg and WHO limit.")
+
+    if not any_exceed:
+        st.info("✅ None of the predicted pollutant levels exceed WHO limits.")
+
+    # 6) Download CSV
     csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download CSV", data=csv_bytes, file_name="aqi_comparison.csv", mime="text/csv")
+    st.download_button(
+        "📥 Download Predicted vs Delhi Avg & WHO (CSV)",
+        data=csv_bytes,
+        file_name="predicted_vs_delhi_who.csv",
+        mime="text/csv"
+    )
+
