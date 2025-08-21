@@ -2010,12 +2010,12 @@ with st.sidebar:
     default_nav = st.session_state.get("nav", "1) Understand + Share")
     default_index = page_options.index(default_nav) if default_nav in page_options else 0
 
-    page = st.radio(
-        "Navigation",
-        options=page_options,
-        index=default_index,
-        key="nav",
-    )
+    # page = st.radio(
+    #     "Navigation",
+    #     options=page_options,
+    #     index=default_index,
+    #     key="nav",
+    # )
 
     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
