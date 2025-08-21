@@ -2978,7 +2978,7 @@ elif page.startswith("5)"):
 
 # -------------------------
 # Page 6: Compare with Delhi Avg & WHO Limits (uses Page-5 saved prediction only)
--------------------------
+# -------------------------
 elif page.startswith("6)"):
     import pandas as pd
     import numpy as np
