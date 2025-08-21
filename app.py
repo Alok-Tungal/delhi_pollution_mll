@@ -647,159 +647,234 @@
 
 
 
+# ──────────────────────────────
+# Delhi AQI Prediction App – Polished Version
+# Author: Alok Tungal
+# ──────────────────────────────
+
 import os
-import io
 import datetime
+import io
+from typing import Dict, List
 import numpy as np
 import pandas as pd
 from PIL import Image
-import qrcode
-from qrcode.constants import ERROR_CORRECT_H
 import streamlit as st
 import joblib
-import altair as alt
+import qrcode
+from qrcode.constants import ERROR_CORRECT_H
 
-# ────────── Page Config ──────────
+# Optional SHAP
+try:
+    import shap
+except:
+    shap = None
+
+import plotly.express as px
+
+# ──────────────────────────────
+# App Config
+# ──────────────────────────────
 st.set_page_config(
     page_title="Delhi AQI – Prediction & Insights",
     page_icon="🌫️",
     layout="wide"
 )
 
-# ────────── Constants ──────────
-APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
+# Global Constants
 COLUMNS = ["PM2.5", "PM10", "NO2", "SO2", "CO", "O3"]
 PRESENTS = {
-    "Good": [30, 40, 20, 5, 0.4, 10],
-    "Moderate": [90, 110, 40, 10, 1.2, 30],
-    "Poor": [200, 250, 90, 20, 2.0, 50],
-    "Very Poor": [300, 350, 120, 30, 3.5, 70],
-    "Severe": [400, 500, 150, 40, 4.5, 90],
+    "Good":       [30,  40,  20,  5,  0.4, 10],
+    "Moderate":   [90, 110,  40, 10,  1.2, 30],
+    "Poor":       [200, 250, 90, 20,  2.0, 50],
+    "Very Poor":  [300, 350, 120, 30,  3.5, 70],
+    "Severe":     [400, 500, 150, 40,  4.5, 90],
 }
 DELHI_AVG = {"PM2.5": 95, "PM10": 180, "NO2": 60, "SO2": 20, "CO": 1.2, "O3": 50}
 WHO_LIMITS = {"PM2.5": 25, "PM10": 50, "NO2": 40, "SO2": 20, "CO": 4, "O3": 100}
-AQI_LABELS = [(50, 'Good'), (100, 'Satisfactory'), (200, 'Moderate'), (300, 'Poor'), (400, 'Very Poor'), (500, 'Severe')]
+APP_URL = "https://pollutionappcreatedbyalok.streamlit.app/"
 
-# ────────── Session Defaults ──────────
+# ──────────────────────────────
+# Session Defaults
+# ──────────────────────────────
 def ensure_session_defaults():
-    if 'nav' not in st.session_state: st.session_state.nav = '1) Understand + Share'
-    if 'values' not in st.session_state: st.session_state.values = {c: float(PRESENTS['Moderate'][i]) for i, c in enumerate(COLUMNS)}
-    if 'predicted_values' not in st.session_state: st.session_state.predicted_values = None
-    if 'predicted_label' not in st.session_state: st.session_state.predicted_label = None
+    if "values" not in st.session_state:
+        st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None
+    if "nav" not in st.session_state:
+        st.session_state.nav = "1) Welcome"
+    if "predicted_values" not in st.session_state:
+        st.session_state.predicted_values = None
+    if "predicted_label" not in st.session_state:
+        st.session_state.predicted_label = None
+    if "prediction_time" not in st.session_state:
+        st.session_state.prediction_time = None
 
 ensure_session_defaults()
 
-# ────────── Helpers ──────────
-def load_model():
-    model, encoder = None, None
-    try: model = joblib.load('aqi_rf_model.joblib')
-    except: model = None
+# ──────────────────────────────
+# Load Model
+# ──────────────────────────────
+def load_model_and_encoder():
+    MODEL, ENCODER = None, None
     try:
-        encoder = joblib.load('label_encoder.joblib')
-    except: encoder = None
-    return model, encoder
+        if os.path.exists("aqi_rf_model.joblib"):
+            MODEL = joblib.load("aqi_rf_model.joblib")
+        if os.path.exists("label_encoder.joblib"):
+            ENCODER = joblib.load("label_encoder.joblib")
+    except:
+        pass
+    return MODEL, ENCODER
 
-def predict_aqi(values):
-    model, encoder = load_model()
-    if model is None: return None, None
-    X = np.array([[values[c] for c in COLUMNS]])
-    y_val = model.predict(X)[0]
-    if encoder: y_label = encoder.inverse_transform([int(y_val)])[0]
-    else:
-        y_label = next(label for limit, label in AQI_LABELS if y_val <= limit)
-    return round(y_val,2), y_label
+MODEL, ENCODER = load_model_and_encoder()
 
-def make_qr_bytes(content:str,size_px:int=160):
+# ──────────────────────────────
+# Helper Functions
+# ──────────────────────────────
+def make_qr_bytes(content: str, size_px: int = 160) -> bytes:
     qr = qrcode.QRCode(version=None, error_correction=ERROR_CORRECT_H, box_size=10, border=2)
-    qr.add_data(content); qr.make(fit=True)
-    img = qr.make_image(fill_color='black', back_color='white').convert('RGB')
+    qr.add_data(content)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
     img = img.resize((size_px, size_px), resample=Image.Resampling.LANCZOS)
-    buf = io.BytesIO(); img.save(buf, format='PNG'); return buf.getvalue()
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", optimize=True)
+    return buf.getvalue()
 
-def comparison_dataframe(values):
-    return pd.DataFrame([
-        {"Pollutant":p, "Predicted":values[p], "Delhi Avg":DELHI_AVG[p], "WHO Limit":WHO_LIMITS[p]}
-        for p in COLUMNS
-    ])
+def predict_aqi(pm25, pm10, no2, so2, co, o3):
+    try:
+        if MODEL is None:
+            st.error("Model not loaded")
+            return None, None
+        X_input = np.array([[pm25, pm10, no2, so2, co, o3]])
+        aqi_val = MODEL.predict(X_input)[0]
+        # Predict label using encoder if available
+        if ENCODER:
+            y_class = MODEL.predict(X_input)
+            aqi_label = ENCODER.inverse_transform(y_class)[0]
+        else:
+            # Manual range
+            if aqi_val <= 50: aqi_label = "Good"
+            elif aqi_val <= 100: aqi_label = "Satisfactory"
+            elif aqi_val <= 200: aqi_label = "Moderate"
+            elif aqi_val <= 300: aqi_label = "Poor"
+            elif aqi_val <= 400: aqi_label = "Very Poor"
+            else: aqi_label = "Severe"
+        return round(aqi_val,2), aqi_label
+    except Exception as e:
+        st.error(f"Prediction error: {e}")
+        return None, None
 
-def badge_html(label):
-    colors = {'Good':'#1e7e34','Satisfactory':'#856404','Moderate':'#856404','Poor':'#a1490c','Very Poor':'#9b1c1c','Severe':'#721c24'}
-    bg = {'Good':'#e7f5e9','Satisfactory':'#fff3cd','Moderate':'#fff3cd','Poor':'#ffe5d0','Very Poor':'#fde2e1','Severe':'#f8d7da'}
-    color = colors.get(label,'#721c24'); background=bg.get(label,'#f8d7da')
-    return f'<span style="background:{background};color:{color};padding:4px 10px;border-radius:12px;font-weight:600">{label}</span>'
+# ──────────────────────────────
+# Sidebar Navigation
+# ──────────────────────────────
+pages = [
+    "1) Welcome",
+    "2) Learn AQI & Health Tips",
+    "3) Sample AQI Scenario",
+    "4) Custom Inputs",
+    "5) Predict AQI",
+    "6) Compare with Delhi Avg & WHO"
+]
 
-# ────────── Sidebar ──────────
-pages = ["1) Understand + Share","2) Learn AQI & Health","3) Sample AQI Scenario","4) Custom Inputs","5) Predict AQI","6) Compare with Delhi & WHO"]
-st.session_state.nav = st.sidebar.radio("Navigation", pages, index=pages.index(st.session_state.nav))
+with st.sidebar:
+    st.title("Delhi AQI App 🌫️")
+    page = st.radio("Navigate", pages, index=pages.index(st.session_state.nav))
+    st.session_state.nav = page
+    st.image(make_qr_bytes(APP_URL), caption="Scan to open app", use_column_width=True)
 
-# ────────── Page 1 ──────────
-if st.session_state.nav.startswith('1'):
-    st.markdown("# 🌍 Delhi AQI Prediction Dashboard",unsafe_allow_html=True)
-    c1,c2 = st.columns([2,1])
-    with c1:
-        st.subheader("✨ Welcome!")
-        st.markdown("This interactive dashboard helps you understand & predict Delhi's AQI 📊.")
-        r1,r2 = st.columns(3), st.columns(3)
-        for col, title, desc, bg in zip(r1+r2, ["PM2.5","PM10","NO2","SO2","CO","O3"],
-                                       ["Fine particles","Coarse","Nitrogen dioxide","Sulfur dioxide","Carbon monoxide","Ozone"],
-                                       ["FADBD8","D6EAF8","E8DAEF","FCF3CF","D5F5E3","FDEDEC"]):
-            with col: st.markdown(f'<div style="background:#{bg};padding:16px;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,.05)"><b>{title}</b><br><small>{desc}</small></div>',unsafe_allow_html=True)
-    with c2:
-        st.image(make_qr_bytes(APP_URL), caption="📱 Scan to open on mobile", use_container_width=True)
+# ──────────────────────────────
+# PAGE 1: Welcome
+# ──────────────────────────────
+if page.startswith("1)"):
+    st.markdown("<h1 style='text-align:center; color:#2E86C1;'>🌍 Delhi AQI Dashboard</h1>", unsafe_allow_html=True)
+    st.markdown("Interactive AQI prediction & health recommendations.", unsafe_allow_html=True)
+    cols = st.columns(3)
+    colors = ["#A3E4D7","#F9E79F","#F5B7B1","#D7BDE2","#FAD7A0","#AED6F1"]
+    icons = ["🌫️","🌪️","🌬️","🔥","🟢","☀️"]
+    pollutants = COLUMNS
+    for i, col in enumerate(cols):
+        with col:
+            st.markdown(f"<div style='padding:15px; border-radius:10px; background:{colors[i]}; text-align:center; font-size:18px;'>{icons[i]}<br>{pollutants[i]}</div>", unsafe_allow_html=True)
 
-# ────────── Page 2 ──────────
-elif st.session_state.nav.startswith('2'):
-    st.title("📚 Learn About AQI & Health Tips")
+# ──────────────────────────────
+# PAGE 2: Learn AQI
+# ──────────────────────────────
+elif page.startswith("2)"):
+    st.title("📚 Learn AQI & Health Tips")
     st.markdown("""
     **AQI Categories (India):**
-    - Good (0-50): Enjoy outdoor activities.
-    - Satisfactory (51-100): Sensitive groups take care.
-    - Moderate (101-200): Reduce prolonged outdoor exertion.
-    - Poor (201-300): Consider masks; limit outdoor time.
-    - Very Poor (301-400): Avoid outdoor exertion; use purifiers.
-    - Severe (401-500): Stay indoors; seek medical advice.
+    - Good (0–50): Enjoy outdoor activities.
+    - Moderate (51–200): Sensitive groups take care.
+    - Poor (201–300): Reduce outdoor activity.
+    - Very Poor (301–400): Avoid outdoor exertion.
+    - Severe (401–500): Stay indoors.
 
-    **Health Tips:** Track AQI, use N95 masks, ventilate indoors, use purifiers, stay hydrated.
+    **Health Tips:**
+    - Use masks (N95/FFP2)
+    - Ventilate during low AQI
+    - Use air purifiers indoors
+    - Stay hydrated
     """)
 
-# ────────── Page 3 ──────────
-elif st.session_state.nav.startswith('3'):
-    st.title("🧪 Try a Sample AQI Scenario")
-    scenarios = {"Winter Smog Morning":[280,360,95,18,2.2,45],"Post-Diwali Night":[420,520,130,30,3.2,70],"Summer Breeze Day":[55,75,22,6,0.6,25]}
-    chosen = st.selectbox("Select Scenario", list(scenarios.keys()))
-    vals = scenarios[chosen]; st.dataframe(pd.DataFrame([vals], columns=COLUMNS), use_container_width=True)
-    if st.button("✅ Apply Scenario"): st.session_state.values = {k: float(v) for k,v in zip(COLUMNS, vals)}
+# ──────────────────────────────
+# PAGE 3: Sample Scenario
+# ──────────────────────────────
+elif page.startswith("3)"):
+    st.title("🧪 Sample AQI Scenario")
+    scenarios = {
+        "Winter Smog Morning": [280, 360, 95, 18, 2.2, 45],
+        "Post-Diwali Night":   [420, 520, 130, 30, 3.2, 70],
+        "Summer Breeze Day":   [55,  75,  22,  6, 0.6, 25],
+    }
+    chosen = st.selectbox("Scenario", list(scenarios.keys()))
+    st.dataframe(pd.DataFrame([scenarios[chosen]], columns=COLUMNS))
+    if st.button("Apply Scenario"):
+        st.session_state.values = {k: float(v) for k,v in zip(COLUMNS, scenarios[chosen])}
+        st.success("Scenario applied. Go to Page 5 to predict AQI.")
 
-# ────────── Page 4 ──────────
-elif st.session_state.nav.startswith('4'):
+# ──────────────────────────────
+# PAGE 4: Custom Inputs
+# ──────────────────────────────
+elif page.startswith("4)"):
     st.title("🎛️ Custom Inputs")
-    defaults = [st.session_state.values[c] for c in COLUMNS]
-    c1,c2 = st.columns(2)
-    pm25=st.number_input("PM2.5",value=float(defaults[0])); pm10=st.number_input("PM10",value=float(defaults[1]))
-    no2=st.number_input("NO2",value=float(defaults[2])); so2=st.number_input("SO2",value=float(defaults[3]))
-    co=st.number_input("CO",value=float(defaults[4])); o3=st.number_input("O3",value=float(defaults[5]))
-    st.session_state.values = {"PM2.5":pm25,"PM10":pm10,"NO2":no2,"SO2":so2,"CO":co,"O3":o3}
+    for col in COLUMNS:
+        st.session_state.values[col] = st.slider(f"{col}", 0, 600, int(st.session_state.values[col]), step=1)
 
-# ────────── Page 5 ──────────
-elif st.session_state.nav.startswith('5'):
-    st.title("🔮 Predict Delhi AQI Category")
-    vals = st.session_state.values
-    if st.button("🚀 Predict AQI"):
-        val,label = predict_aqi(vals)
-        if val: st.success(f"Predicted AQI: {val} — {label}"); st.session_state.predicted_values=vals; st.session_state.predicted_label=label
-        else: st.error("Prediction failed")
+# ──────────────────────────────
+# PAGE 5: Predict AQI
+# ──────────────────────────────
+elif page.startswith("5)"):
+    st.title("🔮 Predict Delhi AQI")
+    vals = [st.session_state.values[col] for col in COLUMNS]
+    st.write("Adjust pollutants & click Predict")
+    for i,col in enumerate(COLUMNS):
+        vals[i] = st.slider(f"{col}", 0, 600, int(vals[i]), step=1)
+    if st.button("Predict AQI"):
+        aqi_val, aqi_label = predict_aqi(*vals)
+        st.session_state.predicted_values = {k:v for k,v in zip(COLUMNS, vals)}
+        st.session_state.predicted_label = aqi_label
+        st.session_state.prediction_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        st.success(f"AQI: {aqi_val}, Category: {aqi_label}")
 
-# ────────── Page 6 ──────────
-elif st.session_state.nav.startswith('6'):
-    st.title("📊 Compare Predicted AQI")
-    if not st.session_state.predicted_values: st.warning("Complete Page 5 first"); st.stop()
-    df_cmp = comparison_dataframe(st.session_state.predicted_values)
-    st.dataframe(df_cmp.set_index('Pollutant'), use_container_width=True)
-    df_long = df_cmp.melt(id_vars='Pollutant', var_name='Metric', value_name='Level')
-    chart = alt.Chart(df_long).mark_bar().encode(x='Pollutant:N', y='Level:Q', color='Metric:N', tooltip=['Pollutant','Metric','Level']).properties(width=700,height=400)
-    st.altair_chart(chart, use_container_width=True)
-    # Badges & Interpretation
-    for _,row in df_cmp.iterrows():
-        pred=row['Predicted']; who=row['WHO Limit']; delhi=row['Delhi Avg']
-        if pred>who: st.error(f"{row['Pollutant']} — {pred} exceeds WHO {who}")
-        elif pred>delhi: st.warning(f"{row['Pollutant
+# ──────────────────────────────
+# PAGE 6: Compare with Delhi Avg & WHO
+# ──────────────────────────────
+elif page.startswith("6)"):
+    st.title("📊 Comparison with Delhi Avg & WHO")
+    if st.session_state.predicted_values is None:
+        st.warning("Go to Page 5 to predict AQI first.")
+        st.stop()
+    df = pd.DataFrame([
+        {"Pollutant": col,
+         "Predicted": st.session_state.predicted_values[col],
+         "Delhi Avg": DELHI_AVG[col],
+         "WHO Limit": WHO_LIMITS[col]}
+        for col in COLUMNS
+    ])
+    st.dataframe(df.set_index("Pollutant"))
+    df_long = df.melt(id_vars="Pollutant", var_name="Metric", value_name="Value")
+    fig = px.bar(df_long, x="Pollutant", y="Value", color="Metric", barmode="group",
+                 title="Predicted vs Delhi Avg vs WHO", height=450)
+    st.plotly_chart(fig, use_container_width=True)
