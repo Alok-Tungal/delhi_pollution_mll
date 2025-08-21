@@ -921,26 +921,39 @@ elif page.startswith("4)"):
 # ──────────────────────────────
 # Page 5: Predict Delhi AQI Category
 # ──────────────────────────────
+# ──────────────────────────────
+# Page 5: Predict Delhi AQI Category
+# ──────────────────────────────
 elif page.startswith("5)"):
-    st.title("🔮 Predict Delhi AQI Category")
-    
-    # Ensure default values exist for all pollutants
-    vals = st.session_state.get("values", {})
-    for c in COLUMNS:
-        if c not in vals:
-            vals[c] = float(PRESENTS["Moderate"][COLUMNS.index(c)])
 
+    st.title("🔮 Predict Delhi AQI Category")
+
+    # Ensure 'values' exists
+    if "values" not in st.session_state:
+        st.session_state.values = {
+            "PM2.5": 80,
+            "PM10": 120,
+            "NO2": 40,
+            "SO2": 10,
+            "CO": 1.0,
+            "Ozone": 50
+        }
+
+    vals = st.session_state.values
+
+    # Split into two columns
     cols1, cols2 = st.columns(2)
+
     with cols1:
         pm25 = st.slider("PM2.5 (µg/m³)", 0, 500, int(vals.get("PM2.5", 80)))
         pm10 = st.slider("PM10 (µg/m³)", 0, 500, int(vals.get("PM10", 120)))
         no2  = st.slider("NO2 (µg/m³)", 0, 300, int(vals.get("NO2", 40)))
     with cols2:
         so2  = st.slider("SO2 (µg/m³)", 0, 200, int(vals.get("SO2", 10)))
-        co   = st.slider("CO (mg/m³)", 0.0, 10.0, float(vals.get("CO", 1.0)), step=0.1)
-        o3   = st.slider("O3 (µg/m³)", 0, 300, int(vals.get("Ozone", 50)))
+        co   = st.slider("CO (mg/m³)", 0, 10, float(vals.get("CO", 1.0)))
+        o3   = st.slider("Ozone (µg/m³)", 0, 300, int(vals.get("Ozone", 50)))
 
-    # Update session_state
+    # Update session_state safely
     st.session_state.values.update({
         "PM2.5": pm25,
         "PM10": pm10,
@@ -950,28 +963,42 @@ elif page.startswith("5)"):
         "Ozone": o3
     })
 
+    # Predict button
     if st.button("🚀 Predict AQI"):
-        aqi_val, aqi_label = predict_aqi(st.session_state.values)
-        if aqi_label:
-            st.session_state.predicted_values = st.session_state.values.copy()
-            st.session_state.predicted_label = aqi_label
-            st.markdown(
-                f"<h2>AQI Prediction: <span class='badge {badge_class(aqi_label)}'>{aqi_label}</span> ({aqi_val})</h2>",
-                unsafe_allow_html=True
-            )
-            st.success("✅ Prediction complete!")
 
-            # Optional SHAP explanation
-            if shap and st.session_state.MODEL:
-                if st.checkbox("Show SHAP Explanation", value=False):
-                    explainer = shap.Explainer(
-                        st.session_state.MODEL, [list(st.session_state.values.values())]
-                    )
-                    shap_values = explainer([list(st.session_state.values.values())])
-                    st.set_option('deprecation.showPyplotGlobalUse', False)
-                    shap.plots.bar(shap_values)
+        # Ensure model exists
+        if "MODEL" not in st.session_state or st.session_state.MODEL is None:
+            st.error("❌ Model not loaded. Prediction unavailable.")
         else:
-            st.error("Prediction failed! Check model availability.")
+            # Predict AQI
+            aqi_val, aqi_label = predict_aqi(st.session_state.values)
+
+            if aqi_label:
+                # Save prediction to session_state
+                st.session_state.predicted_values = st.session_state.values.copy()
+                st.session_state.predicted_label = aqi_label
+
+                # Display AQI with badge
+                st.markdown(
+                    f"<h2>AQI Prediction: "
+                    f"<span class='badge {badge_class(aqi_label)}'>{aqi_label}</span> "
+                    f"({aqi_val})</h2>",
+                    unsafe_allow_html=True
+                )
+                st.success("✅ Prediction complete!")
+
+                # Optional SHAP explanation
+                if shap and st.session_state.MODEL:
+                    if st.checkbox("Show SHAP Explanation", value=False):
+                        explainer = shap.Explainer(
+                            st.session_state.MODEL, [list(st.session_state.values.values())]
+                        )
+                        shap_values = explainer([list(st.session_state.values.values())])
+                        st.set_option('deprecation.showPyplotGlobalUse', False)
+                        st.pyplot(shap.plots.bar(shap_values, show=False))
+
+            else:
+                st.error("Prediction failed! Check model availability.")
 
 
 # ──────────────────────────────
