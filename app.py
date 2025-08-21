@@ -820,12 +820,29 @@ options_list = [
     "6) Compare with Delhi Avg & WHO",
 ]
 with st.sidebar:
-    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+    st.image(
+        "https://img.icons8.com/?size=100&id=12448&format=png&color=000000", 
+        width=32
+    )
     st.markdown("### Delhi AQI App")
-    page = st.radio("Navigation", options_list, index=options_list.index(st.session_state.nav))
+
+    # Ensure nav in session_state is valid
+    current_nav = st.session_state.get("nav", options_list[0])
+    if current_nav not in options_list:
+        current_nav = options_list[0]
+
+    # Radio for navigation
+    page = st.radio(
+        "Navigation",
+        options_list,
+        index=options_list.index(current_nav)
+    )
+
     st.caption("Made with ❤️ for Delhi air quality. Follow pages in order.")
 
-st.session_state.nav = page
+    # Update session state
+    st.session_state.nav = page
+
 
 # ──────────────────────────────
 # PAGE 1: WELCOME + QR
