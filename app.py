@@ -2410,7 +2410,7 @@ elif page.startswith("5)"):
 
             # Display results
             st.success(f"**Predicted AQI Category:** {aqi_category}")
-            st.metric(label="Predicted AQI Value", value=predicted_aqi)
+            st.metric(label="Predicted AQI Value", load_model_and_encoder)
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
