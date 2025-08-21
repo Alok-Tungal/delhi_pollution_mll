@@ -820,33 +820,51 @@ options_list = [
     "6) Compare with Delhi Avg & WHO",
 ]
 
-# Initialize nav if not in session_state
-if "nav" not in st.session_state:
-    st.session_state.nav = options_list[0]  # default to first page
+if "nav" not in st.session_state or st.session_state.nav not in options_list:
+    # default to the prediction page if you want to be at the end of the project,
+    # otherwise set to options_list[0]
+    st.session_state.nav = "5) Predict Delhi AQI Category"
+
+# default pollutant values (safe defaults so UI doesn't break)
+if "values" not in st.session_state:
+    st.session_state.values = {
+        "pm25": 80.0,
+        "pm10": 120.0,
+        "no2": 40.0,
+        "so2": 10.0,
+        "co": 1.0,
+        "ozone": 50.0,
+    }
 
 with st.sidebar:
-    st.image(
-        "https://img.icons8.com/?size=100&id=12448&format=png&color=000000",
-        width=32
-    )
+    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
     st.markdown("### Delhi AQI App")
-
-    # Ensure current_nav is valid
-    current_nav = st.session_state.nav
-    if current_nav not in options_list:
-        current_nav = options_list[0]
-
-    # Navigation radio
+    # safe index lookup (we already ensured st.session_state.nav is valid)
     page = st.radio(
         "Navigation",
-        options_list,
-        index=options_list.index(current_nav)
+        options=options_list,
+        index=options_list.index(st.session_state.nav),
+        key="nav",
     )
+    st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-    st.caption("Made with ❤️ for Delhi air quality. Follow pages in order.")
+def ensure_session_defaults():
+    if "values" not in st.session_state:
+        st.session_state.values = {
+            "PM2.5": 40.0,
+            "PM10": 80.0,
+            "NO2": 25.0,
+            "SO2": 15.0,
+            "CO": 0.8,
+            "Ozone": 30.0,
+        }
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None
+    if "scenario_applied" not in st.session_state:
+        st.session_state.scenario_applied = False
+    if "last_present" not in st.session_state:
+        st.session_state.last_present = None
 
-# Update session_state
-st.session_state.nav = page
 
 
 
