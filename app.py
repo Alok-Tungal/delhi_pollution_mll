@@ -2417,7 +2417,43 @@ elif page.startswith("4)"):
 
 
 
-elif page.startswith("5)"): 
+# elif page.startswith("5)"): 
+#     st.title("🔮 Predict Delhi AQI Category")
+
+#     # ✅ Load your model and encoder once
+#     model, encoder = load_model_and_encoder()
+
+#     st.markdown("Review your inputs before predicting:")
+
+#     # --- Input form for pollutants ---
+#     col1, col2, col3 = st.columns(3)
+#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+#     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+#     no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
+
+#     col4, col5, col6 = st.columns(3)
+#     so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
+#     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
+#     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
+
+#     # --- Predict Button ---
+#     if st.button("🚀 Predict", use_container_width=True):
+#         try:
+#             # ✅ Use your trained model for prediction
+#             input_features = [[pm25, pm10, no2, so2, co, ozone]]
+#             predicted_value = model.predict(input_features)[0]
+#             predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
+
+#             # ✅ Show only category (no numeric value)
+#             st.success(f"**Predicted AQI Category:** {predicted_category}")
+
+#         except Exception as e:
+#             st.error(f"Prediction failed: {e}")
+
+
+
+
+elif page.startswith("5)"):
     st.title("🔮 Predict Delhi AQI Category")
 
     # ✅ Load your model and encoder once
@@ -2439,95 +2475,26 @@ elif page.startswith("5)"):
     # --- Predict Button ---
     if st.button("🚀 Predict", use_container_width=True):
         try:
-            # ✅ Use your trained model for prediction
             input_features = [[pm25, pm10, no2, so2, co, ozone]]
             predicted_value = model.predict(input_features)[0]
             predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
 
-            # ✅ Show only category (no numeric value)
+            # ✅ Save values + prediction into session_state
+            st.session_state["last_inputs"] = {
+                "PM2.5": pm25, "PM10": pm10, "NO2": no2,
+                "SO2": so2, "CO": co, "Ozone": ozone
+            }
+            st.session_state["last_prediction"] = {
+                "category": predicted_category,
+                "value": float(predicted_value)
+            }
+
+            # ✅ Show only category on Page 5
             st.success(f"**Predicted AQI Category:** {predicted_category}")
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
 
-
-
-
-# ──────────────────────────────
-# elif page.startswith("5)"): 
-#     st.title("🔮 Predict Delhi AQI Category")
-
-#     values = st.session_state.values   # ✅ no double normalization
-#     st.markdown("Review your inputs before predicting:")
-
-# # Assuming you already have predict_aqi function
-# def predict_aqi(pm25, pm10, no2, so2, co, ozone): ...
-
-# # Sidebar navigation
-# # page = st.sidebar.selectbox("📑 Choose a page:", ["🏠 Home", "📊 Data Overview", "🔮 Prediction"])
-
-
-# if page == "🔮 Prediction":
-#     st.title("🔮 AQI Prediction")
-#     st.caption("Enter pollutant levels to predict AQI category.")
-
-#     col1, col2, col3 = st.columns(3)
-#     pm25 = col1.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
-#     pm10 = col2.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
-#     no2  = col3.number_input("NO2 (µg/m³)",  min_value=0.0, value=40.0,  step=1.0)
-
-#     col4, col5, col6 = st.columns(3)
-#     so2  = col4.number_input("SO2 (µg/m³)",  min_value=0.0, value=10.0,  step=1.0)
-#     co   = col5.number_input("CO (mg/m³)",   min_value=0.0, value=1.0,   step=0.1)
-#     ozone= col6.number_input("Ozone (µg/m³)",min_value=0.0, value=50.0,  step=1.0)
-
-#     if st.button("🚀 Predict", use_container_width=True):
-#         try:
-#             predicted_aqi, aqi_category = predict_aqi(pm25, pm10, no2, so2, co, ozone)
-#             st.success(f"**Predicted AQI Category:** {aqi_category}")
-#             st.metric(label="Predicted AQI Value", value=predicted_aqi)
-#         except Exception as e:
-#             st.error(f"Prediction failed: {e}")
-
-# ---------------- Sidebar navigation (safe, single-router) ----------------
-# Put this AFTER ensure_session_defaults() and model loading.
-
-# page options (same format you already use)
-# page_options = [
-#     "1) Understand + Share",
-#     "2) Learn About AQI & Health Tips",
-#     "3) Try a Sample AQI Scenario",
-#     "4) Preset or Custom Inputs",
-#     "5) Predict Delhi AQI Category",
-#     "6) Compare with Delhi Avg & WHO",
-# ]
-
-# # Ensure a safe default nav exists before we compute index
-# if "nav" not in st.session_state:
-#     st.session_state["nav"] = page_options[0]   # default: first page
-
-# # Compute safe index (handles the case where nav somehow isn't in page_options)
-# default_nav = st.session_state.get("nav", page_options[0])
-# default_index = page_options.index(default_nav) if default_nav in page_options else 0
-
-# with st.sidebar:
-#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-#     st.markdown("### Delhi AQI App")
-#     # Use a DIFFERENT widget key so we can modify st.session_state['nav'] later
-#     sidebar_choice = st.radio(
-#         "Navigation",
-#         options=page_options,
-#         index=default_index,
-#         key="sidebar_nav",
-#     )
-#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
-
-# # Sync the routing state to the sidebar selection (safe assignment)
-# # This line sets the canonical 'nav' used by your page checks.
-# st.session_state["nav"] = sidebar_choice
-
-# # Now set a local variable `page` (so your existing `elif page.startswith("4)"):` works)
-# page = st.session_state["nav"]
 
 
 
