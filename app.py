@@ -2500,46 +2500,78 @@ elif page.startswith("4)"):
 
 
 # ---------------- Page 5: Predict AQI ----------------
+# import streamlit as st
+# import joblib
+
+# # Load Model + Encoder
+# elif page.startswith("5)"):
+
+#     rf_model = joblib.load("aqi_rf_model.joblib")
+#     label_encoder = joblib.load("label_encoder.joblib")
+    
+#     st.title("🔮 Delhi AQI Prediction")
+    
+#     st.markdown("This page predicts **Delhi AQI Category** using your trained ML model. "
+#                 "All major pollutants (PM2.5, PM10, NO2, SO2, etc.) are considered.")
+    
+#     # Example input (average values from dataset)
+#     pm25 = 120  
+#     pm10 = 180  
+#     no2 = 60  
+#     so2 = 20  
+    
+#     # Prepare features
+#     features = [[pm25, pm10, no2, so2]]
+    
+#     # Predict button
+#     if st.button("🚀 Predict AQI"):
+#         prediction = rf_model.predict(features)
+#         category = label_encoder.inverse_transform(prediction)[0]
+    
+#         # Save results to session_state
+#         st.session_state.prediction_result = {
+#             "AQI Value": prediction[0],
+#             "Category": category,
+#             "Inputs": {
+#                 "PM2.5": pm25,
+#                 "PM10": pm10,
+#                 "NO2": no2,
+#                 "SO2": so2
+#             }
+#         }
+    
+#         # Switch to next page
+#         switch_page("Prediction Results")
+
+
 import streamlit as st
-import joblib
+import numpy as np
+elif page.startswith("5)"):
 
-# Load Model + Encoder
-rf_model = joblib.load("aqi_rf_model.joblib")
-label_encoder = joblib.load("label_encoder.joblib")
-
-st.title("🔮 Delhi AQI Prediction")
-
-st.markdown("This page predicts **Delhi AQI Category** using your trained ML model. "
-            "All major pollutants (PM2.5, PM10, NO2, SO2, etc.) are considered.")
-
-# Example input (average values from dataset)
-pm25 = 120  
-pm10 = 180  
-no2 = 60  
-so2 = 20  
-
-# Prepare features
-features = [[pm25, pm10, no2, so2]]
-
-# Predict button
-if st.button("🚀 Predict AQI"):
-    prediction = rf_model.predict(features)
-    category = label_encoder.inverse_transform(prediction)[0]
-
-    # Save results to session_state
-    st.session_state.prediction_result = {
-        "AQI Value": prediction[0],
-        "Category": category,
-        "Inputs": {
+    st.title("📝 Enter Custom Pollutant Values")
+    
+    # Input form for all 6 features
+    with st.form("custom_input_form"):
+        pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, step=1.0)
+        pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, step=1.0)
+        no2  = st.number_input("NO2 (µg/m³)", min_value=0.0, step=1.0)
+        so2  = st.number_input("SO2 (µg/m³)", min_value=0.0, step=1.0)
+        co   = st.number_input("CO (mg/m³)", min_value=0.0, step=0.1)
+        o3   = st.number_input("O3 (µg/m³)", min_value=0.0, step=1.0)
+    
+        submitted = st.form_submit_button("➡️ Take Analysis")
+    
+    if submitted:
+        # Store in session_state so Page 6 can use it
+        st.session_state["custom_inputs"] = {
             "PM2.5": pm25,
             "PM10": pm10,
             "NO2": no2,
-            "SO2": so2
+            "SO2": so2,
+            "CO": co,
+            "O3": o3
         }
-    }
-
-    # Switch to next page
-    switch_page("Prediction Results")
+        st.success("✅ Custom input submitted! Go to next page for prediction.")
 
 
 
@@ -2931,75 +2963,109 @@ if st.button("🚀 Predict AQI"):
 # -------------------------
 # Page 6: Compare with Delhi Avg & WHO Limits (uses Page-5 saved prediction only)
 # -------------------------
-elif page.startswith("6)"):
-    import pandas as pd
-    import numpy as np
+# elif page.startswith("6)"):
+#     import pandas as pd
+#     import numpy as np
 
-    st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
+#     st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-    # 1) Read saved Page-5 outputs only (do NOT read present/custom inputs)
-    last_inputs = st.session_state.get("last_inputs")
-    last_prediction = st.session_state.get("last_prediction")
+#     # 1) Read saved Page-5 outputs only (do NOT read present/custom inputs)
+#     last_inputs = st.session_state.get("last_inputs")
+#     last_prediction = st.session_state.get("last_prediction")
 
-    if not last_inputs or not last_prediction:
-        st.warning("⚠️ No previous prediction found. Please complete Step 5 (Predict) first; Page 6 reads the saved prediction only.")
-        st.stop()
+#     if not last_inputs or not last_prediction:
+#         st.warning("⚠️ No previous prediction found. Please complete Step 5 (Predict) first; Page 6 reads the saved prediction only.")
+#         st.stop()
 
-    # 2) Show the predicted AQI CATEGORY (no numeric AQI shown unless you opt-in)
-    pred_cat = last_prediction.get("category", "Unknown")
-    st.success(f"**Predicted AQI Category (from Step 5):** {pred_cat}")
-    if last_prediction.get("time"):
-        st.caption(f"Predicted at: {last_prediction['time']}")
+#     # 2) Show the predicted AQI CATEGORY (no numeric AQI shown unless you opt-in)
+#     pred_cat = last_prediction.get("category", "Unknown")
+#     st.success(f"**Predicted AQI Category (from Step 5):** {pred_cat}")
+#     if last_prediction.get("time"):
+#         st.caption(f"Predicted at: {last_prediction['time']}")
 
-    # 3) Build comparison table using the exact Page-5 inputs (Predicted Level)
-    cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
-    delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
-    who = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
+#     # 3) Build comparison table using the exact Page-5 inputs (Predicted Level)
+#     cols = COLUMNS if "COLUMNS" in globals() else ["PM2.5", "PM10", "NO2", "SO2", "CO", "Ozone"]
+#     delhi = DELHI_AVG if "DELHI_AVG" in globals() else {}
+#     who = WHO_LIMITS if "WHO_LIMITS" in globals() else {}
 
-    rows = []
-    for p in cols:
-        pred_lvl = float(last_inputs.get(p, 0.0))
-        delhi_lvl = float(delhi.get(p, np.nan)) if p in delhi else np.nan
-        who_lvl = float(who.get(p, np.nan)) if p in who else np.nan
-        rows.append({"Pollutant": p, "Predicted Level": pred_lvl, "Delhi Avg": delhi_lvl, "WHO Limit": who_lvl})
+#     rows = []
+#     for p in cols:
+#         pred_lvl = float(last_inputs.get(p, 0.0))
+#         delhi_lvl = float(delhi.get(p, np.nan)) if p in delhi else np.nan
+#         who_lvl = float(who.get(p, np.nan)) if p in who else np.nan
+#         rows.append({"Pollutant": p, "Predicted Level": pred_lvl, "Delhi Avg": delhi_lvl, "WHO Limit": who_lvl})
 
-    df_cmp = pd.DataFrame(rows)
+#     df_cmp = pd.DataFrame(rows)
 
-    # 4) Display table & visual comparison
-    st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
+#     # 4) Display table & visual comparison
+#     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
 
-    st.markdown("#### Visual Comparison (Predicted Level vs Delhi Avg vs WHO Limit)")
-    df_long = df_cmp.melt(id_vars=["Pollutant"], value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
-                          var_name="Metric", value_name="Level")
+#     st.markdown("#### Visual Comparison (Predicted Level vs Delhi Avg vs WHO Limit)")
+#     df_long = df_cmp.melt(id_vars=["Pollutant"], value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
+#                           var_name="Metric", value_name="Level")
 
-    for p in cols:
-        sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
-        sub = sub.reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
-        st.markdown(f"**{p}**")
-        st.bar_chart(sub, use_container_width=True)
+#     for p in cols:
+#         sub = df_long[df_long["Pollutant"] == p].set_index("Metric")["Level"]
+#         sub = sub.reindex(["Predicted Level", "Delhi Avg", "WHO Limit"])
+#         st.markdown(f"**{p}**")
+#         st.bar_chart(sub, use_container_width=True)
 
-    # 5) Quick interpretation: warn if Predicted Level > WHO Limit (where WHO available)
-    st.markdown("### ⚠️ Quick interpretation")
-    any_exceed = False
-    for _, r in df_cmp.iterrows():
-        p = r["Pollutant"]
-        pred_lvl = r["Predicted Level"]
-        who_lvl = r["WHO Limit"]
-        delhi_lvl = r["Delhi Avg"]
+#     # 5) Quick interpretation: warn if Predicted Level > WHO Limit (where WHO available)
+#     st.markdown("### ⚠️ Quick interpretation")
+#     any_exceed = False
+#     for _, r in df_cmp.iterrows():
+#         p = r["Pollutant"]
+#         pred_lvl = r["Predicted Level"]
+#         who_lvl = r["WHO Limit"]
+#         delhi_lvl = r["Delhi Avg"]
 
-        if not np.isnan(who_lvl) and pred_lvl > who_lvl:
-            st.error(f"**{p}** — Predicted level {pred_lvl} exceeds WHO limit {who_lvl}. Take precautions.")
-            any_exceed = True
-        elif (not np.isnan(delhi_lvl)) and pred_lvl > delhi_lvl:
-            st.warning(f"**{p}** — Predicted level {pred_lvl} is above Delhi average ({delhi_lvl}).")
-        else:
-            st.success(f"**{p}** — Predicted level {pred_lvl} is at/under Delhi avg and WHO (where available).")
+#         if not np.isnan(who_lvl) and pred_lvl > who_lvl:
+#             st.error(f"**{p}** — Predicted level {pred_lvl} exceeds WHO limit {who_lvl}. Take precautions.")
+#             any_exceed = True
+#         elif (not np.isnan(delhi_lvl)) and pred_lvl > delhi_lvl:
+#             st.warning(f"**{p}** — Predicted level {pred_lvl} is above Delhi average ({delhi_lvl}).")
+#         else:
+#             st.success(f"**{p}** — Predicted level {pred_lvl} is at/under Delhi avg and WHO (where available).")
 
-    if not any_exceed:
-        st.info("None of the predicted pollutant levels exceed WHO limits (based on provided WHO values).")
+#     if not any_exceed:
+#         st.info("None of the predicted pollutant levels exceed WHO limits (based on provided WHO values).")
 
-    # 6) Download CSV of the exact Page-5 prediction vs baselines
-    csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
-    st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
-                       file_name="predicted_vs_delhi_who.csv", mime="text/csv")
+#     # 6) Download CSV of the exact Page-5 prediction vs baselines
+#     csv_bytes = df_cmp.to_csv(index=False).encode("utf-8")
+#     st.download_button("⬇️ Download Predicted vs Delhi Avg & WHO (CSV)", data=csv_bytes,
+#                        file_name="predicted_vs_delhi_who.csv", mime="text/csv")
 
+import joblib
+import matplotlib.pyplot as plt
+
+elif page.startswith("5)"):
+
+    # Load your trained model and encoder
+    MODEL = joblib.load("aqi_rf_model.joblib")
+    ENCODER = joblib.load("label_encoder.joblib")
+    
+    st.title("🔮 AQI Prediction & Analysis")
+    
+    if "custom_inputs" in st.session_state:
+        inputs = st.session_state["custom_inputs"]
+    
+        # Convert to numpy array in correct order
+        X_input = np.array([[inputs["PM2.5"], inputs["PM10"], inputs["NO2"], 
+                             inputs["SO2"], inputs["CO"], inputs["O3"]]])
+    
+        # Prediction
+        y_pred = MODEL.predict(X_input)[0]
+        aqi_category = ENCODER.inverse_transform([y_pred])[0]
+    
+        st.subheader(f"🌍 Predicted AQI Category: **{aqi_category}**")
+    
+        # 📊 Visualization (bar chart of pollutants)
+        st.subheader("📊 Pollutant Contribution")
+        fig, ax = plt.subplots()
+        ax.bar(inputs.keys(), inputs.values())
+        ax.set_ylabel("Concentration")
+        ax.set_title("Pollutant Levels (Custom Input)")
+        st.pyplot(fig)
+    
+    else:
+        st.warning("⚠️ Please enter custom values on the previous page.")
