@@ -2449,4 +2449,4 @@ elif page.startswith("6)"):
 # FOOTER
 # ──────────────────────────────
 st.markdown("---")
-st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
+st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build") 
