@@ -2339,15 +2339,6 @@ elif page.startswith("5)"):
 
     values = st.session_state.values   # ✅ no double normalization
     st.markdown("Review your inputs before predicting:")
-  
-
-
-# 5) PREDICT DELHI AQI CATEGORY
-# ──────────────────────────────
-# 5) PREDICT DELHI AQI CATEGORY
-# ──────────────────────────────
-import streamlit as st
-import datetime
 
 # Assuming you already have predict_aqi function
 def predict_aqi(pm25, pm10, no2, so2, co, ozone): ...
@@ -2428,6 +2419,7 @@ if page == "🔮 Prediction":
 # # 6) COMPARE WITH DELHI AVERAGES & WHO LIMITS
 # ──────────────────────────────
 elif page.startswith("6)"):
+
     st.title("📊 Compare Your Levels with Delhi Averages & WHO Limits")
 
     values = normalize_values(st.session_state.values)
