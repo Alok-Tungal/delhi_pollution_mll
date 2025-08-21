@@ -2381,7 +2381,7 @@ if page == "🔮 Prediction":
 # ---------------- Sidebar navigation (safe, single-router) ----------------
 # Put this AFTER ensure_session_defaults() and model loading.
 
-page options (same format you already use)
+# page options (same format you already use)
 page_options = [
     "1) Understand + Share",
     "2) Learn About AQI & Health Tips",
