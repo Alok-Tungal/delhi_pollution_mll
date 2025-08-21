@@ -94,15 +94,15 @@ POLLUTANT_INFO: Dict[str, str] = {
 }
 
 
-# def ensure_session_defaults():
-#     if "values" not in st.session_state:
-#         st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
-#     if "last_prediction" not in st.session_state:
-#         st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
-#     if "scenario_applied" not in st.session_state:
-#         st.session_state.scenario_applied = ""
-#     if "nav" not in st.session_state:
-#         st.session_state.nav = "1) Understand + Share"
+def ensure_session_defaults():
+    if "values" not in st.session_state:
+        st.session_state.values = {k: float(v) for k, v in zip(COLUMNS, PRESENTS["Moderate"])}
+    if "last_prediction" not in st.session_state:
+        st.session_state.last_prediction = None  # (aqi_value:int, aqi_label:str)
+    if "scenario_applied" not in st.session_state:
+        st.session_state.scenario_applied = ""
+    if "nav" not in st.session_state:
+        st.session_state.nav = "1) Understand + Share"
 
 
 
