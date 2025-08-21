@@ -2544,33 +2544,50 @@ elif page.startswith("4)"):
 #         switch_page("Prediction Results")
 
 
-import streamlit as st
-import numpy as np
 elif page.startswith("5)"):
-        st.title("📝 Enter Custom Pollutant Values")
-    
-    # Input form for all 6 features
-    with st.form("custom_input_form"):
-        pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, step=1.0)
-        pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, step=1.0)
-        no2  = st.number_input("NO2 (µg/m³)", min_value=0.0, step=1.0)
-        so2  = st.number_input("SO2 (µg/m³)", min_value=0.0, step=1.0)
-        co   = st.number_input("CO (mg/m³)", min_value=0.0, step=0.1)
-        o3   = st.number_input("O3 (µg/m³)", min_value=0.0, step=1.0)
-    
-        submitted = st.form_submit_button("➡️ Take Analysis")
-    
-    if submitted:
-        # Store in session_state so Page 6 can use it
-        st.session_state["custom_inputs"] = {
-            "PM2.5": pm25,
-            "PM10": pm10,
-            "NO2": no2,
-            "SO2": so2,
-            "CO": co,
-            "O3": o3
-        }
-        st.success("✅ Custom input submitted! Go to next page for prediction.")
+
+    st.title("🔮 Predict Delhi AQI Category (Random Forest)")
+
+    # --- Inputs for all 6 pollutants ---
+    pm25 = st.number_input("PM2.5 (µg/m³)", min_value=0.0, value=80.0, step=1.0)
+    pm10 = st.number_input("PM10 (µg/m³)", min_value=0.0, value=120.0, step=1.0)
+    no2  = st.number_input("NO2 (µg/m³)", min_value=0.0, value=40.0, step=1.0)
+    so2  = st.number_input("SO2 (µg/m³)", min_value=0.0, value=10.0, step=1.0)
+    co   = st.number_input("CO (mg/m³)", min_value=0.0, value=1.0, step=0.1)
+    o3   = st.number_input("O3 (µg/m³)", min_value=0.0, value=50.0, step=1.0)
+
+    if st.button("🚀 Predict AQI"):
+
+        # Convert input into array
+        X_input = np.array([[pm25, pm10, no2, so2, co, o3]])
+
+        try:
+            # Load trained Random Forest model & label encoder
+            MODEL = joblib.load("aqi_rf_model.joblib")
+            ENCODER = joblib.load("label_encoder.joblib")
+
+            # Predict category
+            y_pred_class = MODEL.predict(X_input)[0]
+            y_pred_label = ENCODER.inverse_transform([y_pred_class])[0]
+
+            # Save predicted values & category to session_state
+            st.session_state["predicted_values"] = {
+                "PM2.5": pm25,
+                "PM10": pm10,
+                "NO2": no2,
+                "SO2": so2,
+                "CO": co,
+                "O3": o3
+            }
+            st.session_state["predicted_label"] = y_pred_label
+
+            st.success(f"Predicted AQI Category: **{y_pred_label}**")
+            st.write("✅ Values stored! Now go to **Page 6** for comparison with Delhi Avg & WHO.")
+
+        except Exception as e:
+            st.error(f"Prediction failed: {e}")
+
+
 
 
 
