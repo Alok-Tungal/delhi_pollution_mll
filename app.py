@@ -2382,41 +2382,41 @@ if page == "🔮 Prediction":
 # Put this AFTER ensure_session_defaults() and model loading.
 
 # page options (same format you already use)
-page_options = [
-    "1) Understand + Share",
-    "2) Learn About AQI & Health Tips",
-    "3) Try a Sample AQI Scenario",
-    "4) Preset or Custom Inputs",
-    "5) Predict Delhi AQI Category",
-    "6) Compare with Delhi Avg & WHO",
-]
+# page_options = [
+#     "1) Understand + Share",
+#     "2) Learn About AQI & Health Tips",
+#     "3) Try a Sample AQI Scenario",
+#     "4) Preset or Custom Inputs",
+#     "5) Predict Delhi AQI Category",
+#     "6) Compare with Delhi Avg & WHO",
+# ]
 
-# Ensure a safe default nav exists before we compute index
-if "nav" not in st.session_state:
-    st.session_state["nav"] = page_options[0]   # default: first page
+# # Ensure a safe default nav exists before we compute index
+# if "nav" not in st.session_state:
+#     st.session_state["nav"] = page_options[0]   # default: first page
 
-# Compute safe index (handles the case where nav somehow isn't in page_options)
-default_nav = st.session_state.get("nav", page_options[0])
-default_index = page_options.index(default_nav) if default_nav in page_options else 0
+# # Compute safe index (handles the case where nav somehow isn't in page_options)
+# default_nav = st.session_state.get("nav", page_options[0])
+# default_index = page_options.index(default_nav) if default_nav in page_options else 0
 
-with st.sidebar:
-    st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
-    st.markdown("### Delhi AQI App")
-    # Use a DIFFERENT widget key so we can modify st.session_state['nav'] later
-    sidebar_choice = st.radio(
-        "Navigation",
-        options=page_options,
-        index=default_index,
-        key="sidebar_nav",
-    )
-    st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
+# with st.sidebar:
+#     st.image("https://img.icons8.com/?size=100&id=12448&format=png&color=000000", width=32)
+#     st.markdown("### Delhi AQI App")
+#     # Use a DIFFERENT widget key so we can modify st.session_state['nav'] later
+#     sidebar_choice = st.radio(
+#         "Navigation",
+#         options=page_options,
+#         index=default_index,
+#         key="sidebar_nav",
+#     )
+#     st.caption("Made with ❤️ for Delhi air quality. Follow the pages in order.")
 
-# Sync the routing state to the sidebar selection (safe assignment)
-# This line sets the canonical 'nav' used by your page checks.
-st.session_state["nav"] = sidebar_choice
+# # Sync the routing state to the sidebar selection (safe assignment)
+# # This line sets the canonical 'nav' used by your page checks.
+# st.session_state["nav"] = sidebar_choice
 
-# Now set a local variable `page` (so your existing `elif page.startswith("4)"):` works)
-page = st.session_state["nav"]
+# # Now set a local variable `page` (so your existing `elif page.startswith("4)"):` works)
+# page = st.session_state["nav"]
 
 
 
@@ -2450,6 +2450,3 @@ elif page.startswith("6)"):
 # ──────────────────────────────
 st.markdown("---")
 st.caption("© 2025 Delhi AQI App • Built with Streamlit • Clean single-router build")
-
-
-
