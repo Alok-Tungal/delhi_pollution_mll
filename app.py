@@ -7,7 +7,7 @@
 # import seaborn as sns
 # # Set page config 
 # st.set_page_config(page_title="🌫️ Delhi AQI Dashboard", layout="wide") 
-# st.markdown("---")
+# st.markdown("---")   
 # st.markdown("### 🧠 Understand the Pollutants & Their Impact")
 
 # pollutant_info = {
