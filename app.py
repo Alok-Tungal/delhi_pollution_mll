@@ -918,36 +918,61 @@ elif page.startswith("4)"):
 # ──────────────────────────────
 # PAGE 5: PREDICT AQI
 # ──────────────────────────────
+# ──────────────────────────────
+# Page 5: Predict Delhi AQI Category
+# ──────────────────────────────
 elif page.startswith("5)"):
     st.title("🔮 Predict Delhi AQI Category")
-    vals = st.session_state.values
+    
+    # Ensure default values exist for all pollutants
+    vals = st.session_state.get("values", {})
+    for c in COLUMNS:
+        if c not in vals:
+            vals[c] = float(PRESENTS["Moderate"][COLUMNS.index(c)])
+
     cols1, cols2 = st.columns(2)
     with cols1:
-        pm25 = st.slider("PM2.5", 0, 500, int(vals["PM2.5"]))
-        pm10 = st.slider("PM10", 0, 500, int(vals["PM10"]))
-        no2  = st.slider("NO2", 0, 300, int(vals["NO2"]))
+        pm25 = st.slider("PM2.5 (µg/m³)", 0, 500, int(vals.get("PM2.5", 80)))
+        pm10 = st.slider("PM10 (µg/m³)", 0, 500, int(vals.get("PM10", 120)))
+        no2  = st.slider("NO2 (µg/m³)", 0, 300, int(vals.get("NO2", 40)))
     with cols2:
-        so2  = st.slider("SO2", 0, 200, int(vals["SO2"]))
-        co   = st.slider("CO", 0, 10, float(vals["CO"]))
-        o3   = st.slider("O3", 0, 300, int(vals["O3"]))
-    st.session_state.values.update({"PM2.5":pm25,"PM10":pm10,"NO2":no2,"SO2":so2,"CO":co,"O3":o3})
+        so2  = st.slider("SO2 (µg/m³)", 0, 200, int(vals.get("SO2", 10)))
+        co   = st.slider("CO (mg/m³)", 0.0, 10.0, float(vals.get("CO", 1.0)), step=0.1)
+        o3   = st.slider("O3 (µg/m³)", 0, 300, int(vals.get("Ozone", 50)))
+
+    # Update session_state
+    st.session_state.values.update({
+        "PM2.5": pm25,
+        "PM10": pm10,
+        "NO2": no2,
+        "SO2": so2,
+        "CO": co,
+        "Ozone": o3
+    })
+
     if st.button("🚀 Predict AQI"):
         aqi_val, aqi_label = predict_aqi(st.session_state.values)
         if aqi_label:
             st.session_state.predicted_values = st.session_state.values.copy()
             st.session_state.predicted_label = aqi_label
-            st.markdown(f"<h2>AQI Prediction: <span class='badge {badge_class(aqi_label)}'>{aqi_label}</span> ({aqi_val})</h2>", unsafe_allow_html=True)
+            st.markdown(
+                f"<h2>AQI Prediction: <span class='badge {badge_class(aqi_label)}'>{aqi_label}</span> ({aqi_val})</h2>",
+                unsafe_allow_html=True
+            )
             st.success("✅ Prediction complete!")
 
-            # Optional SHAP
+            # Optional SHAP explanation
             if shap and st.session_state.MODEL:
                 if st.checkbox("Show SHAP Explanation", value=False):
-                    explainer = shap.Explainer(st.session_state.MODEL, [list(st.session_state.values.values())])
+                    explainer = shap.Explainer(
+                        st.session_state.MODEL, [list(st.session_state.values.values())]
+                    )
                     shap_values = explainer([list(st.session_state.values.values())])
                     st.set_option('deprecation.showPyplotGlobalUse', False)
                     shap.plots.bar(shap_values)
         else:
             st.error("Prediction failed! Check model availability.")
+
 
 # ──────────────────────────────
 # PAGE 6: COMPARE WITH DELHI AVG
