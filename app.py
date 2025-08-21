@@ -2570,17 +2570,21 @@ elif page.startswith("6)"):
 
     st.title("📊 Compare Predicted Levels with Delhi Averages & WHO Limits")
 
-    # Use the same inputs you used on Page 5
-    values = normalize_values(st.session_state.values)
+    # 🔹 Get the same values stored from Page 5
+    if "values" in st.session_state:
+        values = st.session_state.values  
+    else:
+        st.error("⚠️ No predicted values found. Please complete Step 5 first.")
+        st.stop()
 
-    # Build comparison frame and rename the first column
+    # Build comparison frame and rename "Your Level" → "Predicted Level"
     df_cmp = comparison_frame(values).rename(columns={"Your Level": "Predicted Level"})
 
-    # Nice display with Pollutant as index
+    # Display table (Predicted vs Delhi Avg vs WHO Limit)
     st.dataframe(df_cmp.set_index("Pollutant"), use_container_width=True)
 
     st.markdown("#### Visual Comparison")
-    # Keep a consistent order of bars in the charts
+    # Melt for bar chart plotting
     df_long = df_cmp.melt(
         id_vars="Pollutant",
         value_vars=["Predicted Level", "Delhi Avg", "WHO Limit"],
