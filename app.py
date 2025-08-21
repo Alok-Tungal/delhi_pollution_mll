@@ -2444,9 +2444,8 @@ elif page.startswith("5)"):
             predicted_value = model.predict(input_features)[0]
             predicted_category = encoder.inverse_transform([round(predicted_value)])[0]
 
-            # ✅ Show results
+            # ✅ Show only category (no numeric value)
             st.success(f"**Predicted AQI Category:** {predicted_category}")
-            st.metric(label="Predicted AQI Value", value=round(predicted_value, 2))
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
