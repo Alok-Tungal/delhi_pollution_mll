@@ -24,32 +24,21 @@
 # textColor="#023E8A"             # Navy blue text
 # font="sans serif"
 
-# [server]
-# headless = true
-# enableCORS = false
-# enableXsrfProtection = false
-
-# [theme]
-# base="light"
-# primaryColor="#2ECC71"          # Emerald green
-# backgroundColor="#FAFFFB"       # Pure fresh white
-# secondaryBackgroundColor="#E8F8F5"   # Mint shade
-# textColor="#145A32"             # Dark forest green text
-# font="serif"
-
-
 [server]
 headless = true
 enableCORS = false
 enableXsrfProtection = false
 
 [theme]
-base="dark"
-primaryColor="#FFD700"          # Royal gold
-backgroundColor="#0A0A0A"       # Pure matte black
-secondaryBackgroundColor="#1C1C1C"   # Charcoal panels
-textColor="#EAEAEA"             # Soft silver-white text
-font="sans serif"
+base="light"
+primaryColor="#2ECC71"          # Emerald green
+backgroundColor="#FAFFFB"       # Pure fresh white
+secondaryBackgroundColor="#E8F8F5"   # Mint shade
+textColor="#145A32"             # Dark forest green text
+font="serif"
+
+
+
 
 # [server]
 # headless = true
