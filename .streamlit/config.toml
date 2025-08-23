@@ -11,16 +11,15 @@
 # textColor="#2E2E2E"             # Almost-black elegant text
 # font="serif"
 
-
 [server]
 headless = true
 enableCORS = false
 enableXsrfProtection = false
 
 [theme]
-base="dark"
-primaryColor="#A259FF"          # Purple neon glow
-backgroundColor="#0B0C10"       # Deep space black
-secondaryBackgroundColor="#1F2833"   # Dark steel panels
-textColor="#C5C6C7"             # Silver-grey text
-font="monospace"
+base="light"
+primaryColor="#0077B6"          # Deep ocean blue
+backgroundColor="#E0F7FA"       # Aqua mist
+secondaryBackgroundColor="#CAF0F8"   # Soft sky cyan
+textColor="#023E8A"             # Navy blue text
+font="sans serif"
