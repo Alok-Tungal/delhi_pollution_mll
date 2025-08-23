@@ -699,10 +699,9 @@ st.set_page_config(
 # </style>
 # """, unsafe_allow_html=True)
 
-
 import streamlit as st
 
-# Custom CSS for page title with background
+# Custom CSS once
 st.markdown("""
     <style>
     .page-title {
@@ -711,16 +710,48 @@ st.markdown("""
         text-align: center;
         padding: 0.8em;
         border-radius: 15px;
-        background: linear-gradient(135deg, #6A5ACD, #FF6B6B);
         color: white;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.25);
         margin-bottom: 1.5em;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Example usage
-st.markdown('<div class="page-title">🔮 AQI Prediction</div>', unsafe_allow_html=True)
+# Function to render page title with custom background
+def page_title(name):
+    gradients = {
+        "🔮 AQI Prediction": "linear-gradient(135deg, #6A5ACD, #00BFFF)",   # Purple → Blue
+        "📊 Insights": "linear-gradient(135deg, #20BF55, #01BAEF)",         # Teal → Cyan
+        "🕒 Historical Comparison": "linear-gradient(135deg, #FF6B6B, #FFD93D)",  # Coral → Yellow
+        "💡 Recommendations": "linear-gradient(135deg, #11998e, #38ef7d)",  # Emerald green
+    }
+    gradient = gradients.get(name, "linear-gradient(135deg, #6A11CB, #2575FC)")  # default
+
+    st.markdown(f"""
+        <div class="page-title" style="background: {gradient};">
+            {name}
+        </div>
+    """, unsafe_allow_html=True)
+
+# Example usage per page
+page = st.sidebar.radio("Navigation", ["🔮 AQI Prediction", "📊 Insights", "🕒 Historical Comparison", "💡 Recommendations"])
+
+if page == "🔮 AQI Prediction":
+    page_title(page)
+    st.write("This is the AQI prediction page.")
+
+elif page == "📊 Insights":
+    page_title(page)
+    st.write("This is the insights page.")
+
+elif page == "🕒 Historical Comparison":
+    page_title(page)
+    st.write("This is the historical comparison page.")
+
+elif page == "💡 Recommendations":
+    page_title(page)
+    st.write("This is the recommendations page.")
+
 
 
 # ──────────────────────────────
