@@ -1,16 +1,3 @@
-# [server]
-# headless = true
-# enableCORS = false
-# enableXsrfProtection = false
-
-# [theme]
-# base="light"
-# primaryColor="#FF6B6B"          # Coral red for highlights
-# backgroundColor="#FFFDF9"       # Warm off-white
-# secondaryBackgroundColor="#FFEEDA"   # Soft pastel peach panels
-# textColor="#2E2E2E"             # Almost-black elegant text
-# font="serif"
-
 [server]
 headless = true
 enableCORS = false
@@ -18,11 +5,24 @@ enableXsrfProtection = false
 
 [theme]
 base="light"
-primaryColor="#0077B6"          # Deep ocean blue
-backgroundColor="#E0F7FA"       # Aqua mist
-secondaryBackgroundColor="#CAF0F8"   # Soft sky cyan
-textColor="#023E8A"             # Navy blue text
-font="sans serif"
+primaryColor="#FF6B6B"          # Coral red for highlights
+backgroundColor="#FFFDF9"       # Warm off-white
+secondaryBackgroundColor="#FFEEDA"   # Soft pastel peach panels
+textColor="#2E2E2E"             # Almost-black elegant text
+font="serif"
+
+# [server]
+# headless = true
+# enableCORS = false
+# enableXsrfProtection = false
+
+# [theme]
+# base="light"
+# primaryColor="#0077B6"          # Deep ocean blue
+# backgroundColor="#E0F7FA"       # Aqua mist
+# secondaryBackgroundColor="#CAF0F8"   # Soft sky cyan
+# textColor="#023E8A"             # Navy blue text
+# font="sans serif"
 
 # [server]
 # headless = true
