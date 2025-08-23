@@ -1,12 +1,26 @@
+# [server]
+# headless = true
+# enableCORS = false
+# enableXsrfProtection = false
+
+# [theme]
+# base="light"
+# primaryColor="#FF6B6B"          # Coral red for highlights
+# backgroundColor="#FFFDF9"       # Warm off-white
+# secondaryBackgroundColor="#FFEEDA"   # Soft pastel peach panels
+# textColor="#2E2E2E"             # Almost-black elegant text
+# font="serif"
+
+
 [server]
 headless = true
 enableCORS = false
 enableXsrfProtection = false
 
 [theme]
-base="light"
-primaryColor="#FF6B6B"          # Coral red for highlights
-backgroundColor="#FFFDF9"       # Warm off-white
-secondaryBackgroundColor="#FFEEDA"   # Soft pastel peach panels
-textColor="#2E2E2E"             # Almost-black elegant text
-font="serif"
+base="dark"
+primaryColor="#A259FF"          # Purple neon glow
+backgroundColor="#0B0C10"       # Deep space black
+secondaryBackgroundColor="#1F2833"   # Dark steel panels
+textColor="#C5C6C7"             # Silver-grey text
+font="monospace"
