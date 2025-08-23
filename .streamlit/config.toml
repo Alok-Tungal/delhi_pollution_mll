@@ -57,72 +57,9 @@ enableCORS = false
 enableXsrfProtection = false
 
 [theme]
-base="dark"
-primaryColor="#FFFFFF"
-backgroundColor="#000000"
-secondaryBackgroundColor="#101010"
-textColor="#FFFFFF"
-font="sans serif"
-
-
-
-import streamlit as st
-
-# Choose your vibe 🌟
-THEME = "Ocean"   # 🔄 Change: "Ocean" | "Sunset" | "Neon" | "Emerald"
-
-gradients = {
-    "Ocean": {
-        "bg": "linear-gradient(135deg, #2E3192, #1BFFFF)",
-        "sidebar": "linear-gradient(180deg, #0F2027, #203A43, #2C5364)",
-        "button": "linear-gradient(90deg, #00C9FF, #92FE9D)",
-        "shadow": "#00C9FF"
-    },
-    "Sunset": {
-        "bg": "linear-gradient(135deg, #FF512F, #DD2476)",
-        "sidebar": "linear-gradient(180deg, #200122, #6f0000)",
-        "button": "linear-gradient(90deg, #F7971E, #FFD200)",
-        "shadow": "#FFD200"
-    },
-    "Neon": {
-        "bg": "linear-gradient(135deg, #8E2DE2, #4A00E0)",
-        "sidebar": "linear-gradient(180deg, #0F0C29, #302B63, #24243E)",
-        "button": "linear-gradient(90deg, #FF00CC, #333399)",
-        "shadow": "#FF00CC"
-    },
-    "Emerald": {
-        "bg": "linear-gradient(135deg, #11998E, #38EF7D)",
-        "sidebar": "linear-gradient(180deg, #00416A, #E4E5E6)",
-        "button": "linear-gradient(90deg, #56ab2f, #a8e063)",
-        "shadow": "#56ab2f"
-    }
-}
-
-css = f"""
-<style>
-.stApp {{
-    background: {gradients[THEME]['bg']};
-    color: white;
-}}
-
-section[data-testid="stSidebar"] {{
-    background: {gradients[THEME]['sidebar']};
-}}
-
-.stButton > button {{
-    background: {gradients[THEME]['button']};
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 0.6em 1.2em;
-    font-weight: 600;
-    transition: 0.3s;
-}}
-.stButton > button:hover {{
-    transform: scale(1.05);
-    box-shadow: 0px 0px 12px {gradients[THEME]['shadow']};
-}}
-</style>
-"""
-
-st.markdown(css, unsafe_allow_html=True)
+base="light"
+primaryColor="#6A5ACD"          # Slate Blue
+backgroundColor="#FAFAFA"       # Soft White
+secondaryBackgroundColor="#EAE6FF"   # Lavender Panels
+textColor="#1C1C1C"             # Dark Charcoal
+font="serif"
