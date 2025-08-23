@@ -4,9 +4,9 @@ enableCORS = false
 enableXsrfProtection = false
 
 [theme]
-base="dark"
-primaryColor="#00E5FF"         # Neon cyan for highlights
-backgroundColor="#0E1117"      # Deep charcoal background
-secondaryBackgroundColor="#262730"   # Slightly lighter panels
-textColor="#FAFAFA"            # Bright white text
-font="sans serif"
+base="light"
+primaryColor="#FF6B6B"          # Coral red for highlights
+backgroundColor="#FFFDF9"       # Warm off-white
+secondaryBackgroundColor="#FFEEDA"   # Soft pastel peach panels
+textColor="#2E2E2E"             # Almost-black elegant text
+font="serif"
