@@ -51,6 +51,20 @@
 # textColor="#EAEAEA"             # Soft silver-white text
 # font="sans serif"
 
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false
+
+[theme]
+base="dark"
+primaryColor="#FFFFFF"
+backgroundColor="#000000"
+secondaryBackgroundColor="#101010"
+textColor="#FFFFFF"
+font="sans serif"
+
+
 
 import streamlit as st
 
