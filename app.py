@@ -684,73 +684,22 @@ st.set_page_config(
 # ──────────────────────────────
 # STYLES
 # ──────────────────────────────
-# st.markdown("""
-# <style>
-# .badge { padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block; }
-# .badge.good { background:#e7f5e9; color:#1e7e34; }
-# .badge.moderate { background:#fff3cd; color:#856404; }
-# .badge.poor { background:#ffe5d0; color:#a1490c; }
-# .badge.verypoor { background:#fde2e1; color:#9b1c1c; }
-# .badge.severe { background:#f8d7da; color:#721c24; }
-# .card { border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%; }
-# .qr-box { text-align:center; }
-# .qr-title { font-weight:700; margin-bottom:0.3rem; }
-# small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
-# </style>
-# """, unsafe_allow_html=True)
-
-import streamlit as st
-
-# Custom CSS once
 st.markdown("""
-    <style>
-    .page-title {
-        font-size: 2.2em;
-        font-weight: 700;
-        text-align: center;
-        padding: 0.8em;
-        border-radius: 15px;
-        color: white;
-        box-shadow: 0px 4px 15px rgba(0,0,0,0.25);
-        margin-bottom: 1.5em;
-    }
-    </style>
+<style>
+.badge { padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block; }
+.badge.good { background:#e7f5e9; color:#1e7e34; }
+.badge.moderate { background:#fff3cd; color:#856404; }
+.badge.poor { background:#ffe5d0; color:#a1490c; }
+.badge.verypoor { background:#fde2e1; color:#9b1c1c; }
+.badge.severe { background:#f8d7da; color:#721c24; }
+.card { border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%; }
+.qr-box { text-align:center; }
+.qr-title { font-weight:700; margin-bottom:0.3rem; }
+small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
+</style>
 """, unsafe_allow_html=True)
 
-# Function to render page title with custom background
-def page_title(name):
-    gradients = {
-        "🔮 AQI Prediction": "linear-gradient(135deg, #6A5ACD, #00BFFF)",   # Purple → Blue
-        "📊 Insights": "linear-gradient(135deg, #20BF55, #01BAEF)",         # Teal → Cyan
-        "🕒 Historical Comparison": "linear-gradient(135deg, #FF6B6B, #FFD93D)",  # Coral → Yellow
-        "💡 Recommendations": "linear-gradient(135deg, #11998e, #38ef7d)",  # Emerald green
-    }
-    gradient = gradients.get(name, "linear-gradient(135deg, #6A11CB, #2575FC)")  # default
 
-    st.markdown(f"""
-        <div class="page-title" style="background: {gradient};">
-            {name}
-        </div>
-    """, unsafe_allow_html=True)
-
-# Example usage per page
-page = st.sidebar.radio("Navigation", ["🔮 AQI Prediction", "📊 Insights", "🕒 Historical Comparison", "💡 Recommendations"])
-
-if page == "🔮 AQI Prediction":
-    page_title(page)
-    st.write("This is the AQI prediction page.")
-
-elif page == "📊 Insights":
-    page_title(page)
-    st.write("This is the insights page.")
-
-elif page == "🕒 Historical Comparison":
-    page_title(page)
-    st.write("This is the historical comparison page.")
-
-elif page == "💡 Recommendations":
-    page_title(page)
-    st.write("This is the recommendations page.")
 
 
 
