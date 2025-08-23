@@ -1,15 +1,12 @@
-Edit active theme
-Changes made to the active theme will exist for the duration of a session. To discard changes and recover the original theme, refresh the page.
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false
 
-Primary color
-
-#1B86EC
-Background color
-
-#FFFFFF
-Text color
- 
-#31333F
-Secondary background color
-
-#F0F2F6
+[theme]
+base="light"
+primaryColor="#1B86EC"         # Modern blue for highlights
+backgroundColor="#FFFFFF"      # White clean background
+secondaryBackgroundColor="#F0F2F6"   # Soft grey for cards
+textColor="#31333F"            # Dark grey text for readability
+font="sans serif"
