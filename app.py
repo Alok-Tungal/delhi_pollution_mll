@@ -684,20 +684,44 @@ st.set_page_config(
 # ──────────────────────────────
 # STYLES
 # ──────────────────────────────
+# st.markdown("""
+# <style>
+# .badge { padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block; }
+# .badge.good { background:#e7f5e9; color:#1e7e34; }
+# .badge.moderate { background:#fff3cd; color:#856404; }
+# .badge.poor { background:#ffe5d0; color:#a1490c; }
+# .badge.verypoor { background:#fde2e1; color:#9b1c1c; }
+# .badge.severe { background:#f8d7da; color:#721c24; }
+# .card { border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%; }
+# .qr-box { text-align:center; }
+# .qr-title { font-weight:700; margin-bottom:0.3rem; }
+# small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
+# </style>
+# """, unsafe_allow_html=True)
+
+
+import streamlit as st
+
+# Custom CSS for page title with background
 st.markdown("""
-<style>
-.badge { padding: 0.35rem 0.7rem; border-radius: 999px; font-weight: 600; display: inline-block; }
-.badge.good { background:#e7f5e9; color:#1e7e34; }
-.badge.moderate { background:#fff3cd; color:#856404; }
-.badge.poor { background:#ffe5d0; color:#a1490c; }
-.badge.verypoor { background:#fde2e1; color:#9b1c1c; }
-.badge.severe { background:#f8d7da; color:#721c24; }
-.card { border-radius: 18px; padding: 16px; border: 1px solid #eee; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%; }
-.qr-box { text-align:center; }
-.qr-title { font-weight:700; margin-bottom:0.3rem; }
-small.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; color:#666; }
-</style>
+    <style>
+    .page-title {
+        font-size: 2.2em;
+        font-weight: 700;
+        text-align: center;
+        padding: 0.8em;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #6A5ACD, #FF6B6B);
+        color: white;
+        box-shadow: 0px 4px 15px rgba(0,0,0,0.2);
+        margin-bottom: 1.5em;
+    }
+    </style>
 """, unsafe_allow_html=True)
+
+# Example usage
+st.markdown('<div class="page-title">🔮 AQI Prediction</div>', unsafe_allow_html=True)
+
 
 # ──────────────────────────────
 # CONSTANTS
