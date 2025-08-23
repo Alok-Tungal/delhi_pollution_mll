@@ -51,16 +51,35 @@
 # textColor="#EAEAEA"             # Soft silver-white text
 # font="sans serif"
 
+import streamlit as st
 
-[server]
-headless = true
-enableCORS = false
-enableXsrfProtection = false
+# Inject gradient CSS
+st.markdown("""
+    <style>
+    /* App background gradient */
+    .stApp {
+        background: linear-gradient(135deg, #1A2A6C, #4A00E0, #8E2DE2);
+        color: white;
+    }
 
-[theme]
-base="dark"
-primaryColor="#6C63FF"          # Indigo accent for components
-backgroundColor="#0D0D0D"       # Dark base
-secondaryBackgroundColor="#1A1A1A"   # Card panels
-textColor="#F8F8F8"             # Soft white text
-font="sans serif"
+    /* Sidebar gradient */
+    section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #141E30, #243B55);
+    }
+
+    /* Buttons with gradient */
+    .stButton > button {
+        background: linear-gradient(90deg, #FF416C, #FF4B2B);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 0.6em 1.2em;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+    .stButton > button:hover {
+        transform: scale(1.05);
+        box-shadow: 0px 0px 12px #FF4B2B;
+    }
+    </style>
+""", unsafe_allow_html=True)
