@@ -1,8 +1,15 @@
-[server]
-headless = true
-enableCORS = false
-enableXsrfProtection = false
+Edit active theme
+Changes made to the active theme will exist for the duration of a session. To discard changes and recover the original theme, refresh the page.
 
-[theme]
-base = "light"
-primaryColor = "#1b86ec"
+Primary color
+
+#1B86EC
+Background color
+
+#FFFFFF
+Text color
+
+#31333F
+Secondary background color
+
+#F0F2F6
