@@ -24,17 +24,15 @@
 # textColor="#023E8A"             # Navy blue text
 # font="sans serif"
 
-
 [server]
 headless = true
 enableCORS = false
 enableXsrfProtection = false
 
 [theme]
-base="dark"
-primaryColor="#FF00FF"          # Neon magenta
-backgroundColor="#0D0D0D"       # True black
-secondaryBackgroundColor="#1A1A1A"   # Dark grey panels
-textColor="#00FFFF"             # Neon cyan text
-font="monospace"
-
+base="light"
+primaryColor="#2ECC71"          # Emerald green
+backgroundColor="#FAFFFB"       # Pure fresh white
+secondaryBackgroundColor="#E8F8F5"   # Mint shade
+textColor="#145A32"             # Dark forest green text
+font="serif"
